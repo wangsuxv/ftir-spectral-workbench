@@ -54,7 +54,8 @@ referencing==0.37.0
 requests==2.34.2
 rpds-py==2026.6.3
 ruff==0.16.4
-scipy==1.18.1
+scipy==1.17.1; python_version < "3.12"
+scipy==1.18.1; python_version >= "3.12"
 six==1.17.0
 sortedcontainers==2.4.0
 starlette==1.6.0
