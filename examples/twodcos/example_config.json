@@ -1,0 +1,43 @@
+{
+  "input": "../../data/original",
+  "output": "../../outputs/twodcos",
+  "dpt_pattern": "*MIN.dpt",
+  "ranges": [
+    {
+      "high_wavenumber": 1736.0,
+      "low_wavenumber": 1509.0,
+      "label": "amide_1736_1509"
+    },
+    {
+      "high_wavenumber": 1250.0,
+      "low_wavenumber": 1140.0,
+      "label": "fingerprint_1250_1140"
+    }
+  ],
+  "pipeline": {
+    "input_intensity_unit": "absorbance",
+    "perturbation_order": "sort_by_perturbation",
+    "baseline": {
+      "method": "asls",
+      "asls_lam": 1000000.0,
+      "asls_p": 0.01,
+      "asls_diff_order": 2,
+      "asls_max_iter": 50,
+      "asls_tol": 0.001
+    },
+    "smoothing": {
+      "enabled": false,
+      "window_length": 7,
+      "polyorder": 2,
+      "mode": "interp"
+    },
+    "normalization": {
+      "method": "none",
+      "reference_peak_range": null
+    },
+    "convention": "2dpy_compatible",
+    "grid_strategy": "index_order",
+    "contour_levels": 21,
+    "display_percentile": 99.0
+  }
+}

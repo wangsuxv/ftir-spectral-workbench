@@ -1,0 +1,30 @@
+{
+  "input_unit": "percent_transmittance",
+  "wavenumber_range": [1800.0, 900.0],
+  "baseline_smoothing": {
+    "enabled": false,
+    "method": "savgol",
+    "window_length": 7,
+    "polyorder": 2,
+    "estimate_only": true
+  },
+  "series_mode": "collaborative_pls",
+  "coarse_baseline": {
+    "method": "arpls",
+    "lambda": 1000000.0,
+    "max_iter": 50,
+    "tol": 0.001
+  },
+  "fine_baseline": {
+    "enabled": true,
+    "method": "endpoint_window_linear",
+    "endpoint_window_width_cm1": 8.0,
+    "statistic": "median",
+    "strict_endpoint": false,
+    "anchors": []
+  },
+  "normalization": {
+    "method": "none"
+  },
+  "restore_descending_axis_on_export": true
+}

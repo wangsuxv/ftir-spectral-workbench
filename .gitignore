@@ -1,0 +1,17 @@
+.DS_Store
+.coverage
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.venv/
+__pycache__/
+*.egg-info/
+build/
+dist/
+outputs/
+.agents/
+
+# Raw spectra and private replay metadata stay on the local workstation.
+data/original/*
+!data/original/README.md
+artifacts/real_data_demo_manifest.json
