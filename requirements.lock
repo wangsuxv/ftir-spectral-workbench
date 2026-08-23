@@ -1,5 +1,5 @@
 # Exact environment used for the 2026-08-23 verification run.
-# Python 3.12, macOS arm64. Install the project first with: pip install -e '.[dev]'
+# Python 3.12, macOS arm64, with environment markers for the CI Python matrix.
 altair==6.2.2
 annotated-types==0.8.0
 anyio==4.14.2
@@ -29,7 +29,8 @@ matplotlib==3.11.1
 mypy==2.3.1
 mypy_extensions==1.1.0
 narwhals==2.25.0
-numpy==2.5.2
+numpy==2.4.6; python_version < "3.12"
+numpy==2.5.2; python_version >= "3.12"
 packaging==26.3
 pandas==3.0.5
 pandas-stubs==3.0.5.260730
