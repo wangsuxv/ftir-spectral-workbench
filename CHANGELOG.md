@@ -1,6 +1,6 @@
 # Changelog
 
-本文件记录 FTIR Spectral Workbench 的用户可见变化。当前 `0.2.0` 条目描述已通过本地验收的发布候选；它尚未打 tag 或同步到 GitHub。
+本文件记录 FTIR Spectral Workbench 的用户可见变化。当前 `0.2.0` 条目描述已通过本地验收并上传公开功能分支的发布候选；它尚未合并默认分支、打 tag 或创建正式 Release。
 
 ## [0.2.0] - 2026-08-29 — local, unpublished
 
@@ -29,7 +29,7 @@
 ### Privacy and release status
 
 - 未加入实验原始数据、私有派生产物、私有 fingerprint 或产物 hash。
-- 未执行 GitHub push、release 或 tag；本条目不表示远程版本已经更新。
+- 已上传公开功能分支和 Draft PR；未加入原始数据，也尚未合并默认分支、创建 release 或 tag。
 
 ## [0.1.0] - 2026-08-23
 

@@ -121,4 +121,4 @@ ftir-baseline demo --input-dir data/original --output demo_output
 
 导出的 `10_processing_recipe.json`、输入 SHA-256、所有中间矩阵和 manifest 共同构成审计记录。
 
-本地私有数据验证只报告合同、重建、QC、血缘和往返是否通过，不在公开文档或 Git 历史中记录原始谱、样本数量、采集范围、派生统计、数据 fingerprint 或产物 hash。当前 v0.2 工作树尚未发布到 GitHub。
+本地私有数据验证只报告合同、重建、QC、血缘和往返是否通过，不在公开文档或 Git 历史中记录原始谱、样本数量、采集范围、派生统计、数据 fingerprint 或产物 hash。当前 v0.2 候选仅发布到公开功能分支和 Draft PR，尚未合并默认分支或创建正式 Release。
