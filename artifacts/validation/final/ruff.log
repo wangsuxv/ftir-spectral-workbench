@@ -1,0 +1,4 @@
+Command: .venv/bin/ruff check src tests ui scripts
+Result: PASS
+
+All checks passed!
