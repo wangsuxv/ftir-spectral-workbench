@@ -576,10 +576,10 @@ def compute_cross_2dcos(
     Both spectral matrices must use orientation ``(n_spectra, n_wavenumbers)``
     and must describe the same spectra/perturbation sequence.  Their numbers of
     wavenumbers may differ.  Canonical matrices are ``D1.T @ D2 / (m - 1)``
-    and ``D1.T @ N @ D2 / (m - 1)``.  ``2dpy_compatible`` extends official
-    2Dpy's documented homo-spectrum final-transpose orientation to this
-    rectangular result, yielding rows from input 2 and columns from input 1;
-    it does not claim that 2Dpy itself exposes a two-input cross API.
+    and ``D1.T @ N @ D2 / (m - 1)``.  ``2dpy_compatible`` follows the official
+    2Dpy hetero/two-input statement path and its final-transpose orientation,
+    yielding rows from input 2 and columns from input 1.  Official 2Dpy exposes
+    that mode through script variables rather than a packaged function API.
     """
 
     matrix1 = _spectral_matrix(spectra1, name="spectra1")
@@ -673,9 +673,9 @@ def compute_cross_2dcos(
         metadata["compatibility_notes"] = (
             "The exported cross matrices are Phi12.T and Psi12.T, with rows from "
             "spectrum 2 and columns from spectrum 1.  The independently computed reverse "
-            "asynchronous map remains -asynchronous.T.  This is an explicit extension of "
-            "2Dpy's homo-spectrum final-transpose orientation; the referenced 2Dpy script "
-            "does not provide a two-input cross-correlation API."
+            "asynchronous map remains -asynchronous.T.  This matches the referenced "
+            "2Dpy hetero/two-input statement path and final-transpose orientation; "
+            "the official implementation is configured through script variables."
         )
 
     return CrossTwoDCOSResult(

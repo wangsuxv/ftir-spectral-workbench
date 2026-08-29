@@ -1,0 +1,218 @@
+{
+  "file_count": 41,
+  "files": [
+    {
+      "path": "legacy/baseline_streamlit_app.py",
+      "sha256": "a456bbca3cb5ce9fa0394d6ad495a82c55c0f1defbec7e3f9de5d137858a10c6",
+      "size_bytes": 42327
+    },
+    {
+      "path": "src/ftir_baseline/__init__.py",
+      "sha256": "dc756a29501a8dbeacd5317a4d654aab03b53c0ec4238fec2347df2dc235dad1",
+      "size_bytes": 3870
+    },
+    {
+      "path": "src/ftir_baseline/baseline/__init__.py",
+      "sha256": "9bc6d0cede9db68610c8aba752267e2041987f48bfc8904df5ff96d0b5a88ebd",
+      "size_bytes": 2529
+    },
+    {
+      "path": "src/ftir_baseline/baseline/anchors.py",
+      "sha256": "748f1d103218c900ed5e5b13c081763584b6abc722e78f3eada769c0090136f3",
+      "size_bytes": 11862
+    },
+    {
+      "path": "src/ftir_baseline/baseline/automatic.py",
+      "sha256": "d071800138f37479b5535cff668fb4a48c9bb15ff77d39a6e8014a275f4e7159",
+      "size_bytes": 14844
+    },
+    {
+      "path": "src/ftir_baseline/baseline/collaborative.py",
+      "sha256": "5063f6a9e7aab1a64fe811155034aa7242af76e3328656cf165300bcd91ba38a",
+      "size_bytes": 8221
+    },
+    {
+      "path": "src/ftir_baseline/baseline/composite.py",
+      "sha256": "f47b187391712664e31597501e54bca785d26f81d049e80d3a94390f6fd08c4d",
+      "size_bytes": 8747
+    },
+    {
+      "path": "src/ftir_baseline/baseline/endpoint.py",
+      "sha256": "e69bdb1d263f5f4504ffbbad3af51d43a2737b03f15e98c8257db3b5594637c8",
+      "size_bytes": 6533
+    },
+    {
+      "path": "src/ftir_baseline/baseline/protocol.py",
+      "sha256": "4a9f27f7f10c6f5487ca805ba89a97d643d7519390dc6b68c6ccedb20607d1a4",
+      "size_bytes": 5961
+    },
+    {
+      "path": "src/ftir_baseline/baseline/shared_shape.py",
+      "sha256": "e87dc0f9ed5e50de5381e415e1fc4152ec833d7e952d565ab4bcac1b834f66ea",
+      "size_bytes": 5714
+    },
+    {
+      "path": "src/ftir_baseline/cli.py",
+      "sha256": "fda3badc16100f3536bf1d700a7a62f036d099641f32030e1f71b142ca16be83",
+      "size_bytes": 15191
+    },
+    {
+      "path": "src/ftir_baseline/config.py",
+      "sha256": "ad678bdef2317ae9af18c6124dbae568d5af91ee0a1096fc5913469db7496f22",
+      "size_bytes": 6384
+    },
+    {
+      "path": "src/ftir_baseline/export.py",
+      "sha256": "c42f2a2ed8b0647cedc709d449ddb9d69f4aa50de4db3c200d7a48d139ac094f",
+      "size_bytes": 36041
+    },
+    {
+      "path": "src/ftir_baseline/gallery.py",
+      "sha256": "526d590d9c475e66a4a1aaf1b6691ad35c000cfd2f523d662e23d387de4cf07f",
+      "size_bytes": 9609
+    },
+    {
+      "path": "src/ftir_baseline/io.py",
+      "sha256": "7e917300395ebdd7edf2c8a83b85b87a554cca16ead867ef937ee052ee8fc2b7",
+      "size_bytes": 18015
+    },
+    {
+      "path": "src/ftir_baseline/models.py",
+      "sha256": "ce288fe082f7d0ea697e6486b3f9e675664c2d9060be518babbef193775f4655",
+      "size_bytes": 8148
+    },
+    {
+      "path": "src/ftir_baseline/normalization.py",
+      "sha256": "0b099cb2718b52701a33cb923c6b62c3baa74db8cd67dcbd36d257bc43af833e",
+      "size_bytes": 14113
+    },
+    {
+      "path": "src/ftir_baseline/pipeline.py",
+      "sha256": "ba730af1e664c9cc69fe17c79fd38f7c2d1b242996046b47ae8c17f2d37b532a",
+      "size_bytes": 17184
+    },
+    {
+      "path": "src/ftir_baseline/qc.py",
+      "sha256": "75e10fcbc02df3ea8e3dd8e0bc936b69c3b636ea0ea8a977f928435c60c752a2",
+      "size_bytes": 15783
+    },
+    {
+      "path": "src/ftir_baseline/ranges.py",
+      "sha256": "77bd833e0aeaac120ccb0c05bc7c444ab780a8981e7c6a22eedc9ee06ec30d51",
+      "size_bytes": 5425
+    },
+    {
+      "path": "src/ftir_baseline/scoring.py",
+      "sha256": "6bbfbadcd4d2f8665fb271c79a33e6063194f3406fb5f58b092c054ad1a8ab3a",
+      "size_bytes": 14679
+    },
+    {
+      "path": "src/ftir_baseline/smoothing.py",
+      "sha256": "6bc76d626325318ad549519c707b225d4da47b953d1bb41f467e8a8526dce328",
+      "size_bytes": 5507
+    },
+    {
+      "path": "src/ftir_baseline/synthetic.py",
+      "sha256": "0fcd7f1938ab12bca663f664fce0c25e85d9b7f4565d7a4e82d04df5d3fb775c",
+      "size_bytes": 17965
+    },
+    {
+      "path": "src/ftir_baseline/units.py",
+      "sha256": "87a716e705e3e9a98ca245c87cf009af76a727316732a1d92c707e4ec0fcd875",
+      "size_bytes": 7483
+    },
+    {
+      "path": "src/ftir_baseline/validation.py",
+      "sha256": "fc01e10f5f37b68cc27d9af1b57505a014493ef7716af3d0ce970bfc0a078c04",
+      "size_bytes": 6658
+    },
+    {
+      "path": "tests/baseline_regression/__init__.py",
+      "sha256": "ecea020070b21d1c2597530bbd96fd02cad4a420de2d625e735a353ca9b33a59",
+      "size_bytes": 62
+    },
+    {
+      "path": "tests/baseline_regression/test_anchor_pchip.py",
+      "sha256": "180e55ec52292e1725c8b126fcf6a78ffbbe19e4eeed6958e17ed3fdb365f9a9",
+      "size_bytes": 2842
+    },
+    {
+      "path": "tests/baseline_regression/test_automatic.py",
+      "sha256": "88824bd305d2c586fe5d63f3c87388147b634dbee35797893a350223c95bc0c0",
+      "size_bytes": 4320
+    },
+    {
+      "path": "tests/baseline_regression/test_cli.py",
+      "sha256": "5bbd88d204cbeec66b60e039cf80bf13684ff29dd319395f1e87c3a398ca4997",
+      "size_bytes": 2519
+    },
+    {
+      "path": "tests/baseline_regression/test_endpoint.py",
+      "sha256": "2f0007c39336bff3cec9a86d0091a9248124ebbf0c5d650e8305fc887e2c60c8",
+      "size_bytes": 2908
+    },
+    {
+      "path": "tests/baseline_regression/test_export.py",
+      "sha256": "b1ab1a7e69240893b276973ac55a7a3b55ee6fab54ff113e09b0150b5fcff1d7",
+      "size_bytes": 8197
+    },
+    {
+      "path": "tests/baseline_regression/test_gallery.py",
+      "sha256": "924e1b2445debc33300f77811a1b51f58784381c64eda0bedf8e2b8582dc4a32",
+      "size_bytes": 2452
+    },
+    {
+      "path": "tests/baseline_regression/test_io.py",
+      "sha256": "3f61ef8daab6779c26ddeb4c73c48d9bc6904576239e21781ede11bb4944c97a",
+      "size_bytes": 8459
+    },
+    {
+      "path": "tests/baseline_regression/test_normalization.py",
+      "sha256": "072e80db670c88f95ad3f8965d92bb71b7a6eae5639a8319b24eb9bf9ac1011c",
+      "size_bytes": 4452
+    },
+    {
+      "path": "tests/baseline_regression/test_pipeline.py",
+      "sha256": "2e7e14b29dc55f96aaf38d8a7b3a16e5be8dc04bb9fbd4c7969a251bad0167fd",
+      "size_bytes": 8292
+    },
+    {
+      "path": "tests/baseline_regression/test_qc.py",
+      "sha256": "54e514d58a08c4cb3aa9ac8b6d7310ca5c65ecc472bde0eafe3662d3e2196dc7",
+      "size_bytes": 3648
+    },
+    {
+      "path": "tests/baseline_regression/test_ranges.py",
+      "sha256": "67c78623f851c71b142e80b1a98146c47d866872aee5339f4645c43a31124a99",
+      "size_bytes": 4506
+    },
+    {
+      "path": "tests/baseline_regression/test_series.py",
+      "sha256": "ec09f081b4c1026909e332e7da97dd71da50cc5dd7a662e275a1e7eea53d83e2",
+      "size_bytes": 4183
+    },
+    {
+      "path": "tests/baseline_regression/test_streamlit_app.py",
+      "sha256": "036672376ea43996e28f7b1ac18c838012e51ccdfd623ce6cf8dabdeb64eca72",
+      "size_bytes": 5967
+    },
+    {
+      "path": "tests/baseline_regression/test_synthetic_benchmarks.py",
+      "sha256": "0127f4a5751262e18ccb5fa677c05a0e6aad18d584e73cfbf083f6a9bc86eb48",
+      "size_bytes": 3690
+    },
+    {
+      "path": "tests/baseline_regression/test_units.py",
+      "sha256": "6421e40a2b2de23828560fdfb1ff52bad9ed9476d7ff5c615d2b1aaa127d46c2",
+      "size_bytes": 5528
+    }
+  ],
+  "frozen_roots": [
+    "src/ftir_baseline/**",
+    "tests/baseline_regression/**",
+    "legacy/baseline_streamlit_app.py"
+  ],
+  "purpose": "v0.1 baseline freeze for baseline-frozen v0.2.0",
+  "schema_version": "1.0",
+  "start_commit": "30faec99e6980c656d4a50a782e5cdbd8e1e5427"
+}
