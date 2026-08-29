@@ -2,7 +2,7 @@
 
 FTIR Spectral Workbench 将可审计的 FTIR 基线处理与二维相关光谱（2D-COS）放在同一条可复现工作流中。基线处理本身是正式完成状态；用户可以导出校正谱后结束，也可以把同一份内存中的校正吸光度继续送入 2D-COS。
 
-当前工作树是 `0.2.0` 候选版本。它以冻结的 v0.1 基线科学路径为基础，只增加 Coarse/Fine Preview、Series Consistency & QC、A↔T 显示与派生导出，以及 Cross 2 / 完整 Self-Cross overview。候选代码已同步到公开 GitHub 功能分支；在 Draft PR 合并前，默认 `main` 仍保持 v0.1。
+当前公开版本为 `0.2.0`。它以冻结的 v0.1 基线科学路径为基础，只增加 Coarse/Fine Preview、Series Consistency & QC、A↔T 显示与派生导出，以及 Cross 2 / 完整 Self-Cross overview，并通过 PR #1 发布到默认 `main`。
 
 ## v0.2.0 四项更新
 
