@@ -2,6 +2,7 @@
 
 from .baseline_service import BaselineWorkflowService
 from .project_service import ProjectService, WorkbenchProjectService
+from .smoothing_service import PostBaselineSmoothingService
 from .twodcos_service import (
     CrossPreparedConfirmationRequired,
     CrossRangeResult,
@@ -21,6 +22,7 @@ __all__ = [
     "CrossPreparedConfirmationRequired",
     "CrossRangeResult",
     "HomoRangeResult",
+    "PostBaselineSmoothingService",
     "PreparedTwoDCOSService",
     "ProjectService",
     "TwoDCOSAnalysisResult",
