@@ -1,6 +1,35 @@
 # Changelog
 
-本文件记录 FTIR Spectral Workbench 的用户可见变化。当前公开版本为 `0.2.1`。
+本文件记录 FTIR Spectral Workbench 的用户可见变化。当前本地版本为 `0.2.5`。
+
+## [0.2.5] - 2026-09-01
+
+### Added
+
+- 默认关闭的 Post-Baseline Smoothing 科学分支，包含 Savitzky–Golay、Gaussian、Moving Average 和 Median / Despike 四种方法。
+- `PostBaselineSmoothingConfig`、不可变 `PostBaselineSmoothingResult`、统一计算入口、科学 fingerprint、QC 与显式 `PostBaselineSmoothingService`。
+- 从 primary unsmoothed Prepared 创建 child Prepared 的完整 lineage：保留 baseline run/fingerprint，重新计算 Prepared SHA-256，并记录 parent hash、方法、有效参数、QC 与 warning。
+- Streamlit 第 8 页的 uniform-axis diagnostics、实际谱/first/middle/last/mean/median Preview、overlay、removed component、QC、Apply 和 primary/smoothed 2D 分支切换。
+- 可确定生成、严格验签和精确重载的 `post_baseline_smoothing_run.zip`；bundle 同时保存 parent/child Prepared、removed component、配置、QC 和图。
+- `ftir-workbench smooth`，可接受 baseline ZIP 或 Prepared CSV + sidecar；既有 `twodcos` 可直接读取 smoothing bundle。
+- [`docs/post_baseline_smoothing.md`](docs/post_baseline_smoothing.md) 与无实验数据的 `examples/smoothing/` 合成示例。
+
+### Scientific boundaries
+
+- Primary unsmoothed Prepared 仍是默认数据；Preview 不提交，Apply 不自动激活 smoothed branch。
+- 所有 smoothing 只沿 `axis=1` 波数轴，对全部光谱使用同一参数；不沿扰动轴处理，不插值、不重排、不自动重采样，也不覆盖 `PipelineResult.analysis_data`。
+- 非均匀轴默认拒绝；显式 index-space override 会写入 warning 和 provenance。
+- 禁止 chained smoothing 和 smoothing + scientific normalization 组合；2D 阶段只消费 active Prepared，本身不调用 smoothing。
+- baseline bundle 不变；smoothed 2D bundle 使用既有结构并嵌入实际 child Prepared。
+- v0.2.1 的输入、baseline、2D-COS、Cross、peak-order 与 frozen workbench service 文件保持逐文件 size/SHA-256 不变。
+
+### Release status
+
+- 本版本已在本地按六个 Phase 分别提交；尚未由本次任务推送、打 tag 或创建 GitHub Release。
+- 本地验收：723 passed、5 个既有小型单谱绘图 warning；Ruff、Mypy、0.2.5 sdist/wheel build 与全新 wheel 虚拟环境（复用已验证依赖层）import/CLI 链路通过。
+- Science freeze 34/34，冻结根的文件集合与 Git diff 均精确匹配；精确 v0.2.1 起始快照生成的 baseline/2D/project bundle 通过当前 verifier 与 Prepared exact reload。
+- Smoothing bundle roundtrip、unsmoothed/smoothed self + cross 2D、Cross reverse identities 和 smoothed 2D source Prepared exact reload 全部通过。
+- 最终测试、构建、wheel 安装、CLI、science freeze、旧 bundle/project 与 smoothing/2D 集成的真实输出保存在 `artifacts/validation/v0.2.5/final/`。
 
 ## [0.2.1] - 2026-09-01
 

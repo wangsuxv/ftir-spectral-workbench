@@ -1,0 +1,69 @@
+WARNING: The directory '<user-home>/Library/Caches/pip' or its parent directory is not owned or is not writable by the current user. The cache has been disabled. Check the permissions and owner of that directory. If executing pip with sudo, you should use sudo's -H flag.
+Processing ./dist/ftir_spectral_workbench-0.2.5-py3-none-any.whl
+Installing collected packages: ftir-spectral-workbench
+Successfully installed ftir-spectral-workbench-0.2.5
+WARNING: The directory '<user-home>/Library/Caches/pip' or its parent directory is not owned or is not writable by the current user. The cache has been disabled. Check the permissions and owner of that directory. If executing pip with sudo, you should use sudo's -H flag.
+Name: ftir-spectral-workbench
+Version: 0.2.5
+Summary: Auditable baseline correction and optional prepared-data-only 2D-COS for FTIR series
+Home-page:
+Author: FTIR Spectral Workbench contributors
+Author-email:
+License: MIT
+Location: <wheel-smoke>/venv/lib/python3.12/site-packages
+Requires: matplotlib, numpy, pandas, pybaselines, pydantic, scipy
+Required-by:
+Matplotlib is building the font cache; this may take a moment.
+imports=PASS
+workbench_version=0.2.5
+baseline_version=0.1.0
+twodcos_version=0.4.0
+module_source=fresh-wheel-venv
+ftir-workbench-help=PASS
+ftir-workbench-smooth-help=PASS
+ftir-baseline-help=PASS
+ftir2dcos-help=PASS
+{
+  "state": "smoothing_completed",
+  "method": "gaussian",
+  "effective_parameters": {
+    "sigma_points": 1.0,
+    "truncate": 4.0,
+    "mode": "reflect"
+  },
+  "parent_prepared_data_sha256": "ff1c816e4a21320b6de2e6957430ca890989a685cbcce6e59e0904f4140bebb3",
+  "prepared_data_sha256": "67486249be539b7c9d54cfd3ee6b76814b54aa542ad67441c8331c4543123a54",
+  "smoothing_fingerprint": "3ee6da99526c34559a11532d237d55dbcf94f662a4f54a2ecb2c2e1e3f7d1a94",
+  "bundle": "<wheel-smoke>/post_baseline_smoothing_run.zip",
+  "manifest_verified": true,
+  "warnings": [
+    "Relative RMS removed exceeds the diagnostic threshold (0.10) for 3 spectrum/s; maximum=0.354751.",
+    "First-derivative correlation is below the diagnostic threshold (0.95) for 3 spectrum/s; minimum=0.814674."
+  ]
+}
+{
+  "bundle": "<wheel-smoke>/post_baseline_smoothing_run.zip",
+  "bundle_type": "smoothing",
+  "verified": true
+}
+{
+  "state": "twodcos_completed",
+  "self_results": 2,
+  "cross_results": 1,
+  "all_checks_passed": true,
+  "twodcos_fingerprint": "410269b23fbb73d252a91a4c09d53c688b7e57761886e3a316814f4160378e08",
+  "bundle": "<wheel-smoke>/twodcos_run.zip",
+  "manifest_verified": true,
+  "warnings": [
+    "Synthetic Prepared example only; contains no experimental or original instrument data.",
+    "This Prepared dataset is an explicit post-baseline smoothing scientific branch (gaussian); the primary unsmoothed Prepared remains the reference branch.",
+    "Relative RMS removed exceeds the diagnostic threshold (0.10) for 3 spectrum/s; maximum=0.354751.",
+    "First-derivative correlation is below the diagnostic threshold (0.95) for 3 spectrum/s; minimum=0.814674."
+  ]
+}
+{
+  "bundle": "<wheel-smoke>/twodcos_run.zip",
+  "bundle_type": "twodcos",
+  "verified": true
+}
+wheel-install-import-cli-chain=PASS

@@ -4,9 +4,45 @@
 
 ## 当前状态
 
-FTIR Spectral Workbench 的公开版本为 v0.2.1；该版本已完成发布验收，并更新公开 GitHub 仓库的默认 `main`、`v0.2.1` tag 与 GitHub Release。开发基于 `feat/v0.2-baseline-frozen` 的提交 `5976ecedeee4a22391a9d426280b272ad66d802a`。
+FTIR Spectral Workbench 的本地版本为 v0.2.5；开发分支为 `feat/v0.2.5-post-baseline-smoothing`，严格基于 v0.2.1 提交 `92513def080001de4c226fcea0fde484ae8d97fb`。本次任务只升级本地仓库，未推送、打 tag 或创建 GitHub Release。
 
-v0.2.1 的唯一目标是让原始 FTIR 分隔文本更容易被严格、可审计地读取。baseline/2D 数值模型、配置、Prepared、bundle、manifest、peak-order 及非 Import 页面均保持 v0.2.0 行为；许可证仍为 MIT，公开内容不包含实验原始数据或私有派生产物。
+v0.2.5 的唯一新增科学功能是 Post-Baseline Smoothing。v0.2.1 的输入兼容、baseline 算法与结果、Coarse/Fine Preview、Series Consistency & QC、A↔T、baseline-only、Prepared handoff、Cross 1/Cross 2、完整 block overview、peak-order、bundle/project compatibility 保持不变；许可证仍为 MIT，公开内容不包含实验原始数据或私有派生产物。
+
+## v0.2.5 发布范围
+
+- 数据链：`PipelineResult.analysis_data → primary unsmoothed Prepared → optional smoothing → smoothed Prepared → existing prepared-only 2D-COS`。
+- 方法：Savitzky–Golay、Gaussian、Moving Average、Median / Despike；默认 `enabled=false`。
+- 共同合同：finite float64、输入不可变、全序列统一参数、只沿 `axis=1`、轴/标签/顺序不变、不插值、不自动重采样。
+- 轴策略：先检查 `abs(diff(wavenumber))` 近似均匀；默认失败，只有显式 expert override 可按 index-space 处理并记录 warning/provenance。
+- Prepared lineage：child 保留 `baseline_run_id` 和 `baseline_fingerprint`，重新计算 `prepared_data_sha256`，recipe 记录 parent hash、smoothing fingerprint、方法、有效参数、QC 和 warning。
+- UI：新增第 8 页 Post-Baseline Smoothing；2D Setup/Results 顺延为第 9/10 页。Preview 不修改正式状态，Apply 只创建分支且不自动激活。
+- 分支切换：复用 `_activate_prepared_for_twodcos()`，只清除旧 2D 后代并保留 baseline 与 committed smoothing。
+- 导出：新增独立 smoothing bundle 和 verifier；baseline bundle 不变，smoothed 2D bundle 继续用既有结构并嵌入实际 source Prepared。
+- CLI：新增 `ftir-workbench smooth`；旧 `baseline`、`twodcos` 参数与语义不变，2D 阶段不执行 smoothing。
+
+## v0.2.5 Science Freeze
+
+- 冻结清单为 `artifacts/v0.2.1_science_freeze_manifest.json`，覆盖 34 个 v0.2.1 输入、baseline、2D 与 workbench service 文件。
+- 禁止修改的 baseline/2D engine、peak-order、Cross/display helper 和 baseline/2D service 路径保持与起始提交逐文件 size/SHA-256 一致。
+- Post-baseline smoothing 只在新增 workbench core/adapter/service/export 层实现；不复用或修改 baseline estimate-only smoothing，也不向 2D engine 注入 smoothing。
+- 旧 `.csv/.txt/.dpt` 以及 v0.2.1 的全部回归继续由同一测试集覆盖；旧 bundle/project 由起始版本实际生成后交给当前代码验签和 Prepared 精确重载。
+
+## v0.2.5 本地发布验收
+
+| 检查 | 实际结果 |
+|---|---:|
+| 全量 pytest | 723 passed，5 个既有小型单谱绘图 warning |
+| Ruff `src tests ui scripts` | passed |
+| Mypy `src/ftir_workbench` | passed，20 source files |
+| sdist 与 wheel 构建 | passed，0.2.5 |
+| 全新 wheel venv install/import/CLI | passed；依赖复用已验证工作区层，三包导入、四个 help、`smooth → verify → twodcos → verify` |
+| v0.2.1 science freeze | 34/34 start/worktree size + SHA-256；无新增、缺失或 Git diff |
+| exact v0.2.1 bundle/project reload | baseline/2D/project 验签、嵌套 byte identity 与 Prepared exact reload 通过 |
+| smoothing bundle roundtrip | verifier、parent/child、residual、fingerprint 与 child exact reload 通过 |
+| unsmoothed/smoothed 2D | self 2 + cross 1、Cross reverse identities、不同 fingerprint、smoothed source exact reload 通过 |
+| Git 与 distribution 隐私审计 | passed；sdist 仅含 `data/original/README.md`，wheel 无原始数据成员，ignored raw spectra 未读取 |
+
+最终实际结果与机器可读审计保存在 `artifacts/validation/v0.2.5/final/`。审计使用 4×81 的确定性合成 Prepared；真实实验谱、原始数据、私有 bundle、本机路径和临时路径均未写入发布证据。
 
 ## v0.2.1 发布范围
 
@@ -111,9 +147,11 @@ v0.2.1 的唯一目标是让原始 FTIR 分隔文本更容易被严格、可审�
 
 ## 明确排除
 
-v0.2.1 不实施多个独立 Baseline Blocks、全局基线后的局部 range correction、processing/analysis 双范围模型、AnalysisRangePreparationService、global/local-fine 双分支、baseline sensitivity Run A/B/C、新基线方法、baseline schema 或 bundle 变化、独立区间端点强制归零、PySide6/macOS `.app`，也不进行大规模 Streamlit 架构重写。
+v0.2.5 不实施多个独立 Baseline Blocks、全局基线后的局部 range correction、processing/analysis 双范围模型、AnalysisRangePreparationService、global/local-fine 双分支、baseline sensitivity Run A/B/C、新基线方法、baseline schema 或 bundle 变化、独立区间端点强制归零、PySide6/macOS `.app`，也不进行大规模 Streamlit 架构重写。
 
 本补丁也不加入厂商二进制 reader、JCAMP-DX parser、Excel sheet/column mapping 或 raw ZIP ingestion。极短文件、多个同等可信数值块、encoding 多解和 delimiter/decimal 冲突需要用户显式选择；千位分隔符需要在导入前清理。
+
+Post-baseline smoothing 不提供自动最佳算法/参数、SNR 驱动推荐、Butterworth/Whittaker/wavelet/PCA、resampling、沿扰动轴平滑、连续多次 smoothing 或 smoothing + scientific normalization 组合。旧 `.ftirw` 不强制嵌入 smoothing-only branch；该分支通过独立 smoothing bundle 保存，而 smoothed 2D bundle 自包含其实际 source Prepared。
 
 ## 启动
 

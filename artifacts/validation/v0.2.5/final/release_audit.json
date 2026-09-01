@@ -1,0 +1,105 @@
+{
+  "audit": "FTIR Spectral Workbench v0.2.5 local release audit",
+  "audited_head_commit": "87fd88f1aa1dc749636f1cddd643a09e1b7c6fbe",
+  "checks": {
+    "release_metadata": {
+      "baseline_package_version": "0.1.0",
+      "checks": {
+        "baseline_package_version_frozen": true,
+        "distribution_version_is_0_2_5": true,
+        "runtime_modules_from_repository": true,
+        "twodcos_package_version_frozen": true,
+        "workbench_version_is_0_2_5": true
+      },
+      "distribution_version": "0.2.5",
+      "failed_checks": [],
+      "module_sources": {
+        "ftir2dcos": "src/ftir2dcos/__init__.py",
+        "ftir_baseline": "src/ftir_baseline/__init__.py",
+        "ftir_workbench": "src/ftir_workbench/__init__.py"
+      },
+      "status": "pass",
+      "twodcos_package_version": "0.4.0",
+      "workbench_version": "0.2.5"
+    },
+    "smoothing_and_2d": {
+      "checks": {
+        "smoothed_cross_reverse_identities": true,
+        "smoothed_matrices_differ_from_unsmoothed": true,
+        "smoothed_self_cross_complete": true,
+        "smoothed_twodcos_bundle_verified": true,
+        "smoothed_twodcos_source_child_exact": true,
+        "smoothing_bundle_verified": true,
+        "smoothing_child_exact_reload": true,
+        "smoothing_child_hash_changed": true,
+        "smoothing_residual_identity": true,
+        "twodcos_fingerprints_distinct": true,
+        "twodcos_parent_hashes_exact": true,
+        "unsmoothed_self_cross_complete": true
+      },
+      "child_prepared_data_sha256": "76de9d80d46a5b29b0339018f2f96c7bdbee5e9e11d1b947efce554d1a76e8b6",
+      "failed_checks": [],
+      "input": "deterministic synthetic Prepared; no raw-data file was read",
+      "module_sources": {
+        "ftir2dcos": "src/ftir2dcos/__init__.py",
+        "ftir_baseline": "src/ftir_baseline/__init__.py",
+        "ftir_workbench": "src/ftir_workbench/__init__.py"
+      },
+      "parent_prepared_data_sha256": "dbfa02d5483915a872059916962c280a2ca1648e27d15c970c217e1d08fc8370",
+      "shape": [
+        4,
+        81
+      ],
+      "smoothed_twodcos_fingerprint": "07e4cf12f011b00553218d25160e935d4dce7648c28b79a9d8b117b3a41a6a6d",
+      "smoothing_fingerprint": "8b5fbdc36440c84c8d86c5a5f6e2ad6557253b3b248a2c48f47cacb1fa087a9c",
+      "status": "pass",
+      "unsmoothed_twodcos_fingerprint": "27ca519e33a0bdadc78d5412722e161804583e38ec98013ad67177563453b70a"
+    },
+    "v021_compatibility_and_privacy": {
+      "checks": {
+        "exact_v021_bundle_audit_passed": true,
+        "old_baseline_reload": true,
+        "old_project_reload": true,
+        "old_twodcos_reload": true,
+        "raw_and_output_ignore_rules": true,
+        "repository_privacy": true
+      },
+      "failed_checks": [],
+      "legacy_base_commit": "92513def080001de4c226fcea0fde484ae8d97fb",
+      "legacy_generator_version": "0.2.1",
+      "legacy_prepared_shape": [
+        3,
+        61
+      ],
+      "privacy_scope": "Git index and ignore rules only; ignored spectrum contents not read",
+      "reused_audit": "scripts/audit_v021_release.py",
+      "status": "pass"
+    },
+    "v021_science_freeze": {
+      "algorithm": "SHA-256 over exact bytes; no tolerance or normalization",
+      "checked_start_commit_count": 34,
+      "checked_worktree_count": 34,
+      "current_frozen_extra_paths": [],
+      "current_frozen_file_count": 34,
+      "current_frozen_missing_paths": [],
+      "expected_file_count": 34,
+      "git_diff_changed_paths": [],
+      "manifest": "artifacts/v0.2.1_science_freeze_manifest.json",
+      "manifest_file_count": 34,
+      "mismatches": [],
+      "start_commit": "92513def080001de4c226fcea0fde484ae8d97fb",
+      "start_tree": "0f5fb43486e39bc9158cad07860c5bc9c149d5ff",
+      "start_tree_frozen_file_count": 34,
+      "status": "pass"
+    }
+  },
+  "failed_checks": [],
+  "privacy": {
+    "absolute_paths_emitted": false,
+    "fixture_scope": "deterministic synthetic Prepared only",
+    "raw_data_read": false
+  },
+  "repository": "ftir-spectral-workbench",
+  "schema_version": "1.0",
+  "status": "pass"
+}
