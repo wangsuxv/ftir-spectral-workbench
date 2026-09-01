@@ -1,0 +1,17 @@
+Base commit: 5976ecedeee4a22391a9d426280b272ad66d802a
+Fixtures: tests/fixtures/import_compat/legacy_wide.csv
+          tests/fixtures/import_compat/legacy_wide.txt
+          tests/fixtures/import_compat/legacy_series/{0MIN,5MIN,10MIN,20MIN}.dpt
+Fixture provenance: synthetic; no private data used
+Hash implementation: ftir_workbench.fingerprints.array_sha256
+
+PASS CSV/TXT/DPT wavenumber arrays are elementwise identical
+PASS CSV/TXT/DPT spectra arrays are elementwise identical
+PASS CSV/TXT/DPT perturbation arrays are elementwise identical
+PASS CSV/TXT/DPT labels and descending axis direction are identical
+PASS raw-byte source SHA-256 values recorded
+PASS baseline absorbance/coarse/fine/total/corrected/analysis hashes recorded
+PASS Prepared data SHA-256 recorded
+PASS two self blocks and one stored/reverse cross block recorded
+
+Reference: artifacts/v0.2_input_science_reference.json

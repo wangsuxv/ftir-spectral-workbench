@@ -1,0 +1,15 @@
+{
+  "base_commit": "5976ecedeee4a22391a9d426280b272ad66d802a",
+  "base_tree": "8100f8783b59175a5d7300cfa015bdf2bbd709b2",
+  "branch": "feat/v0.2.1-input-compatibility",
+  "generated_at_utc": "2026-08-31T17:24:45Z",
+  "python": "3.12.13",
+  "results": {
+    "build": "passed",
+    "legacy_input_science_reference": "passed: CSV/TXT/DPT reader arrays identical; baseline, Prepared, self/cross 2D hashes recorded",
+    "mypy": "passed: 17 source files",
+    "pytest": "passed: 445 tests in 39.27s",
+    "ruff": "passed"
+  },
+  "schema_version": "1.0"
+}

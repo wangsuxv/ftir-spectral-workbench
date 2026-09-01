@@ -1,0 +1,6 @@
+Command: .venv/bin/python -m mypy src/ftir_workbench
+Base commit: 5976ecedeee4a22391a9d426280b272ad66d802a
+Mypy: 2.3.1 (compiled: yes)
+
+pyproject.toml: note: unused section(s): module = ['plotly', 'plotly.*', 'pybaselines', 'streamlit', 'streamlit.*']
+Success: no issues found in 17 source files
