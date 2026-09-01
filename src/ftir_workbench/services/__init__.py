@@ -2,7 +2,7 @@
 
 from .baseline_service import BaselineWorkflowService
 from .project_service import ProjectService, WorkbenchProjectService
-from .smoothing_service import PostBaselineSmoothingService
+from .smoothing_service import PostBaselineSmoothingService, SmoothingBundleBuilder
 from .twodcos_service import (
     CrossPreparedConfirmationRequired,
     CrossRangeResult,
@@ -25,6 +25,7 @@ __all__ = [
     "PostBaselineSmoothingService",
     "PreparedTwoDCOSService",
     "ProjectService",
+    "SmoothingBundleBuilder",
     "TwoDCOSAnalysisResult",
     "TwoDCOSWorkflowResult",
     "TwoDCOSWorkflowService",

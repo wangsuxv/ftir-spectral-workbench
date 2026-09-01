@@ -5,6 +5,7 @@ from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 
 import numpy as np
+import pytest
 from streamlit.testing.v1 import AppTest
 
 from ftir_workbench import (
@@ -14,6 +15,7 @@ from ftir_workbench import (
     TwoDCOSConfig,
     TwoDCOSRange,
     TwoDCOSWorkflowService,
+    verify_smoothing_bundle,
 )
 from ftir_workbench.fingerprints import prepared_data_sha256
 
@@ -234,7 +236,13 @@ def test_smoothing_page_preview_apply_staleness_and_branch_switching() -> None:
     assert child is not None
     assert app.session_state["active_prepared"] is previous_active
     assert app.session_state["prepared"] is primary
-    assert app.session_state["smoothing_bundle"] is None
+    smoothing_bundle = app.session_state["smoothing_bundle"]
+    assert isinstance(smoothing_bundle, bytes)
+    assert verify_smoothing_bundle(smoothing_bundle)
+    assert any(
+        button.label == "下载 smoothing bundle"
+        for button in app.get("download_button")
+    )
 
     formal_fingerprint = formal.smoothing_fingerprint
     _element(app.selectbox, "Preview spectrum").set_value("mean").run()
@@ -323,6 +331,61 @@ def test_smoothing_method_controls_are_conditional() -> None:
     assert "Convolution boundary mode" in select_labels
     assert "Moving-average window length" not in number_labels
     assert any("非线性 expert 方法" in warning.value for warning in app.warning)
+
+
+def test_committed_branch_rebuilds_missing_smoothing_bundle_for_download() -> None:
+    primary = _prepared()
+    result, child = PostBaselineSmoothingService().apply(
+        primary,
+        PostBaselineSmoothingConfig(enabled=True, method="gaussian"),
+    )
+    app = AppTest.from_file(APP_PATH, default_timeout=30).run()
+    app.session_state["prepared"] = primary
+    app.session_state["smoothing_result"] = result
+    app.session_state["smoothed_prepared"] = child
+    app.session_state["smoothing_bundle"] = None
+
+    app.sidebar.radio[0].set_value("8. Post-Baseline Smoothing").run()
+
+    assert not app.exception
+    bundle = app.session_state["smoothing_bundle"]
+    assert isinstance(bundle, bytes)
+    assert verify_smoothing_bundle(bundle)
+    downloads = {
+        item.label: item for item in app.get("download_button")
+    }
+    assert "下载 smoothing bundle" in downloads
+
+
+def test_apply_preserves_branch_when_smoothing_bundle_export_fails(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    primary = _prepared()
+    previous_active = object()
+    app = AppTest.from_file(APP_PATH, default_timeout=30).run()
+    app.session_state["prepared"] = primary
+    app.session_state["active_prepared"] = previous_active
+    app.sidebar.radio[0].set_value("8. Post-Baseline Smoothing").run()
+    _element(app.checkbox, "Enable post-baseline smoothing").set_value(True).run()
+    _element(app.button, "Generate Preview").click().run()
+
+    def _fail_bundle(*_args: object, **_kwargs: object) -> bytes:
+        raise RuntimeError("simulated smoothing export failure")
+
+    monkeypatch.setattr(PostBaselineSmoothingService, "build_bundle", _fail_bundle)
+    _element(app.button, "Create Smoothed Scientific Branch").click().run()
+
+    assert not app.exception
+    assert app.session_state["smoothing_result"] is not None
+    assert app.session_state["smoothed_prepared"] is not None
+    assert app.session_state["smoothing_bundle"] is None
+    assert app.session_state["active_prepared"] is previous_active
+    assert _element(app.button, "Use Smoothed Branch for 2D-COS").disabled is False
+    assert any(
+        "Smoothed scientific branch 已保留" in warning.value
+        and "simulated smoothing export failure" in warning.value
+        for warning in app.warning
+    )
 
 
 def test_smoothed_2d_setup_shows_active_branch_lineage() -> None:

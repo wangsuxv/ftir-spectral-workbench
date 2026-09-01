@@ -555,7 +555,7 @@ def load_prepared(
     source: PreparedSource,
     metadata: object | None = None,
 ) -> PreparedSpectralDataset:
-    """Load prepared data from CSV, CSV+sidecar, a sidecar path, or baseline ZIP.
+    """Load prepared data from CSV, sidecar, baseline ZIP, or smoothing ZIP.
 
     Bare CSV is intentionally accepted as a public checkpoint format.  Its
     result carries an explicit provenance warning and sentinel parent IDs.
@@ -572,6 +572,34 @@ def load_prepared(
 
     payload, input_name, input_path = _read_bytes(source, default_name=_DEFAULT_PREPARED_CSV)
     if zipfile.is_zipfile(io.BytesIO(payload)):
+        from .smoothing_export import (
+            SMOOTHING_ARTIFACT_TYPE,
+            SMOOTHING_PAYLOAD_MEMBERS,
+            load_smoothing_prepared,
+        )
+
+        with zipfile.ZipFile(io.BytesIO(payload), "r") as archive:
+            names = set(archive.namelist())
+            artifact_type: object = None
+            if "manifest.json" in names:
+                with suppress(
+                    KeyError,
+                    TypeError,
+                    UnicodeDecodeError,
+                    json.JSONDecodeError,
+                ):
+                    manifest_value = json.loads(archive.read("manifest.json"))
+                    if isinstance(manifest_value, Mapping):
+                        artifact_type = manifest_value.get("artifact_type")
+        if (
+            artifact_type == SMOOTHING_ARTIFACT_TYPE
+            or bool(
+                (SMOOTHING_PAYLOAD_MEMBERS - {_DEFAULT_PREPARED_META}).intersection(
+                    names
+                )
+            )
+        ):
+            return load_smoothing_prepared(payload)
         if not (
             verify_legacy_baseline_manifest(payload) or verify_workbench_manifest(payload)
         ):
