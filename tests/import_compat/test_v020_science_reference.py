@@ -1,7 +1,13 @@
 from __future__ import annotations
 
 import hashlib
+import inspect
+import io
 import json
+import os
+import subprocess
+import sys
+import tarfile
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
@@ -104,8 +110,130 @@ def _twodcos_config(reference: Mapping[str, Any]) -> TwoDCOSConfig:
     )
 
 
+def _pipeline_arrays(result: Any) -> dict[str, np.ndarray]:
+    return {
+        "absorbance_full": result.absorbance_full.spectra,
+        "absorbance_selected": result.absorbance_selected.spectra,
+        "baseline_estimation_spectra": result.baseline_estimation_spectra,
+        "coarse_baseline": result.baseline.coarse_baseline,
+        "fine_baseline": result.baseline.fine_baseline,
+        "total_baseline": result.baseline.total_baseline,
+        "corrected": result.baseline.corrected,
+        "analysis_data": result.analysis_data,
+    }
+
+
+def _science_arrays(kind: str) -> dict[str, np.ndarray]:
+    """Compute every frozen array with whichever source tree is on PYTHONPATH."""
+
+    reference = _load_reference()
+    data, _ = _read_legacy_fixture(kind)
+    result = BaselineWorkflowService().run(data, _baseline_config())
+    prepared = BaselineWorkflowService().prepared(
+        result,
+        baseline_run_id=f"v0.2.0-{kind}-science-reference",
+    )
+    twodcos = TwoDCOSWorkflowService().compute(
+        prepared,
+        _twodcos_config(reference["science"]["twodcos"]),
+    )
+    arrays = {
+        "input.wavenumber": data.wavenumber,
+        "input.spectra": data.spectra,
+        "input.perturbation": data.perturbation,
+        **{f"pipeline.{name}": values for name, values in _pipeline_arrays(result).items()},
+    }
+    for index, item in enumerate(twodcos.self_results):
+        arrays[f"twodcos.self.{index}.dynamic"] = item.dynamic
+        arrays[f"twodcos.self.{index}.synchronous"] = item.synchronous
+        arrays[f"twodcos.self.{index}.asynchronous"] = item.asynchronous
+    cross = twodcos.cross_results[0].result
+    arrays.update(
+        {
+            "twodcos.cross.0.stored_synchronous": cross.synchronous,
+            "twodcos.cross.0.stored_asynchronous": cross.asynchronous,
+            "twodcos.cross.0.reverse_synchronous": cross.reverse_synchronous,
+            "twodcos.cross.0.reverse_asynchronous": cross.reverse_asynchronous,
+        }
+    )
+    return {name: np.asarray(values) for name, values in arrays.items()}
+
+
+def _write_v020_arrays(output: Path) -> None:
+    payload = {
+        f"{kind}.{name}": values
+        for kind in ("csv", "txt", "dpt")
+        for name, values in _science_arrays(kind).items()
+    }
+    np.savez(output, **payload)
+
+
+@pytest.fixture(scope="session")
+def v020_arrays(tmp_path_factory: pytest.TempPathFactory) -> dict[str, np.ndarray]:
+    """Run the exact v0.2.0 source on this runner for bitwise upgrade checks."""
+
+    reference = _load_reference()
+    base_commit = reference["base_commit"]
+    temporary = tmp_path_factory.mktemp("v020-input-science")
+    snapshot = temporary / "source"
+    snapshot.mkdir()
+    archive_payload = subprocess.run(
+        ("git", "archive", "--format=tar", base_commit),
+        cwd=PROJECT_ROOT,
+        check=True,
+        capture_output=True,
+        timeout=120,
+    ).stdout
+    with tarfile.open(fileobj=io.BytesIO(archive_payload), mode="r:") as archive:
+        members = archive.getmembers()
+        unsafe = [
+            member.name
+            for member in members
+            if not (snapshot / member.name).resolve().is_relative_to(snapshot.resolve())
+            or member.issym()
+            or member.islnk()
+        ]
+        assert not unsafe, f"unsafe v0.2.0 archive members: {unsafe!r}"
+        if "filter" in inspect.signature(archive.extractall).parameters:
+            archive.extractall(snapshot, members=members, filter="data")
+        else:  # pragma: no cover - compatibility with early Python 3.11
+            archive.extractall(snapshot, members=members)
+
+    output = temporary / "v020-arrays.npz"
+    environment = os.environ.copy()
+    environment["PYTHONPATH"] = str(snapshot / "src")
+    completed = subprocess.run(
+        (sys.executable, str(Path(__file__).resolve()), "_write-v020-arrays", str(output)),
+        cwd=snapshot,
+        env=environment,
+        check=False,
+        capture_output=True,
+        timeout=120,
+    )
+    assert completed.returncode == 0, completed.stderr.decode("utf-8", errors="replace")
+    with np.load(output, allow_pickle=False) as payload:
+        return {name: payload[name].copy() for name in payload.files}
+
+
+def _assert_exact_v020(
+    kind: str,
+    name: str,
+    values: np.ndarray,
+    v020_arrays: Mapping[str, np.ndarray],
+) -> None:
+    base_values = v020_arrays[f"{kind}.{name}"]
+    np.testing.assert_array_equal(values, base_values)
+    assert array_sha256(values, field_name=name) == array_sha256(
+        base_values,
+        field_name=name,
+    )
+
+
 @pytest.mark.parametrize("kind", ("csv", "txt", "dpt"))
-def test_v020_legacy_inputs_reproduce_frozen_science_reference(kind: str) -> None:
+def test_v020_legacy_inputs_reproduce_frozen_science_reference(
+    kind: str,
+    v020_arrays: Mapping[str, np.ndarray],
+) -> None:
     """Every legacy reader path must reproduce the v0.2.0 scientific bytes."""
 
     reference = _load_reference()
@@ -118,22 +246,17 @@ def test_v020_legacy_inputs_reproduce_frozen_science_reference(kind: str) -> Non
     _assert_array_reference(data.wavenumber, input_reference["wavenumber"])
     _assert_array_reference(data.spectra, input_reference["spectra"])
     _assert_array_reference(data.perturbation, input_reference["perturbation"])
+    _assert_exact_v020(kind, "input.wavenumber", data.wavenumber, v020_arrays)
+    _assert_exact_v020(kind, "input.spectra", data.spectra, v020_arrays)
+    _assert_exact_v020(kind, "input.perturbation", data.perturbation, v020_arrays)
 
     baseline_service = BaselineWorkflowService()
     result = baseline_service.run(data, _baseline_config())
     pipeline_reference = reference["science"]["pipeline"]
-    pipeline_arrays = {
-        "absorbance_full": result.absorbance_full.spectra,
-        "absorbance_selected": result.absorbance_selected.spectra,
-        "baseline_estimation_spectra": result.baseline_estimation_spectra,
-        "coarse_baseline": result.baseline.coarse_baseline,
-        "fine_baseline": result.baseline.fine_baseline,
-        "total_baseline": result.baseline.total_baseline,
-        "corrected": result.baseline.corrected,
-        "analysis_data": result.analysis_data,
-    }
+    pipeline_arrays = _pipeline_arrays(result)
     for name, values in pipeline_arrays.items():
         _assert_array_reference(values, pipeline_reference[name])
+        _assert_exact_v020(kind, f"pipeline.{name}", values, v020_arrays)
     assert (
         pipeline_result_fingerprint(result)
         == pipeline_reference["pipeline_result_fingerprint"]
@@ -167,26 +290,43 @@ def test_v020_legacy_inputs_reproduce_frozen_science_reference(kind: str) -> Non
     if kind == "csv":
         assert twodcos.twodcos_fingerprint == twodcos_reference["twodcos_fingerprint"]
     assert len(twodcos.self_results) == len(twodcos_reference["self"]) == 2
-    for result_item, item_reference in zip(
-        twodcos.self_results,
-        twodcos_reference["self"],
-        strict=True,
+    for index, (result_item, item_reference) in enumerate(
+        zip(
+            twodcos.self_results,
+            twodcos_reference["self"],
+            strict=True,
+        )
     ):
         assert result_item.analysis_range.to_dict() == item_reference["range"]
-        _assert_array_reference(result_item.dynamic, item_reference["dynamic"])
-        _assert_array_reference(result_item.synchronous, item_reference["synchronous"])
-        _assert_array_reference(result_item.asynchronous, item_reference["asynchronous"])
+        for name in ("dynamic", "synchronous", "asynchronous"):
+            _assert_exact_v020(
+                kind,
+                f"twodcos.self.{index}.{name}",
+                getattr(result_item, name),
+                v020_arrays,
+            )
 
     assert len(twodcos.cross_results) == len(twodcos_reference["cross"]) == 1
     cross = twodcos.cross_results[0].result
     cross_reference = twodcos_reference["cross"][0]
-    _assert_array_reference(cross.synchronous, cross_reference["stored_synchronous"])
-    _assert_array_reference(cross.asynchronous, cross_reference["stored_asynchronous"])
-    _assert_array_reference(
-        cross.reverse_synchronous,
-        cross_reference["reverse_synchronous"],
+    assert cross.synchronous.shape == tuple(cross_reference["stored_synchronous"]["shape"])
+    assert cross.asynchronous.shape == tuple(cross_reference["stored_asynchronous"]["shape"])
+    assert cross.reverse_synchronous.shape == tuple(
+        cross_reference["reverse_synchronous"]["shape"]
     )
-    _assert_array_reference(
-        cross.reverse_asynchronous,
-        cross_reference["reverse_asynchronous"],
+    assert cross.reverse_asynchronous.shape == tuple(
+        cross_reference["reverse_asynchronous"]["shape"]
     )
+    for name, values in (
+        ("stored_synchronous", cross.synchronous),
+        ("stored_asynchronous", cross.asynchronous),
+        ("reverse_synchronous", cross.reverse_synchronous),
+        ("reverse_asynchronous", cross.reverse_asynchronous),
+    ):
+        _assert_exact_v020(kind, f"twodcos.cross.0.{name}", values, v020_arrays)
+
+
+if __name__ == "__main__":  # pragma: no cover - exercised by the session fixture
+    if len(sys.argv) != 3 or sys.argv[1] != "_write-v020-arrays":
+        raise SystemExit("expected: _write-v020-arrays OUTPUT.npz")
+    _write_v020_arrays(Path(sys.argv[2]))

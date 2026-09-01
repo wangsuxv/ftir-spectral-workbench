@@ -17,7 +17,7 @@ def test_exact_v020_bundles_verify_and_reload_with_current_code() -> None:
     summary = run_release_audit(REPOSITORY)
     serialized = json.dumps(summary, sort_keys=True)
 
-    assert summary["status"] == "pass"
+    assert summary["status"] == "pass", json.dumps(summary, indent=2, sort_keys=True)
     assert summary["repository"] == REPOSITORY.name
     assert str(REPOSITORY) not in serialized
     assert ".audit-ignore-probe" not in serialized
