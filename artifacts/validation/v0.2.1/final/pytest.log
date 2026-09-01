@@ -10,7 +10,7 @@ Final v0.2.1 working tree
 ........................................................................ [ 84%]
 ........................................................................ [ 96%]
 .....................                                                    [100%]
-597 passed, 5 warnings in 53.86s
+597 passed, 5 warnings in 53.61s
 
 The five warnings are matplotlib's identical-y-limit warning from
 src/ftir_baseline/qc.py for the small single-spectrum TAB/DPT/ASC/DAT/XY CLI

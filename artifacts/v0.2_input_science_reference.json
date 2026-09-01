@@ -2,6 +2,13 @@
   "array_hash_algorithm": "ftir_workbench.fingerprints.array_sha256",
   "base_commit": "5976ecedeee4a22391a9d426280b272ad66d802a",
   "fixtures_are_synthetic": true,
+  "reference_environment": {
+    "numpy": "2.5.2",
+    "platform": "macOS arm64 with Accelerate",
+    "python": "3.12",
+    "scipy": "1.18.1",
+    "scope": "Canonical local byte capture. Cross-platform upgrade tests execute this base commit and v0.2.1 in the same runtime and require exact array equality, because BLAS reduction order can change insignificant float64 low bits across platforms."
+  },
   "inputs": {
     "csv": {
       "axis_direction": "descending",

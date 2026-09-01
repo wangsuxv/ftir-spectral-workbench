@@ -3,7 +3,7 @@
   "build": {
     "sdist": {
       "path": "dist/ftir_spectral_workbench-0.2.1.tar.gz",
-      "sha256": "de187ddf44a8b221716288b138b8d87424cdd3f3576232510c0d2f92cc8e2133"
+      "sha256": "67e15d133dfcf8e5eeb0cab43f1131b5b75c96ee61e9720215a2d64ce340a484"
     },
     "status": "pass",
     "wheel": {
