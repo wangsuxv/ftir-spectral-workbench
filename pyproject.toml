@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ftir-spectral-workbench"
-version = "0.1.0"
+version = "0.2.1"
 description = "Auditable baseline correction and optional prepared-data-only 2D-COS for FTIR series"
 readme = "README.md"
 license = { text = "MIT" }

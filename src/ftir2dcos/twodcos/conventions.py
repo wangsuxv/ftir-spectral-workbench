@@ -1,7 +1,8 @@
 """Matrix orientation conventions for two-dimensional correlation spectra.
 
 The compatibility convention is based on Shigeaki Morita's official 2Dpy
-script.  The source reads a wide CSV and transposes it, mean-centres every
+script.  Its script variables select homo or hetero/two-input mode; it reads
+the wide CSV input or inputs and transposes each, mean-centres every
 spectral-variable column, calculates the two correlation matrices, and then
 transposes both matrices before plotting and writing them.  Keeping that final
 transpose explicit is essential: for homo 2D-COS it leaves the symmetric map
@@ -80,10 +81,11 @@ _TWODPY_SPEC = ConventionSpec(
     ),
     source_url=TWODPY_SOURCE_URL,
     compatibility_notes=(
-        "2Dpy sets rows to spectrum-2 variables and columns to spectrum-1 variables after "
-        "the final transpose.  For cross data this is the transpose of the canonical "
-        "spectrum-1-by-spectrum-2 matrix.  For homo data, Psi_2Dpy = Psi_canonical.T, "
-        "which is also -Psi_canonical up to floating-point roundoff."
+        "In hetero/two-input mode, 2Dpy sets rows to spectrum-2 variables and columns "
+        "to spectrum-1 variables after the final transpose.  For cross data this is "
+        "the transpose of the canonical spectrum-1-by-spectrum-2 matrix.  For homo data, "
+        "Psi_2Dpy = Psi_canonical.T, which is also -Psi_canonical up to floating-point "
+        "roundoff.  The mode is configured through script variables, not a function API."
     ),
 )
 

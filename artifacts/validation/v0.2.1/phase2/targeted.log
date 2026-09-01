@@ -1,0 +1,13 @@
+Command: .venv/bin/python -m pytest -q tests/import_compat/test_robust_parser.py tests/import_compat/test_v020_science_reference.py
+
+........................................................................ [ 64%]
+.......................................                                  [100%]
+111 passed in 0.65s
+
+The 108 robust parser cases cover delimiter/decimal detection, supported encodings,
+preamble/header handling, strict malformed-row rejection, edge-column trimming,
+multi-file provenance, raw-byte hashes, and unsupported-format rejection.
+
+The 3 science-reference cases compare legacy CSV/TXT/DPT wavenumber, spectra,
+perturbation, labels, baseline results, Prepared hash, and self/cross 2D matrices
+against artifacts/v0.2_input_science_reference.json.

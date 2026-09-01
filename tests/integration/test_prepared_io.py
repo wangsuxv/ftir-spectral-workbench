@@ -84,6 +84,8 @@ def resign_bundle(
     *,
     manifest_updates: dict[str, object] | None = None,
     file_updates: dict[str, bytes] | None = None,
+    manifest_removals: tuple[str, ...] = (),
+    file_removals: tuple[str, ...] = (),
 ) -> bytes:
     """Rebuild a bundle with valid file hashes and a valid manifest signature."""
 
@@ -96,10 +98,14 @@ def resign_bundle(
         }
         directories = tuple(name for name in archive.namelist() if name.endswith("/"))
     files.update(file_updates or {})
+    for name in file_removals:
+        files.pop(name, None)
     manifest.pop("manifest_sha256", None)
     manifest.pop("files", None)
     manifest.pop("directories", None)
     manifest.update(manifest_updates or {})
+    for name in manifest_removals:
+        manifest.pop(name, None)
     return export_module._build_manifest_archive(
         files,
         directories=directories,
@@ -204,6 +210,21 @@ def test_twodcos_bundle_preserves_all_homo_and_cross_range_outputs() -> None:
     with zipfile.ZipFile(io.BytesIO(bundle), "r") as archive:
         names = set(archive.namelist())
         manifest = json.loads(archive.read("manifest.json"))
+        stored_rows, stored_columns, stored_sync = export_module._matrix_from_csv(
+            archive.read("cross_ranges/cross_01/synchronous_matrix.csv")
+        )
+        _, _, stored_async = export_module._matrix_from_csv(
+            archive.read("cross_ranges/cross_01/asynchronous_matrix.csv")
+        )
+        reverse_rows, reverse_columns, reverse_sync = export_module._matrix_from_csv(
+            archive.read("cross_ranges/cross_01/reverse_synchronous_matrix.csv")
+        )
+        _, _, reverse_async = export_module._matrix_from_csv(
+            archive.read("cross_ranges/cross_01/reverse_asynchronous_matrix.csv")
+        )
+        orientations = json.loads(
+            archive.read("cross_ranges/cross_01/orientations.json")
+        )
     assert {
         "ranges/range_01/range.json",
         "ranges/range_01/dynamic_spectra.csv",
@@ -216,10 +237,255 @@ def test_twodcos_bundle_preserves_all_homo_and_cross_range_outputs() -> None:
         "cross_ranges/cross_01/ranges.json",
         "cross_ranges/cross_01/synchronous_matrix.csv",
         "cross_ranges/cross_01/asynchronous_matrix.csv",
+        "cross_ranges/cross_01/reverse_synchronous_matrix.csv",
+        "cross_ranges/cross_01/reverse_asynchronous_matrix.csv",
+        "cross_ranges/cross_01/orientations.json",
     } <= names
     assert manifest["homo_result_count"] == 2
     assert manifest["cross_result_count"] == 1
+    assert manifest["cross_pair_count"] == 1
+    assert manifest["oriented_cross_map_count"] == 2
+    assert manifest["reverse_cross_exported"] is True
     assert manifest["twodcos_fingerprint"] == analysis.twodcos_fingerprint
+    np.testing.assert_array_equal(reverse_rows, stored_columns)
+    np.testing.assert_array_equal(reverse_columns, stored_rows)
+    np.testing.assert_array_equal(reverse_sync, stored_sync.T)
+    np.testing.assert_array_equal(reverse_async, -stored_async.T)
+    assert orientations == {
+        "pair_index": 1,
+        "stored": {
+            "row_range": config.ranges[1].to_dict(),
+            "column_range": config.ranges[0].to_dict(),
+            "row_variable": "nu2",
+            "column_variable": "nu1",
+            "synchronous_file": "synchronous_matrix.csv",
+            "asynchronous_file": "asynchronous_matrix.csv",
+        },
+        "reverse": {
+            "row_range": config.ranges[0].to_dict(),
+            "column_range": config.ranges[1].to_dict(),
+            "row_variable": "nu1",
+            "column_variable": "nu2",
+            "synchronous_file": "reverse_synchronous_matrix.csv",
+            "asynchronous_file": "reverse_asynchronous_matrix.csv",
+        },
+        "identities": {
+            "synchronous": "reverse = stored.T",
+            "asynchronous": "reverse = -stored.T",
+        },
+    }
+
+
+def _two_range_twodcos_bundle() -> bytes:
+    prepared = make_prepared()
+    config = TwoDCOSConfig(
+        ranges=(
+            TwoDCOSRange(1737.0, 1600.0, label="upper"),
+            TwoDCOSRange(1600.0, 1508.0, label="lower"),
+        ),
+        cross_range_enabled=True,
+    )
+    return build_twodcos_bundle(
+        prepared,
+        TwoDCOSWorkflowService().compute(prepared, config),
+    )
+
+
+def _three_range_twodcos_bundle() -> bytes:
+    prepared = make_prepared()
+    config = TwoDCOSConfig(
+        ranges=(
+            TwoDCOSRange(1737.0, 1660.0, label="upper"),
+            TwoDCOSRange(1660.0, 1580.0, label="middle"),
+            TwoDCOSRange(1580.0, 1508.0, label="lower"),
+        ),
+        cross_range_enabled=True,
+    )
+    return build_twodcos_bundle(
+        prepared,
+        TwoDCOSWorkflowService().compute(prepared, config),
+    )
+
+
+def test_twodcos_verifier_accepts_v01_bundle_without_reverse_contract() -> None:
+    bundle = _two_range_twodcos_bundle()
+    legacy = resign_bundle(
+        bundle,
+        manifest_removals=(
+            "cross_pair_count",
+            "oriented_cross_map_count",
+            "reverse_cross_exported",
+        ),
+        file_removals=(
+            "cross_ranges/cross_01/reverse_synchronous_matrix.csv",
+            "cross_ranges/cross_01/reverse_asynchronous_matrix.csv",
+            "cross_ranges/cross_01/orientations.json",
+        ),
+    )
+
+    assert verify_workbench_manifest(legacy)
+    assert verify_twodcos_bundle(legacy)
+
+
+def test_twodcos_verifier_rejects_resigned_reverse_identity_tampering() -> None:
+    bundle = _two_range_twodcos_bundle()
+    member = "cross_ranges/cross_01/reverse_asynchronous_matrix.csv"
+    with zipfile.ZipFile(io.BytesIO(bundle), "r") as archive:
+        rows, columns, matrix = export_module._matrix_from_csv(archive.read(member))
+    changed = matrix.copy()
+    changed[0, 0] += 1.0
+    forged = resign_bundle(
+        bundle,
+        file_updates={member: export_module._matrix_csv(changed, rows, columns)},
+    )
+
+    assert verify_workbench_manifest(forged)
+    assert not verify_twodcos_bundle(forged)
+
+
+def test_twodcos_verifier_rejects_resigned_reverse_axis_tampering() -> None:
+    bundle = _two_range_twodcos_bundle()
+    member = "cross_ranges/cross_01/reverse_synchronous_matrix.csv"
+    with zipfile.ZipFile(io.BytesIO(bundle), "r") as archive:
+        rows, columns, matrix = export_module._matrix_from_csv(archive.read(member))
+    changed_rows = rows.copy()
+    changed_rows[0] += 0.25
+    forged = resign_bundle(
+        bundle,
+        file_updates={member: export_module._matrix_csv(matrix, changed_rows, columns)},
+    )
+
+    assert verify_workbench_manifest(forged)
+    assert not verify_twodcos_bundle(forged)
+
+
+def test_twodcos_verifier_rejects_resigned_orientation_tampering() -> None:
+    bundle = _two_range_twodcos_bundle()
+    member = "cross_ranges/cross_01/orientations.json"
+    with zipfile.ZipFile(io.BytesIO(bundle), "r") as archive:
+        orientations = json.loads(archive.read(member))
+    orientations["reverse"]["row_variable"] = "nu2"
+    forged = resign_bundle(
+        bundle,
+        file_updates={member: export_module._json_bytes(orientations)},
+    )
+
+    assert verify_workbench_manifest(forged)
+    assert not verify_twodcos_bundle(forged)
+
+
+@pytest.mark.parametrize(
+    ("manifest_removals", "file_removals"),
+    (
+        (("oriented_cross_map_count",), ()),
+        ((), ("cross_ranges/cross_01/orientations.json",)),
+    ),
+)
+def test_twodcos_verifier_rejects_partial_v02_cross_contract(
+    manifest_removals: tuple[str, ...],
+    file_removals: tuple[str, ...],
+) -> None:
+    forged = resign_bundle(
+        _two_range_twodcos_bundle(),
+        manifest_removals=manifest_removals,
+        file_removals=file_removals,
+    )
+
+    assert verify_workbench_manifest(forged)
+    assert not verify_twodcos_bundle(forged)
+
+
+def test_twodcos_verifier_rejects_resigned_missing_v02_config_contract() -> None:
+    forged = resign_bundle(
+        _two_range_twodcos_bundle(),
+        file_updates={"twodcos_config.json": export_module._json_bytes({})},
+    )
+
+    assert verify_workbench_manifest(forged)
+    assert not verify_twodcos_bundle(forged)
+
+
+def test_twodcos_verifier_binds_resigned_pair_ranges_to_config_combinations() -> None:
+    bundle = _two_range_twodcos_bundle()
+    ranges_member = "cross_ranges/cross_01/ranges.json"
+    orientations_member = "cross_ranges/cross_01/orientations.json"
+    with zipfile.ZipFile(io.BytesIO(bundle), "r") as archive:
+        ranges = json.loads(archive.read(ranges_member))
+        orientations = json.loads(archive.read(orientations_member))
+    forged_first = dict(ranges["first_range"])
+    forged_first["high_wavenumber"] = 1800.0
+    ranges["first_range"] = forged_first
+    for name in ("stored", "reverse"):
+        orientation = orientations[name]
+        if orientation["row_variable"] == "nu1":
+            orientation["row_range"] = forged_first
+        if orientation["column_variable"] == "nu1":
+            orientation["column_range"] = forged_first
+    forged = resign_bundle(
+        bundle,
+        file_updates={
+            ranges_member: export_module._json_bytes(ranges),
+            orientations_member: export_module._json_bytes(orientations),
+        },
+    )
+
+    assert verify_workbench_manifest(forged)
+    assert not verify_twodcos_bundle(forged)
+
+
+def test_twodcos_verifier_rejects_resigned_missing_three_range_pair() -> None:
+    prefix = "cross_ranges/cross_03/"
+    forged = resign_bundle(
+        _three_range_twodcos_bundle(),
+        manifest_updates={
+            "cross_result_count": 2,
+            "cross_pair_count": 2,
+            "oriented_cross_map_count": 4,
+        },
+        file_removals=tuple(
+            f"{prefix}{name}"
+            for name in (
+                "ranges.json",
+                "synchronous_matrix.csv",
+                "asynchronous_matrix.csv",
+                "reverse_synchronous_matrix.csv",
+                "reverse_asynchronous_matrix.csv",
+                "orientations.json",
+                "qc_metrics.json",
+            )
+        ),
+    )
+
+    assert verify_workbench_manifest(forged)
+    assert not verify_twodcos_bundle(forged)
+
+
+def test_twodcos_verifier_rejects_resigned_duplicate_three_range_pair() -> None:
+    bundle = _three_range_twodcos_bundle()
+    source_prefix = "cross_ranges/cross_01/"
+    target_prefix = "cross_ranges/cross_02/"
+    suffixes = (
+        "ranges.json",
+        "synchronous_matrix.csv",
+        "asynchronous_matrix.csv",
+        "reverse_synchronous_matrix.csv",
+        "reverse_asynchronous_matrix.csv",
+        "orientations.json",
+        "qc_metrics.json",
+    )
+    with zipfile.ZipFile(io.BytesIO(bundle), "r") as archive:
+        updates = {
+            f"{target_prefix}{suffix}": archive.read(f"{source_prefix}{suffix}")
+            for suffix in suffixes
+        }
+    orientations_name = f"{target_prefix}orientations.json"
+    orientations = json.loads(updates[orientations_name])
+    orientations["pair_index"] = 2
+    updates[orientations_name] = export_module._json_bytes(orientations)
+    forged = resign_bundle(bundle, file_updates=updates)
+
+    assert verify_workbench_manifest(forged)
+    assert not verify_twodcos_bundle(forged)
 
 
 @pytest.mark.parametrize(

@@ -1,0 +1,67 @@
+{
+  "base_commit": "5976ecedeee4a22391a9d426280b272ad66d802a",
+  "build": {
+    "sdist": {
+      "path": "dist/ftir_spectral_workbench-0.2.1.tar.gz",
+      "sha256": "67e15d133dfcf8e5eeb0cab43f1131b5b75c96ee61e9720215a2d64ce340a484"
+    },
+    "status": "pass",
+    "wheel": {
+      "path": "dist/ftir_spectral_workbench-0.2.1-py3-none-any.whl",
+      "sha256": "b3252d8426fadf14109466912ec4b53479d2ee7b7351b1ee988cf2eb03a5e28d"
+    }
+  },
+  "import_compat_tests": {
+    "passed": 127,
+    "status": "pass"
+  },
+  "legacy_bundle_compatibility": {
+    "base_generator_version": "0.2.0",
+    "checks_passed": 17,
+    "prepared_reload": "exact array equality",
+    "status": "pass"
+  },
+  "legacy_science_reference": {
+    "passed": 3,
+    "status": "pass"
+  },
+  "mypy": {
+    "source_files": 17,
+    "status": "pass"
+  },
+  "privacy": {
+    "distribution_artifacts_checked": true,
+    "sdist_original_members": [
+      "data/original/README.md"
+    ],
+    "tracked_original_files": [
+      "data/original/README.md"
+    ],
+    "wheel_original_members": [],
+    "status": "pass"
+  },
+  "pytest": {
+    "passed": 597,
+    "status": "pass",
+    "warnings": 5
+  },
+  "ruff": {
+    "status": "pass"
+  },
+  "science_freeze": {
+    "files_matched": 24,
+    "files_recorded": 24,
+    "status": "pass"
+  },
+  "validation_date": "2026-09-01",
+  "version": "0.2.1",
+  "wheel_smoke": {
+    "cli_entry_points": [
+      "ftir-workbench",
+      "ftir-baseline",
+      "ftir2dcos"
+    ],
+    "installed_distribution_version": "0.2.1",
+    "status": "pass"
+  }
+}

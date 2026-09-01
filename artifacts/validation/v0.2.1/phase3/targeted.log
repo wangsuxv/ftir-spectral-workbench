@@ -1,0 +1,7 @@
+Command: .venv/bin/python -m pytest -q tests/import_compat/test_reader_conformance.py tests/baseline_regression/test_cli.py tests/integration/test_unified_cli.py tests/ui/test_import_compat_ui.py tests/ui/test_unified_streamlit.py tests/ui/test_cross2_ui.py
+
+................................................                         [100%]
+48 passed, 5 warnings in 15.95s
+
+The warnings are the pre-existing matplotlib identical-y-limit warning from
+src/ftir_baseline/qc.py when the small single-spectrum CLI fixtures are plotted.

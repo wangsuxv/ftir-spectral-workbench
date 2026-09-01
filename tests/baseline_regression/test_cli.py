@@ -8,7 +8,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from ftir_baseline.cli import main
+from ftir_baseline.cli import build_parser, main
 from ftir_baseline.export import verify_export_manifest
 
 
@@ -19,6 +19,17 @@ def write_wide_csv(path: Path) -> None:
         for point in range(1800, 899, -5):
             baseline = 0.01 + (1800 - point) * 1e-5
             writer.writerow([point, baseline, baseline + 0.002])
+
+
+def write_semicolon_decimal_comma_table(path: Path) -> None:
+    path.write_text(
+        "Instrument export\n"
+        ";Wavenumber;0 min;5 min;\n"
+        ";1002,0;0,10;0,20;\n"
+        ";1001,0;0,11;0,21;\n"
+        ";1000,0;0,12;0,22;\n",
+        encoding="utf-8-sig",
+    )
 
 
 def test_cli_init_recipe(tmp_path: Path) -> None:
@@ -82,3 +93,78 @@ def test_cli_scan_emits_standard_json_with_anchor_metrics(
     assert payload["candidates"]
     assert "Anchor PCHIP" in {row["name"] for row in payload["candidates"]}
     assert all(np.isfinite(row["mean_anchor_error"]) for row in payload["candidates"])
+
+
+@pytest.mark.parametrize(
+    "argv",
+    [
+        ["inspect", "raw.dat", "--unit", "absorbance"],
+        ["run", "raw.dat", "--unit", "absorbance"],
+        ["scan", "raw.dat", "--unit", "absorbance"],
+        ["demo"],
+    ],
+)
+def test_raw_input_commands_expose_text_import_options(argv: list[str]) -> None:
+    arguments = build_parser().parse_args(
+        [
+            *argv,
+            "--delimiter",
+            "semicolon",
+            "--decimal-mark",
+            "comma",
+            "--encoding",
+            "gb18030",
+            "--header",
+            "present",
+            "--skip-rows",
+            "2",
+            "--no-trim-empty-edge-columns",
+        ]
+    )
+
+    assert arguments.delimiter == "semicolon"
+    assert arguments.decimal_mark == "comma"
+    assert arguments.encoding == "gb18030"
+    assert arguments.header == "present"
+    assert arguments.skip_rows == 2
+    assert arguments.trim_empty_edge_columns is False
+
+
+def test_cli_inspect_applies_explicit_text_import_options(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    source = tmp_path / "semicolon-decimal-comma.dat"
+    write_semicolon_decimal_comma_table(source)
+
+    assert (
+        main(
+            [
+                "inspect",
+                str(source),
+                "--unit",
+                "absorbance",
+                "--delimiter",
+                "semicolon",
+                "--decimal-mark",
+                "comma",
+                "--encoding",
+                "utf-8-sig",
+                "--header",
+                "present",
+                "--skip-rows",
+                "1",
+                "--trim-empty-edge-columns",
+            ]
+        )
+        == 0
+    )
+
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["shape"] == [2, 3]
+    assert payload["metadata"]["delimiter_name"] == "semicolon"
+    assert payload["metadata"]["decimal_mark"] == "comma"
+    assert payload["metadata"]["encoding"] == "utf-8-sig"
+    assert payload["metadata"]["header_mode"] == "present"
+    assert payload["metadata"]["skip_rows"] == 1
+    assert payload["metadata"]["trimmed_empty_edge_columns"] == 2

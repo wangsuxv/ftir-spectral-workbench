@@ -19,7 +19,7 @@ from .gallery import (
     scan_baseline_candidates,
     starter_pchip_anchor_windows,
 )
-from .io import load_spectrum_directory, load_spectrum_files, read_spectrum_file
+from .io import TextImportOptions, load_spectrum_directory, load_spectrum_files, read_spectrum_file
 from .models import SpectrumSet
 from .pipeline import run_pipeline
 from .ranges import crop_spectrum_set
@@ -85,6 +85,7 @@ def _config_from_args(args: argparse.Namespace) -> PipelineConfig:
 
 def _load_inputs(args: argparse.Namespace, unit: IntensityUnit) -> SpectrumSet:
     paths = [Path(value) for value in args.inputs]
+    import_options = _text_import_options(args)
     if len(paths) == 1 and paths[0].is_dir():
         exclude = () if args.include_baseline_file else ("BASELINE.dpt",)
         return load_spectrum_directory(
@@ -92,18 +93,21 @@ def _load_inputs(args: argparse.Namespace, unit: IntensityUnit) -> SpectrumSet:
             input_unit=unit,
             exclude_names=exclude,
             sort_by_perturbation=bool(args.sort_by_perturbation),
+            import_options=import_options,
         )
     if len(paths) == 1:
         return read_spectrum_file(
             paths[0],
             input_unit=unit,
             sort_by_perturbation=bool(args.sort_by_perturbation),
+            import_options=import_options,
         )
     return load_spectrum_files(
         paths,
         input_unit=unit,
         exclude_names=() if args.include_baseline_file else ("BASELINE.dpt",),
         sort_by_perturbation=bool(args.sort_by_perturbation),
+        import_options=import_options,
     )
 
 
@@ -245,6 +249,7 @@ def command_demo(args: argparse.Namespace) -> int:
         exclude_names=("BASELINE.dpt",),
         sort_by_perturbation=True,
         source_name="local DPT series",
+        import_options=_text_import_options(args),
     )
     result = run_pipeline(data, config)
     output_dir = Path(args.output)
@@ -301,7 +306,11 @@ def command_demo(args: argparse.Namespace) -> int:
 
 
 def _add_input_options(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("inputs", nargs="+", help="DPT/CSV/TXT files or one directory")
+    parser.add_argument(
+        "inputs",
+        nargs="+",
+        help="plain-text spectrum files (.csv/.tsv/.tab/.txt/.dpt/.asc/.dat/.xy) or one directory",
+    )
     parser.add_argument("--unit", choices=UNITS, help="explicitly confirmed input unit")
     parser.add_argument(
         "--sort-by-perturbation",
@@ -312,6 +321,67 @@ def _add_input_options(parser: argparse.ArgumentParser) -> None:
         "--include-baseline-file",
         action="store_true",
         help="include BASELINE.dpt as a spectrum (normally excluded from a time series)",
+    )
+    _add_text_import_arguments(parser)
+
+
+def _add_text_import_arguments(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--delimiter",
+        choices=("auto", "comma", "tab", "semicolon", "whitespace"),
+        default="auto",
+        help="text delimiter (default: detect automatically)",
+    )
+    parser.add_argument(
+        "--decimal-mark",
+        choices=("auto", "dot", "comma"),
+        default="auto",
+        help="decimal mark (comma is valid only with a non-comma delimiter)",
+    )
+    parser.add_argument(
+        "--encoding",
+        choices=(
+            "auto",
+            "utf-8",
+            "utf-8-sig",
+            "utf-16",
+            "utf-16-le",
+            "utf-16-be",
+            "gb18030",
+            "cp1252",
+        ),
+        default="auto",
+        help="text encoding (default: BOM-aware automatic detection)",
+    )
+    parser.add_argument(
+        "--header",
+        choices=("auto", "present", "absent"),
+        default="auto",
+        help="whether a column header is present immediately before the numeric block",
+    )
+    parser.add_argument(
+        "--skip-rows",
+        type=int,
+        default=0,
+        metavar="N",
+        help="skip exactly N leading physical rows before parsing",
+    )
+    parser.add_argument(
+        "--trim-empty-edge-columns",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="trim columns that are empty on every parsed row (default: enabled)",
+    )
+
+
+def _text_import_options(args: argparse.Namespace) -> TextImportOptions:
+    return TextImportOptions(
+        delimiter=args.delimiter,
+        decimal_mark=args.decimal_mark,
+        encoding=args.encoding,
+        header_mode=args.header,
+        skip_rows=args.skip_rows,
+        trim_empty_edge_columns=args.trim_empty_edge_columns,
     )
 
 
@@ -377,6 +447,7 @@ def build_parser() -> argparse.ArgumentParser:
     demo_parser.add_argument("--input-dir", default="data/original")
     demo_parser.add_argument("--output", default="outputs/baseline-demo")
     demo_parser.add_argument("--extract", action=argparse.BooleanOptionalAction, default=True)
+    _add_text_import_arguments(demo_parser)
     demo_parser.set_defaults(handler=command_demo)
     return parser
 

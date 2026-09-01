@@ -15,7 +15,7 @@ import numpy as np
 
 from ftir_baseline.config import PipelineConfig
 from ftir_baseline.export import verify_export_manifest as verify_baseline_bundle
-from ftir_baseline.io import load_spectrum_directory, read_spectrum_file
+from ftir_baseline.io import TextImportOptions, load_spectrum_directory, read_spectrum_file
 
 from .config import TwoDCOSConfig, TwoDCOSRange
 from .export import (
@@ -82,6 +82,7 @@ def _baseline_config(args: argparse.Namespace) -> PipelineConfig:
 
 def _load_raw(args: argparse.Namespace) -> Any:
     source = Path(args.input).expanduser()
+    import_options = _text_import_options(args)
     if source.is_dir():
         return load_spectrum_directory(
             source,
@@ -89,11 +90,13 @@ def _load_raw(args: argparse.Namespace) -> Any:
             exclude_names=("BASELINE.dpt",),
             sort_by_perturbation=bool(args.sort_by_perturbation),
             source_name=source.name,
+            import_options=import_options,
         )
     return read_spectrum_file(
         source,
         input_unit=args.unit,
         sort_by_perturbation=bool(args.sort_by_perturbation),
+        import_options=import_options,
     )
 
 
@@ -127,6 +130,67 @@ def _add_baseline_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--smoothing-window", type=int, default=7)
     parser.add_argument("--smoothing-polyorder", type=int, default=2)
     parser.add_argument("--sort-by-perturbation", action=argparse.BooleanOptionalAction, default=True)
+    _add_text_import_arguments(parser)
+
+
+def _add_text_import_arguments(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--delimiter",
+        choices=("auto", "comma", "tab", "semicolon", "whitespace"),
+        default="auto",
+        help="Text delimiter (default: detect automatically).",
+    )
+    parser.add_argument(
+        "--decimal-mark",
+        choices=("auto", "dot", "comma"),
+        default="auto",
+        help="Decimal mark (comma is valid only with a non-comma delimiter).",
+    )
+    parser.add_argument(
+        "--encoding",
+        choices=(
+            "auto",
+            "utf-8",
+            "utf-8-sig",
+            "utf-16",
+            "utf-16-le",
+            "utf-16-be",
+            "gb18030",
+            "cp1252",
+        ),
+        default="auto",
+        help="Text encoding (default: BOM-aware automatic detection).",
+    )
+    parser.add_argument(
+        "--header",
+        choices=("auto", "present", "absent"),
+        default="auto",
+        help="Whether a column header is present immediately before the numeric block.",
+    )
+    parser.add_argument(
+        "--skip-rows",
+        type=int,
+        default=0,
+        metavar="N",
+        help="Skip exactly N leading physical rows before parsing.",
+    )
+    parser.add_argument(
+        "--trim-empty-edge-columns",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Trim columns that are empty on every parsed row (default: enabled).",
+    )
+
+
+def _text_import_options(args: argparse.Namespace) -> TextImportOptions:
+    return TextImportOptions(
+        delimiter=args.delimiter,
+        decimal_mark=args.decimal_mark,
+        encoding=args.encoding,
+        header_mode=args.header,
+        skip_rows=args.skip_rows,
+        trim_empty_edge_columns=args.trim_empty_edge_columns,
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:

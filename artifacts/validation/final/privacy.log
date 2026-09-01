@@ -1,0 +1,10 @@
+Local privacy audit for baseline-frozen v0.2.0
+Result: PASS
+
+- Git tracks no *.dpt, *.DPT, *.ftirw, *.FTIRW, *.zip, *.ZIP, .env, or *.env files.
+- data/original/ contains only its public README in the tracked file set.
+- Local ignore guards cover DPT/FTIRW files, data/original payloads, outputs,
+  private artifact directories, and generated artifact ZIP files.
+- Validation logs contain no experimental spectra, private dimensions, private
+  fingerprints, or private artifact hashes.
+- No GitHub push, tag, release, or other remote synchronization was performed.

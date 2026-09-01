@@ -1,0 +1,293 @@
+{
+  "array_hash_algorithm": "ftir_workbench.fingerprints.array_sha256",
+  "base_commit": "5976ecedeee4a22391a9d426280b272ad66d802a",
+  "fixtures_are_synthetic": true,
+  "reference_environment": {
+    "numpy": "2.5.2",
+    "platform": "macOS arm64 with Accelerate",
+    "python": "3.12",
+    "scipy": "1.18.1",
+    "scope": "Canonical local byte capture. Cross-platform upgrade tests execute this base commit and v0.2.1 in the same runtime and require exact array equality, because BLAS reduction order can change insignificant float64 low bits across platforms."
+  },
+  "inputs": {
+    "csv": {
+      "axis_direction": "descending",
+      "labels": [
+        "0MIN",
+        "5MIN",
+        "10MIN",
+        "20MIN"
+      ],
+      "perturbation": {
+        "field_name": "perturbation",
+        "sha256": "a30a5a8ce2e82c84ce604333b7039c451db0dbae4d257e8277c4b86651211aeb",
+        "shape": [
+          4
+        ]
+      },
+      "source_sha256": "a1a915061c93fbc68e2f684530b930f0cf6f54be4690b3d5e0431231357b4769",
+      "spectra": {
+        "field_name": "spectra",
+        "sha256": "50161fc28a6093648cb5bdc57946497e80c67819dd1c11059c11cf5780bd85eb",
+        "shape": [
+          4,
+          9
+        ]
+      },
+      "wavenumber": {
+        "field_name": "wavenumber",
+        "sha256": "df4b0999c8a0809a218ab87a757b5d2ac8640afbe4b0a47b61cab96943544ed2",
+        "shape": [
+          9
+        ]
+      }
+    },
+    "dpt": {
+      "axis_direction": "descending",
+      "combined_source_sha256": "52714f5404e94600901699d7eab2f050ff863551dfcc7752c3940a43080b02a8",
+      "labels": [
+        "0MIN",
+        "5MIN",
+        "10MIN",
+        "20MIN"
+      ],
+      "perturbation": {
+        "field_name": "perturbation",
+        "sha256": "a30a5a8ce2e82c84ce604333b7039c451db0dbae4d257e8277c4b86651211aeb",
+        "shape": [
+          4
+        ]
+      },
+      "source_sha256_by_file": {
+        "0MIN.dpt": "e82403f0ba8548c29e481c79fe67dc52239e617bb7a6c62253a6bd9dbcb69e2e",
+        "10MIN.dpt": "32a234bece49a08a1c1338ecc593ec14d08b5b6067aa5e7ee97e634910154fa1",
+        "20MIN.dpt": "e0709ec3989031a1b3b4132c6b690e42325e5aaebd32568fc78703356627e9a8",
+        "5MIN.dpt": "2f8cd76fa091a3001a6ffb5c7fcb20eaf65209594a2229c005de2eb550afa1c4"
+      },
+      "spectra": {
+        "field_name": "spectra",
+        "sha256": "50161fc28a6093648cb5bdc57946497e80c67819dd1c11059c11cf5780bd85eb",
+        "shape": [
+          4,
+          9
+        ]
+      },
+      "wavenumber": {
+        "field_name": "wavenumber",
+        "sha256": "df4b0999c8a0809a218ab87a757b5d2ac8640afbe4b0a47b61cab96943544ed2",
+        "shape": [
+          9
+        ]
+      }
+    },
+    "txt": {
+      "axis_direction": "descending",
+      "labels": [
+        "0MIN",
+        "5MIN",
+        "10MIN",
+        "20MIN"
+      ],
+      "perturbation": {
+        "field_name": "perturbation",
+        "sha256": "a30a5a8ce2e82c84ce604333b7039c451db0dbae4d257e8277c4b86651211aeb",
+        "shape": [
+          4
+        ]
+      },
+      "source_sha256": "9122758167ae545094e3c402d87dccb2aa8d39b98441b0196e8f57f02a21a4a5",
+      "spectra": {
+        "field_name": "spectra",
+        "sha256": "50161fc28a6093648cb5bdc57946497e80c67819dd1c11059c11cf5780bd85eb",
+        "shape": [
+          4,
+          9
+        ]
+      },
+      "wavenumber": {
+        "field_name": "wavenumber",
+        "sha256": "df4b0999c8a0809a218ab87a757b5d2ac8640afbe4b0a47b61cab96943544ed2",
+        "shape": [
+          9
+        ]
+      }
+    }
+  },
+  "schema_version": "1.0",
+  "science": {
+    "pipeline": {
+      "absorbance_full": {
+        "field_name": "absorbance_full",
+        "sha256": "b364ad0ef620d99dceb9d9588cb919938421a1e55947eb57e481f56a056f72af",
+        "shape": [
+          4,
+          9
+        ]
+      },
+      "absorbance_selected": {
+        "field_name": "absorbance_selected",
+        "sha256": "966a90548467a12fdd7da8951e8e3e40d1bf739cb97b3108c7832e1534057dc4",
+        "shape": [
+          4,
+          9
+        ]
+      },
+      "analysis_data": {
+        "field_name": "analysis_data",
+        "sha256": "a572ab537215e1cbb8ad79ca9cf878090d3e4cadc4739f6adede63458d044c00",
+        "shape": [
+          4,
+          9
+        ]
+      },
+      "baseline_estimation_spectra": {
+        "field_name": "baseline_estimation_spectra",
+        "sha256": "efbf35a3e9fc15b5ed8fbf624365485fd9f2f185952642ba4f1f9f28392956cf",
+        "shape": [
+          4,
+          9
+        ]
+      },
+      "coarse_baseline": {
+        "field_name": "coarse_baseline",
+        "sha256": "36e1dc624850f0e6620f582bb56b5cfac78acf788dab1fc19d7e1e9f1e92cc05",
+        "shape": [
+          4,
+          9
+        ]
+      },
+      "corrected": {
+        "field_name": "corrected",
+        "sha256": "0f1151fd68ce1547a79d4cc7d41dc808fd971eba122061a17209a0dec5a5c662",
+        "shape": [
+          4,
+          9
+        ]
+      },
+      "fine_baseline": {
+        "field_name": "fine_baseline",
+        "sha256": "c46e79bb27d450faa2e5d5ff2d0a1f46f8060209323919177acb8e102e7c026f",
+        "shape": [
+          4,
+          9
+        ]
+      },
+      "pipeline_result_fingerprint": "f98d797e2d33d4aaee8c2507303cf4e4aba4aa41d3323380d220eba2114de746",
+      "total_baseline": {
+        "field_name": "total_baseline",
+        "sha256": "747948983c3d78e906f40eee6acf5ec078e0f85fdcdf2d24d5e3dbf3d42c1bb7",
+        "shape": [
+          4,
+          9
+        ]
+      }
+    },
+    "prepared": {
+      "baseline_fingerprint": "993c90865b7df98e9af5cdce13ec834571a4ee7e1349392a542586d10fe0c059",
+      "prepared_data_sha256": "be438f797851510fac92a0cf0d854fb953ae3c0490dfe40fe228776ce299b736"
+    },
+    "twodcos": {
+      "cross": [
+        {
+          "reverse_asynchronous": {
+            "field_name": "cross_1_reverse_asynchronous",
+            "sha256": "b2ede0020650cdb9cd17195cf95c486565455d0ba0c8b5a462e4884aa8554fd2",
+            "shape": [
+              5,
+              4
+            ]
+          },
+          "reverse_synchronous": {
+            "field_name": "cross_1_reverse_synchronous",
+            "sha256": "7ba62dbd5806b8dd99de3dc308dc5f4cb15b928b1fb3658ff794cffb6c711801",
+            "shape": [
+              5,
+              4
+            ]
+          },
+          "stored_asynchronous": {
+            "field_name": "cross_1_stored_asynchronous",
+            "sha256": "73be6627475ee6061e301206fdd4c4abeacf92218d074276992f769d453f08e6",
+            "shape": [
+              4,
+              5
+            ]
+          },
+          "stored_synchronous": {
+            "field_name": "cross_1_stored_synchronous",
+            "sha256": "b755971fbe92aa29b231252317d71cec9e6b1fd5baf904d33b58e0034c7e20a6",
+            "shape": [
+              4,
+              5
+            ]
+          }
+        }
+      ],
+      "self": [
+        {
+          "asynchronous": {
+            "field_name": "self_1_asynchronous",
+            "sha256": "956a814467149ffcb4b35d26419b8e900d47a9731f9578ba7ac1afa71fb270e3",
+            "shape": [
+              5,
+              5
+            ]
+          },
+          "dynamic": {
+            "field_name": "self_1_dynamic",
+            "sha256": "7a6d68c779058851d692c13a83a6c285901879d36494e3f40f641b09afbda76b",
+            "shape": [
+              4,
+              5
+            ]
+          },
+          "range": {
+            "high_wavenumber": 1800.0,
+            "label": "upper",
+            "low_wavenumber": 1400.0
+          },
+          "synchronous": {
+            "field_name": "self_1_synchronous",
+            "sha256": "e1c049a71931e8b2a1b4ebb85884734be1b9657a275c9f000e04a7b4316456d9",
+            "shape": [
+              5,
+              5
+            ]
+          }
+        },
+        {
+          "asynchronous": {
+            "field_name": "self_2_asynchronous",
+            "sha256": "1c03c6009d576051e3ac140cbf76c6d5635a9809ba4d5069eb9d5804d5887bf7",
+            "shape": [
+              4,
+              4
+            ]
+          },
+          "dynamic": {
+            "field_name": "self_2_dynamic",
+            "sha256": "bf1f96050d8a7741f10d7b52d28154234447a203b9c2e8ca5ca33a9c0f12beff",
+            "shape": [
+              4,
+              4
+            ]
+          },
+          "range": {
+            "high_wavenumber": 1300.0,
+            "label": "lower",
+            "low_wavenumber": 1000.0
+          },
+          "synchronous": {
+            "field_name": "self_2_synchronous",
+            "sha256": "a5a0ccc8e6514941e99f73b2312edd9a3696c310064c2ad7ae18510d4ff304fb",
+            "shape": [
+              4,
+              4
+            ]
+          }
+        }
+      ],
+      "twodcos_fingerprint": "8c3aa28f072d3a7d8ab6b612ec6be85d15f999c18bf5a11bf38d64c22f093d19"
+    }
+  }
+}

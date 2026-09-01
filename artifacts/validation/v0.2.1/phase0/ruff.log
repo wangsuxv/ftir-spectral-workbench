@@ -1,0 +1,5 @@
+Command: .venv/bin/python -m ruff check src tests ui scripts
+Base commit: 5976ecedeee4a22391a9d426280b272ad66d802a
+Ruff: 0.16.4
+
+All checks passed!

@@ -13,6 +13,10 @@ jobs:
         python-version: ["3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v7
+        with:
+          # Release tests export the exact v0.2.0 base commit for an
+          # upgrade-before/after comparison, so a shallow PR checkout is not enough.
+          fetch-depth: 0
       - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}

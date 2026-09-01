@@ -1,0 +1,10 @@
+Command: .venv/bin/python -m pytest -q tests/import_compat/test_v020_science_reference.py
+
+...                                                                      [100%]
+3 passed in 1.19s
+
+Legacy CSV, TXT, and DPT fixtures match the frozen v0.2.0 reference for raw
+bytes, wavenumber, spectra, perturbation, labels, baseline result, and Prepared
+hash. The test also runs the exact base commit in the same runtime and requires
+zero-tolerance array equality for every input, baseline, self, and cross 2D
+matrix; this avoids treating platform BLAS low-bit differences as an upgrade.
