@@ -1,0 +1,13 @@
+Artifacts inspected:
+- dist/ftir_spectral_workbench-0.2.1.tar.gz: 239 members
+- dist/ftir_spectral_workbench-0.2.1-py3-none-any.whl: 67 listed file members
+
+Sensitive path checks:
+- sdist data/original members: data/original/README.md only
+- sdist outputs members: none
+- wheel data/original members: none
+- wheel outputs members: none
+- Git-tracked data/original/outputs members: data/original/README.md only
+
+Result: PASS. No local experimental spectrum or generated output is present in
+the v0.2.1 distribution artifacts.

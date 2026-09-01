@@ -1,0 +1,8 @@
+Instrument: synthetic FTIR example
+Acquisition: generated compatibility data
+
+# This file contains no experimental or private measurements.
+Wavenumber;0 min;5 min
+1002.0;0.125;0.225
+1001.0;0.150;0.250
+1000.0;0.175;0.275

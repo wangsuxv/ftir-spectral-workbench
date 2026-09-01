@@ -1,0 +1,10 @@
+Command: .venv/bin/python -m pytest -q tests/import_compat
+
+........................................................................ [ 56%]
+.......................................................                  [100%]
+127 passed in 10.51s
+
+These repository fixtures cover all eight claimed extensions, all four
+delimiters, dot/decimal-comma profiles, UTF-8/BOM, UTF-16 LE/BE BOM, GB18030,
+CP1252, two-column/wide/multi-file layouts, preamble/header/edge-column cases,
+strict malformed input, raw-byte hashes, and legacy reader conformance.

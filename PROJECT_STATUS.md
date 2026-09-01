@@ -1,12 +1,25 @@
 # Project Status
 
-更新日期：2026-08-29
+更新日期：2026-09-01
 
 ## 当前状态
 
-FTIR Spectral Workbench 的 v0.2.0 基线冻结版已完成发布验收，并通过 PR #1 更新公开 GitHub 仓库的默认 `main`。项目版本 metadata 为 `0.2.0`；本次发布保留 MIT 许可证且不包含实验原始数据或私有派生产物。
+FTIR Spectral Workbench 的公开版本为 v0.2.1；该版本已完成发布验收，并更新公开 GitHub 仓库的默认 `main`、`v0.2.1` tag 与 GitHub Release。开发基于 `feat/v0.2-baseline-frozen` 的提交 `5976ecedeee4a22391a9d426280b272ad66d802a`。
 
-本版本从冻结的 v0.1.0 科学基线开始，只实施四项 UI/协调层增量，不改变 baseline 数值模型、配置 schema、workflow state 或 baseline bundle。
+v0.2.1 的唯一目标是让原始 FTIR 分隔文本更容易被严格、可审计地读取。baseline/2D 数值模型、配置、Prepared、bundle、manifest、peak-order 及非 Import 页面均保持 v0.2.0 行为；许可证仍为 MIT，公开内容不包含实验原始数据或私有派生产物。
+
+## v0.2.1 发布范围
+
+- 文本扩展名：`.csv`、`.tsv`、`.tab`、`.txt`、`.dpt`、`.asc`、`.dat`、`.xy`。
+- 布局：单个二列光谱、单个宽表光谱序列、多个二列单谱文件。
+- 内容：comma/tab/semicolon/whitespace，dot 与受约束的 decimal comma，UTF-8/BOM、UTF-16 LE/BE BOM、GB18030、CP1252，blank/comment lines、leading preamble、可选 header、科学计数法和全空边缘列。
+- 公共接口：旧 reader API 保留；新增 `TextImportOptions`、`ImportProbe` 和 `probe_spectrum_file`，Probe 与正式加载共享 parser。
+- Import 页面：新增 Advanced text import options 和 Import Diagnosis；单位继续由用户明确选择。
+- CLI：新增可选 delimiter、decimal mark、encoding、header、skip rows 与 edge-column flags；旧命令无需新参数。
+- Provenance：原始 bytes SHA-256、解析证据、数值块物理行号、跳过行、warning 和多文件逐文件诊断均可审计。
+- 文档与数据：[`docs/input_formats.md`](docs/input_formats.md) 给出完整合同；`examples/import_formats/` 和 `tests/fixtures/import_compat/` 只包含合成数据。
+
+明确不支持 OMNIC `.spa/.spg/.srs`、Bruker OPUS `.0/.1/...`、`.spc`、`.sp`、JCAMP-DX、Excel 和 raw ZIP。重命名扩展名不能把这些二进制或结构化格式变为受支持文本；必须先用仪器软件导出。
 
 ## 已交付
 
@@ -32,14 +45,21 @@ FTIR Spectral Workbench 的 v0.2.0 基线冻结版已完成发布验收，并通
 - Cross 2 严格使用 `Phi_reverse=Phi_stored.T`、`Psi_reverse=-Psi_stored.T`，实际 row/column ranges 随 `nu1`/`nu2` metadata 映射；完整 N×N Self/Cross overview 不重算矩阵。
 - 2D bundle 增加 reverse matrices 与 `orientations.json`；verifier 校验矩阵、轴和 metadata，同时兼容完整的 v0.1 stored-only bundle。
 
-## Baseline Freeze
+## v0.2.1 Science Freeze
+
+- 冻结 baseline config/pipeline/算法、单位转换、归一化、QC、gallery、导出，以及 2D-COS 数学、peak-order 和 workbench baseline/2D service。
+- v0.2.0 科学冻结文件的 size/SHA-256 基准保存在 `artifacts/v0.2_science_freeze_manifest.json`；v0.2.1 最终审计必须逐项匹配。
+- 旧 `.csv/.txt/.dpt` 的 wavenumber、spectra、perturbation、labels、baseline、Prepared hash 及 self/cross 2D matrices 由冻结 reference 做逐元素/哈希回归。
+- parser 不排序波数轴、不插值、不去重、不裁剪、不删除内部缺失值、不根据 header 推断单位，也不自动翻转多文件轴；多文件轴继续 point-for-point 一致。
+
+## v0.2.0 历史 Baseline Freeze
 
 - 冻结范围：`src/ftir_baseline/**`、`tests/baseline_regression/**`、`legacy/baseline_streamlit_app.py`。
 - 起始哈希：`artifacts/v0.1_baseline_freeze_manifest.json`，共记录 41 个文件。
 - 已逐项复核 41 个 manifest 条目的大小与 SHA-256，冻结路径相对起始 commit 没有代码差异，完整 baseline regression 为 135 passed。
 - Series QC、Preview 和 A→T 都位于 UI/`ftir_workbench` 层，未向 baseline result 或 config 增加字段。
 
-## 最终验证
+## v0.2.0 已发布版本的历史验证
 
 | 检查 | 结果 |
 |---|---:|
@@ -54,7 +74,26 @@ FTIR Spectral Workbench 的 v0.2.0 基线冻结版已完成发布验收，并通
 | 冻结路径相对起始 commit 的 Git diff | empty |
 | Git 跟踪范围隐私审计 | passed，无原始谱/私有 bundle |
 
-可公开复核的完整结果保存在 `artifacts/validation/final/`。这些结果对应已合并到默认分支的 v0.2.0 源码；GitHub Actions 也已通过。
+可公开复核的完整结果保存在 `artifacts/validation/final/`。这些结果只对应已合并到默认分支的 v0.2.0 源码；GitHub Actions 也已通过，不能当作 v0.2.1 的最终结果。
+
+## v0.2.1 发布验收
+
+| 检查 | 实际结果 |
+|---|---:|
+| 全量 pytest | 597 passed，5 个小型单谱绘图 warning |
+| 输入兼容测试 | 127 passed |
+| 旧 CSV/TXT/DPT 科学 reference | 3 passed，逐元素/哈希一致 |
+| Ruff | passed |
+| Mypy `src/ftir_workbench` | passed，17 source files |
+| sdist 与 wheel 构建 | passed，0.2.1 |
+| 全新临时环境 wheel install/import/CLI | passed，三包可导入，三个入口可启动，TSV inspect/baseline/verify 成功 |
+| v0.2.0 science freeze | 24/24 size 与 SHA-256 匹配 |
+| exact v0.2.0 bundle/project reload | 17/17 验签、嵌套检查与 Prepared 精确重载通过 |
+| Git 跟踪范围隐私审计 | passed，仅跟踪 `data/original/README.md` |
+
+真实命令输出统一保存在 `artifacts/validation/v0.2.1/final/`。科学子组件 `ftir_baseline==0.1.0` 和 `ftir2dcos==0.4.0` 保留其冻结的历史版本；发行包与统一工作台版本为 `0.2.1`。
+
+该版本已推送并发布；公开 release 仅包含源码与合成测试资料，不包含实验原始数据或私有派生产物。
 
 ## 私有数据验证
 
@@ -72,7 +111,9 @@ FTIR Spectral Workbench 的 v0.2.0 基线冻结版已完成发布验收，并通
 
 ## 明确排除
 
-本版本不实施多个独立 Baseline Blocks、全局基线后的局部 range correction、processing/analysis 双范围模型、AnalysisRangePreparationService、global/local-fine 双分支、baseline sensitivity Run A/B/C、新基线方法、baseline schema 或 bundle 变化、独立区间端点强制归零、PySide6/macOS `.app`，也不进行大规模 Streamlit 架构重写。
+v0.2.1 不实施多个独立 Baseline Blocks、全局基线后的局部 range correction、processing/analysis 双范围模型、AnalysisRangePreparationService、global/local-fine 双分支、baseline sensitivity Run A/B/C、新基线方法、baseline schema 或 bundle 变化、独立区间端点强制归零、PySide6/macOS `.app`，也不进行大规模 Streamlit 架构重写。
+
+本补丁也不加入厂商二进制 reader、JCAMP-DX parser、Excel sheet/column mapping 或 raw ZIP ingestion。极短文件、多个同等可信数值块、encoding 多解和 delimiter/decimal 冲突需要用户显式选择；千位分隔符需要在导入前清理。
 
 ## 启动
 

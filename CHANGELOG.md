@@ -1,6 +1,39 @@
 # Changelog
 
-本文件记录 FTIR Spectral Workbench 的用户可见变化。当前 `0.2.0` 条目描述已通过本地与 GitHub Actions 验收并发布到默认分支的公开版本。
+本文件记录 FTIR Spectral Workbench 的用户可见变化。当前公开版本为 `0.2.1`。
+
+## [0.2.1] - 2026-09-01
+
+### Added
+
+- `.tsv`、`.tab`、`.asc`、`.dat`、`.xy` 原始文本入口；`.csv`、`.txt`、`.dpt` 旧入口继续可用。
+- comma、tab、semicolon、whitespace 内容检测，以及非 comma delimiter 下的 decimal-comma 严格解析。
+- UTF-8、UTF-8 BOM、UTF-16 LE/BE BOM、GB18030 和 CP1252 文本解码。
+- `TextImportOptions`、`ImportProbe`、`probe_spectrum_file`，并由 Probe 与正式读取共享同一个内部 parser。
+- leading metadata/preamble、blank/comment lines、可选 header、科学计数法和全空边缘列处理。
+- Streamlit Import Diagnosis/高级文本选项，以及 CLI delimiter、decimal mark、encoding、header、skip rows 和 edge-column 控件。
+- 混合文本扩展名多文件序列的逐文件解析诊断和 provenance。
+- [`docs/input_formats.md`](docs/input_formats.md) 与六个无私有数据的合成输入示例。
+
+### Strict validation
+
+- 原始 SHA-256 针对解码前 bytes 计算；检测证据、物理行号和 warning 写入 metadata。
+- 数值块内的坏行、ragged row、内部缺失值、非有限值、千位分隔歧义和同等可信的候选块会明确失败。
+- 多文件波数轴继续要求 point-for-point 一致；不会静默排序、插值、去重、裁剪或翻转。
+- OMNIC/OPUS、SPC、PerkinElmer、JCAMP-DX、Excel 和 raw ZIP 不会通过扩展名白名单伪装为受支持文本。
+
+### Unchanged
+
+- Coarse/Fine Preview、Candidate Gallery、Series Consistency & QC、A↔T、Cross 2、full block overview 和 baseline-only 行为不变。
+- Prepared handoff、self/cross 2D-COS、peak-order、bundle/project schema、manifest 和 verifier 合同不变。
+- baseline 和 2D-COS 的科学配置、公式、结果路径及非 Import 页面保持 v0.2.0 行为。
+
+### Release status
+
+- 已合并到公开默认分支，并发布 `v0.2.1` tag 与 GitHub Release。
+- 本地验收：597 passed；Ruff、Mypy、sdist/wheel build 与安装后 CLI smoke 均通过。
+- 科学冻结 24/24 文件匹配；exact v0.2.0 基线源码生成的 baseline/2D/project bundle 通过 17 项验签与 Prepared 精确重载。
+- 真实命令输出与机器可读审计见 `artifacts/validation/v0.2.1/final/`。
 
 ## [0.2.0] - 2026-08-29
 

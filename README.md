@@ -2,7 +2,15 @@
 
 FTIR Spectral Workbench 将可审计的 FTIR 基线处理与二维相关光谱（2D-COS）放在同一条可复现工作流中。基线处理本身是正式完成状态；用户可以导出校正谱后结束，也可以把同一份内存中的校正吸光度继续送入 2D-COS。
 
-当前公开版本为 `0.2.0`。它以冻结的 v0.1 基线科学路径为基础，只增加 Coarse/Fine Preview、Series Consistency & QC、A↔T 显示与派生导出，以及 Cross 2 / 完整 Self-Cross overview，并通过 PR #1 发布到默认 `main`。
+当前公开版本为 `0.2.1`。它在 v0.2.0 冻结科学路径和全部既有功能不变的前提下，提高了原始 FTIR 分隔文本的输入兼容性；项目采用 MIT 许可证，公开仓库不包含实验原始数据。
+
+## v0.2.1 文本输入兼容性
+
+v0.2.1 接受 `.csv`、`.tsv`、`.tab`、`.txt`、`.dpt`、`.asc`、`.dat` 和 `.xy` 分隔文本，覆盖单个二列表、单个宽表和多个二列单谱文件。内容解析支持 comma、tab、semicolon、whitespace，dot/decimal-comma、UTF-8/BOM、UTF-16 LE/BE BOM、GB18030、CP1252，以及 blank/comment lines、leading preamble、可选 header、科学计数法和可证明的全空边缘列。
+
+导入 Probe 与正式加载共享同一 parser，并记录原始 bytes 的 SHA-256、编码/分隔符/小数符号证据、header、数值块物理行号、跳过行、边缘空列和 warning。单位仍由用户明确选择；parser 不排序波数轴、不插值、不去重、不裁剪、不删除内部缺失值，也不自动翻转多文件波数轴。
+
+本补丁不读取 OMNIC `.spa/.spg/.srs`、Bruker OPUS `.0/.1/...`、`.spc`、`.sp`、JCAMP-DX、Excel 或 raw ZIP。请先在仪器软件中导出为受支持的纯文本表。完整支持矩阵、检测规则、CLI/API 示例与排错说明见 [`docs/input_formats.md`](docs/input_formats.md)；纯合成示例见 [`examples/import_formats/`](examples/import_formats/)。v0.2.1 发布验收达到 597 passed，并完成 wheel 安装、CLI smoke、24/24 科学冻结哈希及旧 bundle/project 重载；证据保存在 `artifacts/validation/v0.2.1/final/`。
 
 ## v0.2.0 四项更新
 
@@ -22,7 +30,7 @@ FTIR Spectral Workbench 将可审计的 FTIR 基线处理与二维相关光谱�
 - 2D 服务不调用旧 `ftir2dcos.pipeline`，因此不会重复单位转换、平滑、基线或归一化。
 - 不连续 2D 区间分别计算 self/cross 矩阵，不会伪装成连续波数轴。
 - 不同 Prepared blocks 的 cross 默认阻断；兼容性检查后仍需显式确认，并记录双方血缘。
-- `src/ftir_baseline/**`、`tests/baseline_regression/**` 和 `legacy/baseline_streamlit_app.py` 在 v0.2 中冻结；文件哈希记录于 `artifacts/v0.1_baseline_freeze_manifest.json`。
+- v0.2.0 的科学计算路径在 v0.2.1 继续冻结；输入 parser/API 可以扩展，但 baseline config、pipeline、算法、单位转换、归一化、QC、gallery、导出以及 2D-COS 科学实现不得改变。对应审计记录保存在 `artifacts/`。
 - Preview、显示单位、热图色阶和 Cross orientation 都是状态隔离的查看操作，不改变 Prepared、2D fingerprint 或已存在矩阵。
 
 ## Preview 与正式配置
@@ -64,7 +72,7 @@ ruff check src tests ui scripts
 
 ## 私有数据
 
-公开仓库不包含实验原始数据，也不包含由私有数据生成的指纹清单。`data/original/` 仅作为本机数据入口；其中除说明文件外的所有内容均被 Git 忽略。你也可以直接在 Streamlit 界面上传自己的 `.dpt`、`.csv` 或 `.txt` 文件。
+公开仓库不包含实验原始数据，也不包含由私有数据生成的指纹清单。`data/original/` 仅作为本机数据入口；其中除说明文件外的所有内容均被 Git 忽略。你也可以直接在 Streamlit 界面上传自己的 `.dpt`、`.csv`、`.tsv`、`.tab`、`.txt`、`.asc`、`.dat` 或 `.xy` 文本文件。
 
 导入目录时会：
 
@@ -80,6 +88,16 @@ ruff check src tests ui scripts
 ftir-workbench demo \
   --input-dir data/original \
   --output outputs/real-data-demo
+```
+
+需要覆盖自动文本检测时，可在 `inspect`、`baseline` 或 `demo` 的原始输入命令中使用 `--delimiter`、`--decimal-mark`、`--encoding`、`--header`、`--skip-rows`、`--trim-empty-edge-columns` 或 `--no-trim-empty-edge-columns`。旧命令不要求这些参数。例如：
+
+```bash
+ftir-workbench inspect examples/import_formats/semicolon_decimal_comma.csv \
+  --unit absorbance \
+  --delimiter semicolon \
+  --decimal-mark comma \
+  --header present
 ```
 
 对演算产物重新载入、复算并验证三层 manifest：

@@ -1,0 +1,8 @@
+Command: .venv/bin/python -m pytest -q tests/import_compat/test_v020_science_reference.py
+
+...                                                                      [100%]
+3 passed in 0.70s
+
+Legacy CSV, TXT, and DPT fixtures match the frozen v0.2.0 reference for
+wavenumber, spectra, perturbation, labels, baseline result, Prepared hash, and
+self/cross 2D matrices.

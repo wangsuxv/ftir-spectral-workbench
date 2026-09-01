@@ -1,0 +1,22 @@
+Command: .venv/bin/python -m build
+
+* Creating isolated environment: venv+pip...
+* Installing packages in isolated environment:
+  - hatchling>=1.25
+* Getting build dependencies for sdist...
+* Building sdist...
+* Building wheel from sdist
+* Creating isolated environment: venv+pip...
+* Installing packages in isolated environment:
+  - hatchling>=1.25
+* Getting build dependencies for wheel...
+* Building wheel...
+Successfully built ftir_spectral_workbench-0.2.1.tar.gz and ftir_spectral_workbench-0.2.1-py3-none-any.whl
+
+SHA-256:
+de187ddf44a8b221716288b138b8d87424cdd3f3576232510c0d2f92cc8e2133  dist/ftir_spectral_workbench-0.2.1.tar.gz
+b3252d8426fadf14109466912ec4b53479d2ee7b7351b1ee988cf2eb03a5e28d  dist/ftir_spectral_workbench-0.2.1-py3-none-any.whl
+
+One earlier isolated-build retry encountered a transient PyPI SSL EOF while
+fetching hatchling. The unchanged command was retried with authorized network
+access and completed successfully as recorded above.

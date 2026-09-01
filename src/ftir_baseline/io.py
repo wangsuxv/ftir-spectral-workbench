@@ -1496,8 +1496,8 @@ def _parse_text_table(path: Path, options: TextImportOptions) -> _ParsedTextTabl
         content,
         options,
     )
-    # Re-evaluate the selected profile across the complete file; the detection sample is
-    # capped at 30 lines, while strict validation must inspect every row.
+    # Re-evaluate the selected profile so strict validation uses the exact candidate
+    # chosen from the complete file rather than a competing delimiter profile.
     candidate = _evaluate_delimiter_candidate(
         content,
         delimiter=candidate.delimiter,

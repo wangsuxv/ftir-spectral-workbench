@@ -1,0 +1,24 @@
+Artifact: dist/ftir_spectral_workbench-0.2.1-py3-none-any.whl
+SHA-256: b3252d8426fadf14109466912ec4b53479d2ee7b7351b1ee988cf2eb03a5e28d
+Environment: fresh temporary Python 3.12 virtual environment
+
+1. A normal dependency-resolving pip install completed successfully.
+2. The exact final rebuilt wheel was force-reinstalled into that environment.
+3. Installed imports and versions:
+   imports: PASS
+   distribution=0.2.1 workbench=0.2.1 baseline=0.1.0 twodcos=0.4.0
+4. Console entry points:
+   ftir-workbench --help: exit 0
+   ftir-baseline --help: exit 0
+   ftir2dcos --help: exit 0
+5. Installed-wheel raw input smoke using examples/import_formats/wide_utf8.tsv:
+   ftir-workbench inspect: exit 0; 3 spectra, 5 points, descending axis
+   ftir-baseline inspect: exit 0; 3 spectra, 5 points, confirmed absorbance
+6. Installed-wheel workflow smoke:
+   ftir-workbench baseline: exit 0; state=baseline_completed; manifest_verified=true
+   ftir-workbench verify: exit 0; bundle_type=baseline; verified=true
+
+Preflight note: an initial --no-deps-only probe correctly reported missing
+SciPy before declared dependencies were installed. It was not counted as the
+installation result; the normal dependency-resolving installation above is the
+release smoke.
