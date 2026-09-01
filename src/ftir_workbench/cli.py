@@ -9,7 +9,7 @@ import sys
 import zipfile
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 
@@ -27,6 +27,7 @@ from .export import (
     verify_twodcos_bundle,
     verify_workbench_manifest,
 )
+from .post_baseline_smoothing import ConvolutionMode, PostBaselineSmoothingConfig
 from .services.baseline_service import BaselineWorkflowService
 from .services.twodcos_service import TwoDCOSWorkflowService
 
@@ -182,6 +183,55 @@ def _add_text_import_arguments(parser: argparse.ArgumentParser) -> None:
     )
 
 
+def _add_smoothing_arguments(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--method",
+        choices=("savgol", "gaussian", "moving_average", "median"),
+        required=True,
+        help="Post-baseline smoothing algorithm (the command always creates an enabled branch).",
+    )
+    parser.add_argument(
+        "--window-length",
+        type=int,
+        help="Odd point window for savgol, moving_average, or median.",
+    )
+    parser.add_argument(
+        "--polyorder",
+        type=int,
+        help="Savitzky–Golay polynomial order.",
+    )
+    parser.add_argument(
+        "--sigma-points",
+        type=float,
+        help="Gaussian sigma measured in points.",
+    )
+    parser.add_argument(
+        "--truncate",
+        type=float,
+        help="Gaussian kernel truncation in sigma units.",
+    )
+    parser.add_argument(
+        "--mode",
+        choices=("interp", "reflect", "mirror", "nearest"),
+        help=(
+            "Boundary mode: interp/mirror/nearest for savgol; "
+            "reflect/mirror/nearest for the other methods."
+        ),
+    )
+    parser.add_argument(
+        "--uniformity-rtol",
+        type=float,
+        default=1e-3,
+        help="Relative tolerance for approximately uniform wavenumber spacing.",
+    )
+    parser.add_argument(
+        "--nonuniform-axis-policy",
+        choices=("error", "allow_index_space_with_warning"),
+        default="error",
+        help="Reject a nonuniform axis or explicitly smooth it in index space with a warning.",
+    )
+
+
 def _text_import_options(args: argparse.Namespace) -> TextImportOptions:
     return TextImportOptions(
         delimiter=args.delimiter,
@@ -208,7 +258,15 @@ def build_parser() -> argparse.ArgumentParser:
     _add_baseline_arguments(baseline_parser)
     baseline_parser.set_defaults(handler=_command_baseline)
 
-    twodcos_parser = subparsers.add_parser("twodcos", help="Run 2D-COS from a prepared CSV, sidecar, or baseline ZIP")
+    twodcos_help = (
+        "Run 2D-COS from a prepared CSV, sidecar, baseline ZIP, "
+        "or smoothing bundle"
+    )
+    twodcos_parser = subparsers.add_parser(
+        "twodcos",
+        help=twodcos_help,
+        description=twodcos_help,
+    )
     twodcos_parser.add_argument("input", type=Path)
     twodcos_parser.add_argument("--metadata", type=Path)
     twodcos_parser.add_argument("--range", dest="ranges", type=_range, action="append", required=True)
@@ -217,6 +275,24 @@ def build_parser() -> argparse.ArgumentParser:
     twodcos_parser.add_argument("--no-cross", action="store_true")
     twodcos_parser.add_argument("--output", type=Path, default=Path("outputs"))
     twodcos_parser.set_defaults(handler=_command_twodcos)
+
+    smooth_help = (
+        "Create an explicit post-baseline smoothed Prepared branch and bundle"
+    )
+    smooth_parser = subparsers.add_parser(
+        "smooth",
+        help=smooth_help,
+        description=smooth_help,
+    )
+    smooth_parser.add_argument(
+        "input",
+        type=Path,
+        help="Prepared CSV/sidecar, baseline ZIP, or smoothing ZIP.",
+    )
+    smooth_parser.add_argument("--metadata", type=Path)
+    smooth_parser.add_argument("--output", type=Path, default=Path("outputs"))
+    _add_smoothing_arguments(smooth_parser)
+    smooth_parser.set_defaults(handler=_command_smooth)
 
     demo_parser = subparsers.add_parser("demo", help="Run a local DPT series through baseline and optional 2D demonstration")
     demo_parser.add_argument("--input-dir", dest="input", type=Path, default=DEFAULT_DATA)
@@ -316,6 +392,120 @@ def _command_twodcos(args: argparse.Namespace) -> int:
     return 0
 
 
+def _smoothing_config(args: argparse.Namespace) -> PostBaselineSmoothingConfig:
+    method = str(args.method)
+    supplied = {
+        "window_length": args.window_length,
+        "polyorder": args.polyorder,
+        "sigma_points": args.sigma_points,
+        "truncate": args.truncate,
+    }
+    allowed_parameters = {
+        "savgol": frozenset({"window_length", "polyorder"}),
+        "gaussian": frozenset({"sigma_points", "truncate"}),
+        "moving_average": frozenset({"window_length"}),
+        "median": frozenset({"window_length"}),
+    }
+    invalid = sorted(
+        name
+        for name, value in supplied.items()
+        if value is not None and name not in allowed_parameters[method]
+    )
+    if invalid:
+        rendered = ", ".join(f"--{name.replace('_', '-')}" for name in invalid)
+        raise ValueError(f"{rendered} is not valid with --method {method}")
+
+    mode = args.mode
+    if method == "savgol":
+        if mode == "reflect":
+            raise ValueError(
+                "--mode reflect is not valid with --method savgol; "
+                "choose interp, mirror, or nearest"
+            )
+        return PostBaselineSmoothingConfig(
+            enabled=True,
+            method="savgol",
+            savgol_window_length=(7 if args.window_length is None else args.window_length),
+            savgol_polyorder=(2 if args.polyorder is None else args.polyorder),
+            savgol_mode="interp" if mode is None else mode,
+            uniformity_rtol=args.uniformity_rtol,
+            nonuniform_axis_policy=args.nonuniform_axis_policy,
+        )
+
+    if mode == "interp":
+        raise ValueError(
+            f"--mode interp is not valid with --method {method}; "
+            "choose reflect, mirror, or nearest"
+        )
+    convolution_mode = cast(ConvolutionMode, "reflect" if mode is None else mode)
+    if method == "gaussian":
+        return PostBaselineSmoothingConfig(
+            enabled=True,
+            method="gaussian",
+            gaussian_sigma_points=(
+                1.0 if args.sigma_points is None else args.sigma_points
+            ),
+            gaussian_truncate=4.0 if args.truncate is None else args.truncate,
+            convolution_mode=convolution_mode,
+            uniformity_rtol=args.uniformity_rtol,
+            nonuniform_axis_policy=args.nonuniform_axis_policy,
+        )
+    if method == "moving_average":
+        return PostBaselineSmoothingConfig(
+            enabled=True,
+            method="moving_average",
+            moving_average_window_length=(
+                3 if args.window_length is None else args.window_length
+            ),
+            convolution_mode=convolution_mode,
+            uniformity_rtol=args.uniformity_rtol,
+            nonuniform_axis_policy=args.nonuniform_axis_policy,
+        )
+    return PostBaselineSmoothingConfig(
+        enabled=True,
+        method="median",
+        median_window_length=3 if args.window_length is None else args.window_length,
+        convolution_mode=convolution_mode,
+        uniformity_rtol=args.uniformity_rtol,
+        nonuniform_axis_policy=args.nonuniform_axis_policy,
+    )
+
+
+def _command_smooth(args: argparse.Namespace) -> int:
+    config = _smoothing_config(args)
+
+    from .services.smoothing_service import PostBaselineSmoothingService
+    from .smoothing_export import verify_smoothing_bundle
+
+    parent = load_prepared(args.input, metadata=args.metadata)
+    service = PostBaselineSmoothingService()
+    result, prepared = service.apply(parent, config)
+    bundle = service.build_bundle(result, prepared)
+    if not verify_smoothing_bundle(bundle):
+        raise RuntimeError("generated smoothing bundle failed verification")
+    path = _write_bundle(args.output, "post_baseline_smoothing_run.zip", bundle)
+    scientific_config = result.config.scientific_dict()
+    print(
+        json.dumps(
+            {
+                "state": "smoothing_completed",
+                "method": result.config.method,
+                "effective_parameters": scientific_config["parameters"],
+                "parent_prepared_data_sha256": parent.prepared_data_sha256,
+                "prepared_data_sha256": prepared.prepared_data_sha256,
+                "smoothing_fingerprint": result.smoothing_fingerprint,
+                "bundle": str(path),
+                "manifest_verified": True,
+                "warnings": list(result.warnings),
+            },
+            ensure_ascii=False,
+            indent=2,
+            allow_nan=False,
+        )
+    )
+    return 0
+
+
 def _command_demo(args: argparse.Namespace) -> int:
     baseline_result, prepared, baseline_bundle = _run_baseline(args)
     baseline_path = _write_bundle(args.output, "baseline_run.zip", baseline_bundle)
@@ -376,6 +566,8 @@ def _command_verify(args: argparse.Namespace) -> int:
                 bundle_type = "project"
             elif artifact_type == "twodcos_run":
                 bundle_type = "twodcos"
+            elif artifact_type == "post_baseline_smoothing_run":
+                bundle_type = "smoothing"
             elif "prepared_spectrum" in manifest:
                 bundle_type = "baseline"
         except (OSError, ValueError, KeyError, zipfile.BadZipFile, json.JSONDecodeError):
@@ -384,6 +576,10 @@ def _command_verify(args: argparse.Namespace) -> int:
         verified = verify_project_bundle(args.bundle)
     elif bundle_type == "twodcos":
         verified = verify_twodcos_bundle(args.bundle)
+    elif bundle_type == "smoothing":
+        from .smoothing_export import verify_smoothing_bundle
+
+        verified = verify_smoothing_bundle(args.bundle)
     elif bundle_type == "baseline":
         verified = verify_baseline_bundle(args.bundle)
     else:

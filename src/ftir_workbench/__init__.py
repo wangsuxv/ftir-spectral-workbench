@@ -2,6 +2,7 @@
 
 from .adapters import (
     prepared_from_baseline_result,
+    prepared_from_smoothed_result,
     prepared_scientific_branch_from_baseline_result,
     to_prepared_dataset,
 )
@@ -40,13 +41,21 @@ from .fingerprints import (
     twodcos_fingerprint,
 )
 from .models import PreparedSpectralDataset
+from .post_baseline_smoothing import (
+    PostBaselineSmoothingConfig,
+    PostBaselineSmoothingResult,
+    apply_post_baseline_smoothing,
+    post_baseline_smoothing_fingerprint,
+)
 from .project import Project, WorkbenchProject, WorkflowState
 from .services import (
     BaselineWorkflowService,
     CrossPreparedConfirmationRequired,
     CrossRangeResult,
     HomoRangeResult,
+    PostBaselineSmoothingService,
     ProjectService,
+    SmoothingBundleBuilder,
     TwoDCOSAnalysisResult,
     TwoDCOSWorkflowService,
     WorkbenchProjectService,
@@ -55,6 +64,14 @@ from .services import (
     compute_homo_from_prepared,
     cross_result_fingerprint,
 )
+from .smoothing_export import (
+    SMOOTHING_ARTIFACT_TYPE,
+    SMOOTHING_BUNDLE_MEMBERS,
+    SMOOTHING_PAYLOAD_MEMBERS,
+    build_smoothing_bundle,
+    load_smoothing_prepared,
+    verify_smoothing_bundle,
+)
 from .validation import (
     PreparedDatasetValidationError,
     validate_cross_prepared_compatibility,
@@ -62,9 +79,12 @@ from .validation import (
 )
 from .workflow import ChangeScope, InvalidWorkflowTransition
 
-__version__ = "0.2.1"
+__version__ = "0.2.5"
 
 __all__ = [
+    "SMOOTHING_ARTIFACT_TYPE",
+    "SMOOTHING_BUNDLE_MEMBERS",
+    "SMOOTHING_PAYLOAD_MEMBERS",
     "BaselineWorkflowConfig",
     "BaselineWorkflowService",
     "BlockKind",
@@ -79,10 +99,14 @@ __all__ = [
     "ImportConfig",
     "InvalidWorkflowTransition",
     "OrientedCrossView",
+    "PostBaselineSmoothingConfig",
+    "PostBaselineSmoothingResult",
+    "PostBaselineSmoothingService",
     "PreparedDatasetValidationError",
     "PreparedSpectralDataset",
     "Project",
     "ProjectService",
+    "SmoothingBundleBuilder",
     "TwoDCOSAnalysisResult",
     "TwoDCOSConfig",
     "TwoDCOSDisplayConfig",
@@ -95,8 +119,10 @@ __all__ = [
     "absorbance_to_fraction_transmittance",
     "absorbance_to_percent_transmittance",
     "analyze_peak_order",
+    "apply_post_baseline_smoothing",
     "array_sha256",
     "baseline_fingerprint",
+    "build_smoothing_bundle",
     "canonical_json_bytes",
     "canonical_json_sha256",
     "compute_cross_from_prepared",
@@ -106,13 +132,17 @@ __all__ = [
     "derived_transmittance_csv_bytes",
     "derived_transmittance_filename",
     "full_block_overview",
+    "load_smoothing_prepared",
     "oriented_cross_views",
+    "post_baseline_smoothing_fingerprint",
     "prepared_data_sha256",
     "prepared_from_baseline_result",
+    "prepared_from_smoothed_result",
     "prepared_scientific_branch_from_baseline_result",
     "project_fingerprint",
     "to_prepared_dataset",
     "twodcos_fingerprint",
     "validate_cross_prepared_compatibility",
     "validate_prepared_dataset",
+    "verify_smoothing_bundle",
 ]

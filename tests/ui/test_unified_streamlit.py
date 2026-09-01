@@ -6,6 +6,7 @@ import zipfile
 from dataclasses import replace
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 from streamlit.testing.v1 import AppTest
@@ -27,7 +28,7 @@ def _load_app_module():  # type: ignore[no-untyped-def]
     return module
 
 
-def test_unified_app_starts_and_exposes_nine_stage_workflow() -> None:
+def test_unified_app_starts_and_exposes_ten_stage_workflow() -> None:
     app = AppTest.from_file(APP_PATH, default_timeout=30).run()
 
     assert not app.exception
@@ -40,8 +41,9 @@ def test_unified_app_starts_and_exposes_nine_stage_workflow() -> None:
         "5. Series Consistency & QC",
         "6. Normalization / Branches",
         "7. Baseline Result & Export",
-        "8. Optional 2D-COS Setup",
-        "9. 2D-COS Results",
+        "8. Post-Baseline Smoothing",
+        "9. Optional 2D-COS Setup",
+        "10. 2D-COS Results",
     ]
     assert any("Start from corrected absorbance" in tab.label for tab in app.tabs)
 
@@ -178,7 +180,7 @@ def test_display_config_changes_contour_render_without_matrix_recompute() -> Non
 
 def test_switching_prepared_branch_invalidates_all_2d_descendants() -> None:
     app_module = _load_app_module()
-    branch = object()
+    branch = SimpleNamespace(prepared_data_sha256="3" * 64)
     state = {
         "active_prepared": object(),
         "prepared_source": "old",
@@ -202,6 +204,8 @@ def test_switching_prepared_branch_invalidates_all_2d_descendants() -> None:
     assert state["twodcos_bundle"] is None
     assert state["peak_order_result"] is None
     assert str(state["twodcos_status"]).startswith("PREPARED_FOR_2DCOS")
+    assert "scientific sensitivity branch (vector)" in state["twodcos_status"]
+    assert branch.prepared_data_sha256 in state["twodcos_status"]
 
 
 def test_baseline_export_page_renders_without_calling_twodcos(

@@ -1,0 +1,20 @@
+........................................................................ [ 12%]
+........................................................................ [ 24%]
+........................................................................ [ 36%]
+........................................................................ [ 48%]
+........................................................................ [ 60%]
+........................................................................ [ 72%]
+........................................................................ [ 84%]
+........................................................................ [ 96%]
+.....................                                                    [100%]
+=============================== warnings summary ===============================
+tests/integration/test_unified_cli.py::test_supported_extension_cli_entry_points[tab]
+tests/integration/test_unified_cli.py::test_supported_extension_cli_entry_points[dpt]
+tests/integration/test_unified_cli.py::test_supported_extension_cli_entry_points[asc]
+tests/integration/test_unified_cli.py::test_supported_extension_cli_entry_points[dat]
+tests/integration/test_unified_cli.py::test_supported_extension_cli_entry_points[xy]
+  <repository>/src/ftir_baseline/qc.py:372: UserWarning: Attempting to set identical low and high ylims makes transformation singular; automatically expanding.
+    image = axis.imshow(display_matrix, aspect="auto", origin="lower", extent=extent)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+597 passed, 5 warnings in 52.71s
