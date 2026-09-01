@@ -1,0 +1,10 @@
+Instrument: Synthetic FTIR
+Resolution: 4 cm-1
+
+# synthetic comment
+// generated for parser conformance
+% contains no private data
+Wavenumber;0MIN;5MIN
+1002;0.125;0.225
+1001;0.150;0.250
+1000;0.175;0.275

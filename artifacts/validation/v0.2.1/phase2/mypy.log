@@ -1,0 +1,4 @@
+Command: .venv/bin/mypy src/ftir_workbench src/ftir_baseline/io.py
+
+pyproject.toml: note: unused section(s): module = ['plotly', 'plotly.*', 'pybaselines', 'scipy.*', 'streamlit', 'streamlit.*']
+Success: no issues found in 18 source files
