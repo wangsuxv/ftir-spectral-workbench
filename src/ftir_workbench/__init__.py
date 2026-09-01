@@ -55,6 +55,7 @@ from .services import (
     HomoRangeResult,
     PostBaselineSmoothingService,
     ProjectService,
+    SmoothingBundleBuilder,
     TwoDCOSAnalysisResult,
     TwoDCOSWorkflowService,
     WorkbenchProjectService,
@@ -62,6 +63,14 @@ from .services import (
     compute_cross_from_prepared,
     compute_homo_from_prepared,
     cross_result_fingerprint,
+)
+from .smoothing_export import (
+    SMOOTHING_ARTIFACT_TYPE,
+    SMOOTHING_BUNDLE_MEMBERS,
+    SMOOTHING_PAYLOAD_MEMBERS,
+    build_smoothing_bundle,
+    load_smoothing_prepared,
+    verify_smoothing_bundle,
 )
 from .validation import (
     PreparedDatasetValidationError,
@@ -73,6 +82,9 @@ from .workflow import ChangeScope, InvalidWorkflowTransition
 __version__ = "0.2.1"
 
 __all__ = [
+    "SMOOTHING_ARTIFACT_TYPE",
+    "SMOOTHING_BUNDLE_MEMBERS",
+    "SMOOTHING_PAYLOAD_MEMBERS",
     "BaselineWorkflowConfig",
     "BaselineWorkflowService",
     "BlockKind",
@@ -94,6 +106,7 @@ __all__ = [
     "PreparedSpectralDataset",
     "Project",
     "ProjectService",
+    "SmoothingBundleBuilder",
     "TwoDCOSAnalysisResult",
     "TwoDCOSConfig",
     "TwoDCOSDisplayConfig",
@@ -109,6 +122,7 @@ __all__ = [
     "apply_post_baseline_smoothing",
     "array_sha256",
     "baseline_fingerprint",
+    "build_smoothing_bundle",
     "canonical_json_bytes",
     "canonical_json_sha256",
     "compute_cross_from_prepared",
@@ -118,6 +132,7 @@ __all__ = [
     "derived_transmittance_csv_bytes",
     "derived_transmittance_filename",
     "full_block_overview",
+    "load_smoothing_prepared",
     "oriented_cross_views",
     "post_baseline_smoothing_fingerprint",
     "prepared_data_sha256",
@@ -129,4 +144,5 @@ __all__ = [
     "twodcos_fingerprint",
     "validate_cross_prepared_compatibility",
     "validate_prepared_dataset",
+    "verify_smoothing_bundle",
 ]

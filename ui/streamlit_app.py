@@ -416,10 +416,11 @@ def _store_smoothed_branch(
     *,
     result: PostBaselineSmoothingResult,
     prepared: Any,
+    bundle: bytes | None,
 ) -> None:
     state["smoothing_result"] = result
     state["smoothed_prepared"] = prepared
-    state["smoothing_bundle"] = None
+    state["smoothing_bundle"] = bundle
 
 
 def _formal_smoothing_matches_parent(
@@ -2187,6 +2188,7 @@ def page_post_baseline_smoothing() -> None:
         key=f"smoothing_display_range_{parent.prepared_data_sha256[:12]}",
     )
 
+    smoothing_bundle_build_failed = False
     if st.button(
         "Generate Preview",
         type="primary",
@@ -2233,7 +2235,8 @@ def page_post_baseline_smoothing() -> None:
     ):
         try:
             assert draft is not None
-            formal_result, smoothed_prepared = PostBaselineSmoothingService().apply(
+            service = PostBaselineSmoothingService()
+            formal_result, smoothed_prepared = service.apply(
                 parent,
                 draft,
             )
@@ -2241,10 +2244,22 @@ def page_post_baseline_smoothing() -> None:
                 st.session_state,
                 result=formal_result,
                 prepared=smoothed_prepared,
+                bundle=None,
             )
             st.success(
                 "Smoothed scientific branch 已创建但未激活；Primary Prepared 保持不变。"
             )
+            try:
+                st.session_state.smoothing_bundle = service.build_bundle(
+                    formal_result,
+                    smoothed_prepared,
+                )
+            except Exception as exc:
+                smoothing_bundle_build_failed = True
+                st.warning(
+                    "Smoothed scientific branch 已保留，但 smoothing bundle "
+                    f"暂时无法生成：{exc}"
+                )
         except Exception as exc:
             st.error(str(exc))
 
@@ -2261,9 +2276,28 @@ def page_post_baseline_smoothing() -> None:
             st.json(dict(formal_result.summary_metrics))
             if draft is not None and draft != formal_result.config:
                 st.warning("Current draft differs from committed smoothed branch.")
-        st.info(
-            "Smoothing bundle 下载将在 Phase 4 接入；本阶段不生成占位或不可验证 ZIP。"
-        )
+        smoothing_bundle = st.session_state.smoothing_bundle
+        if (
+            formal_is_current
+            and smoothing_bundle is None
+            and not smoothing_bundle_build_failed
+        ):
+            try:
+                smoothing_bundle = PostBaselineSmoothingService().build_bundle(
+                    formal_result,
+                    smoothed_prepared,
+                )
+                st.session_state.smoothing_bundle = smoothing_bundle
+            except Exception as exc:
+                st.error(f"Smoothing bundle unavailable: {exc}")
+        if formal_is_current and isinstance(smoothing_bundle, bytes):
+            st.download_button(
+                "下载 smoothing bundle",
+                data=smoothing_bundle,
+                file_name="post_baseline_smoothing_run.zip",
+                mime="application/zip",
+                width="stretch",
+            )
 
     primary_button, smoothed_button = st.columns(2)
     if primary_button.button(
