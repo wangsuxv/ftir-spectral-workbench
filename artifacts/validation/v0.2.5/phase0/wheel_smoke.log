@@ -1,0 +1,96 @@
+WARNING: The directory '<user-cache>/pip' or its parent directory is not owned or is not writable by the current user. The cache has been disabled. Check the permissions and owner of that directory. If executing pip with sudo, you should use sudo's -H flag.
+Processing ./dist/ftir_spectral_workbench-0.2.1-py3-none-any.whl
+Installing collected packages: ftir-spectral-workbench
+Successfully installed ftir-spectral-workbench-0.2.1
+0.2.1
+usage: ftir-workbench [-h] {inspect,baseline,twodcos,demo,verify} ...
+
+Baseline-first FTIR processing with optional prepared-only 2D-COS
+
+positional arguments:
+  {inspect,baseline,twodcos,demo,verify}
+    inspect             Validate and summarize raw FTIR input
+    baseline            Run and export a baseline-only workflow
+    twodcos             Run 2D-COS from a prepared CSV, sidecar, or baseline
+                        ZIP
+    demo                Run a local DPT series through baseline and optional
+                        2D demonstration
+    verify              Verify a workbench ZIP/.ftirw manifest
+
+options:
+  -h, --help            show this help message and exit
+usage: ftir-workbench baseline [-h] [--output OUTPUT]
+                               [--unit {absorbance,percent_transmittance,fraction_transmittance}]
+                               [--baseline-high BASELINE_HIGH]
+                               [--baseline-low BASELINE_LOW]
+                               [--coarse-method {none,offset,linear,arpls,asls,airpls,rubberband,pspline_arpls}]
+                               [--lam LAM] [--asls-p ASLS_P]
+                               [--max-iter MAX_ITER] [--tol TOL]
+                               [--fine-method {none,endpoint_window_linear}]
+                               [--endpoint-width ENDPOINT_WIDTH]
+                               [--series-mode {independent_locked,collaborative_pls,shared_shape}]
+                               [--smoothing]
+                               [--smoothing-window SMOOTHING_WINDOW]
+                               [--smoothing-polyorder SMOOTHING_POLYORDER]
+                               [--sort-by-perturbation | --no-sort-by-perturbation]
+                               [--delimiter {auto,comma,tab,semicolon,whitespace}]
+                               [--decimal-mark {auto,dot,comma}]
+                               [--encoding {auto,utf-8,utf-8-sig,utf-16,utf-16-le,utf-16-be,gb18030,cp1252}]
+                               [--header {auto,present,absent}]
+                               [--skip-rows N]
+                               [--trim-empty-edge-columns | --no-trim-empty-edge-columns]
+                               input
+
+positional arguments:
+  input
+
+options:
+  -h, --help            show this help message and exit
+  --output OUTPUT
+  --unit {absorbance,percent_transmittance,fraction_transmittance}
+  --baseline-high BASELINE_HIGH
+  --baseline-low BASELINE_LOW
+  --coarse-method {none,offset,linear,arpls,asls,airpls,rubberband,pspline_arpls}
+  --lam LAM
+  --asls-p ASLS_P
+  --max-iter MAX_ITER
+  --tol TOL
+  --fine-method {none,endpoint_window_linear}
+  --endpoint-width ENDPOINT_WIDTH
+  --series-mode {independent_locked,collaborative_pls,shared_shape}
+  --smoothing           Use an estimate-only Savitzky–Golay channel.
+  --smoothing-window SMOOTHING_WINDOW
+  --smoothing-polyorder SMOOTHING_POLYORDER
+  --sort-by-perturbation, --no-sort-by-perturbation
+  --delimiter {auto,comma,tab,semicolon,whitespace}
+                        Text delimiter (default: detect automatically).
+  --decimal-mark {auto,dot,comma}
+                        Decimal mark (comma is valid only with a non-comma
+                        delimiter).
+  --encoding {auto,utf-8,utf-8-sig,utf-16,utf-16-le,utf-16-be,gb18030,cp1252}
+                        Text encoding (default: BOM-aware automatic
+                        detection).
+  --header {auto,present,absent}
+                        Whether a column header is present immediately before
+                        the numeric block.
+  --skip-rows N         Skip exactly N leading physical rows before parsing.
+  --trim-empty-edge-columns, --no-trim-empty-edge-columns
+                        Trim columns that are empty on every parsed row
+                        (default: enabled).
+usage: ftir-workbench twodcos [-h] [--metadata METADATA] --range RANGES
+                              [--convention {canonical,2dpy_compatible}]
+                              [--nonuniform-policy {warn,allow,error}]
+                              [--no-cross] [--output OUTPUT]
+                              input
+
+positional arguments:
+  input
+
+options:
+  -h, --help            show this help message and exit
+  --metadata METADATA
+  --range RANGES
+  --convention {canonical,2dpy_compatible}
+  --nonuniform-policy {warn,allow,error}
+  --no-cross
+  --output OUTPUT

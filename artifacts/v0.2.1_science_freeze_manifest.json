@@ -1,0 +1,190 @@
+{
+  "schema_version": "1.0",
+  "purpose": "v0.2.1 science and input freeze for v0.2.5 post-baseline smoothing",
+  "base_commit": "92513def080001de4c226fcea0fde484ae8d97fb",
+  "base_tree": "0f5fb43486e39bc9158cad07860c5bc9c149d5ff",
+  "generated_at_utc": "2026-09-01T03:34:50Z",
+  "file_count": 34,
+  "frozen_roots": [
+    "src/ftir_baseline/**",
+    "src/ftir2dcos/twodcos/**",
+    "src/ftir2dcos/preprocessing/smoothing.py",
+    "src/ftir2dcos/peak_order.py",
+    "src/ftir_workbench/cross_views.py",
+    "src/ftir_workbench/display_units.py",
+    "src/ftir_workbench/services/baseline_service.py",
+    "src/ftir_workbench/services/twodcos_service.py"
+  ],
+  "files": [
+    {
+      "path": "src/ftir2dcos/peak_order.py",
+      "sha256": "80cc72222af73d86c061ad2e598b696b5906a815351f0ec365f0eb5f3799f552",
+      "size_bytes": 31048
+    },
+    {
+      "path": "src/ftir2dcos/preprocessing/smoothing.py",
+      "sha256": "ffaeec3bb9e6dd265f530125aa02a83b35f686de26eaf04f7f954551c61b12d3",
+      "size_bytes": 3139
+    },
+    {
+      "path": "src/ftir2dcos/twodcos/__init__.py",
+      "sha256": "54762022738d45edf0fd3f9e08e86583ca641059f8a56d4e1d5c1418f04ec8e1",
+      "size_bytes": 1270
+    },
+    {
+      "path": "src/ftir2dcos/twodcos/conventions.py",
+      "sha256": "02b4e5437f07325c7b95e67c8a237072b48456accabe4316c7d86128cb1de25c",
+      "size_bytes": 6016
+    },
+    {
+      "path": "src/ftir2dcos/twodcos/engine.py",
+      "sha256": "2d608599518a9343b93c9b57e48793a774988cc4e9d714478790cd32cd9dace5",
+      "size_bytes": 31316
+    },
+    {
+      "path": "src/ftir2dcos/twodcos/noda.py",
+      "sha256": "ab0dac0a59291389785ee823ad730840550aada0770410040c61d9930c2e2f07",
+      "size_bytes": 1589
+    },
+    {
+      "path": "src/ftir_baseline/__init__.py",
+      "sha256": "14d915a77633d3ef89850e5f100ddda66406534293f9c9a1c24ba1d73b234d5d",
+      "size_bytes": 4274
+    },
+    {
+      "path": "src/ftir_baseline/baseline/__init__.py",
+      "sha256": "9bc6d0cede9db68610c8aba752267e2041987f48bfc8904df5ff96d0b5a88ebd",
+      "size_bytes": 2529
+    },
+    {
+      "path": "src/ftir_baseline/baseline/anchors.py",
+      "sha256": "748f1d103218c900ed5e5b13c081763584b6abc722e78f3eada769c0090136f3",
+      "size_bytes": 11862
+    },
+    {
+      "path": "src/ftir_baseline/baseline/automatic.py",
+      "sha256": "d071800138f37479b5535cff668fb4a48c9bb15ff77d39a6e8014a275f4e7159",
+      "size_bytes": 14844
+    },
+    {
+      "path": "src/ftir_baseline/baseline/collaborative.py",
+      "sha256": "5063f6a9e7aab1a64fe811155034aa7242af76e3328656cf165300bcd91ba38a",
+      "size_bytes": 8221
+    },
+    {
+      "path": "src/ftir_baseline/baseline/composite.py",
+      "sha256": "f47b187391712664e31597501e54bca785d26f81d049e80d3a94390f6fd08c4d",
+      "size_bytes": 8747
+    },
+    {
+      "path": "src/ftir_baseline/baseline/endpoint.py",
+      "sha256": "e69bdb1d263f5f4504ffbbad3af51d43a2737b03f15e98c8257db3b5594637c8",
+      "size_bytes": 6533
+    },
+    {
+      "path": "src/ftir_baseline/baseline/protocol.py",
+      "sha256": "4a9f27f7f10c6f5487ca805ba89a97d643d7519390dc6b68c6ccedb20607d1a4",
+      "size_bytes": 5961
+    },
+    {
+      "path": "src/ftir_baseline/baseline/shared_shape.py",
+      "sha256": "e87dc0f9ed5e50de5381e415e1fc4152ec833d7e952d565ab4bcac1b834f66ea",
+      "size_bytes": 5714
+    },
+    {
+      "path": "src/ftir_baseline/cli.py",
+      "sha256": "99919a36c46d94fea6efb4119e52f1c435a1e75ba1e9f3c559015be6bc5aa980",
+      "size_bytes": 17399
+    },
+    {
+      "path": "src/ftir_baseline/config.py",
+      "sha256": "ad678bdef2317ae9af18c6124dbae568d5af91ee0a1096fc5913469db7496f22",
+      "size_bytes": 6384
+    },
+    {
+      "path": "src/ftir_baseline/export.py",
+      "sha256": "c42f2a2ed8b0647cedc709d449ddb9d69f4aa50de4db3c200d7a48d139ac094f",
+      "size_bytes": 36041
+    },
+    {
+      "path": "src/ftir_baseline/gallery.py",
+      "sha256": "526d590d9c475e66a4a1aaf1b6691ad35c000cfd2f523d662e23d387de4cf07f",
+      "size_bytes": 9609
+    },
+    {
+      "path": "src/ftir_baseline/io.py",
+      "sha256": "55c5f4c5f3638a1194d7240ca2d338a3b59dc2626d6ff055e242c65401d7f52f",
+      "size_bytes": 75273
+    },
+    {
+      "path": "src/ftir_baseline/models.py",
+      "sha256": "ce288fe082f7d0ea697e6486b3f9e675664c2d9060be518babbef193775f4655",
+      "size_bytes": 8148
+    },
+    {
+      "path": "src/ftir_baseline/normalization.py",
+      "sha256": "0b099cb2718b52701a33cb923c6b62c3baa74db8cd67dcbd36d257bc43af833e",
+      "size_bytes": 14113
+    },
+    {
+      "path": "src/ftir_baseline/pipeline.py",
+      "sha256": "ba730af1e664c9cc69fe17c79fd38f7c2d1b242996046b47ae8c17f2d37b532a",
+      "size_bytes": 17184
+    },
+    {
+      "path": "src/ftir_baseline/qc.py",
+      "sha256": "75e10fcbc02df3ea8e3dd8e0bc936b69c3b636ea0ea8a977f928435c60c752a2",
+      "size_bytes": 15783
+    },
+    {
+      "path": "src/ftir_baseline/ranges.py",
+      "sha256": "77bd833e0aeaac120ccb0c05bc7c444ab780a8981e7c6a22eedc9ee06ec30d51",
+      "size_bytes": 5425
+    },
+    {
+      "path": "src/ftir_baseline/scoring.py",
+      "sha256": "6bbfbadcd4d2f8665fb271c79a33e6063194f3406fb5f58b092c054ad1a8ab3a",
+      "size_bytes": 14679
+    },
+    {
+      "path": "src/ftir_baseline/smoothing.py",
+      "sha256": "6bc76d626325318ad549519c707b225d4da47b953d1bb41f467e8a8526dce328",
+      "size_bytes": 5507
+    },
+    {
+      "path": "src/ftir_baseline/synthetic.py",
+      "sha256": "0fcd7f1938ab12bca663f664fce0c25e85d9b7f4565d7a4e82d04df5d3fb775c",
+      "size_bytes": 17965
+    },
+    {
+      "path": "src/ftir_baseline/units.py",
+      "sha256": "87a716e705e3e9a98ca245c87cf009af76a727316732a1d92c707e4ec0fcd875",
+      "size_bytes": 7483
+    },
+    {
+      "path": "src/ftir_baseline/validation.py",
+      "sha256": "fc01e10f5f37b68cc27d9af1b57505a014493ef7716af3d0ce970bfc0a078c04",
+      "size_bytes": 6658
+    },
+    {
+      "path": "src/ftir_workbench/cross_views.py",
+      "sha256": "dc28f8c9a168db6212fe3683f80f6ead0514239c74e857558f75196591c62105",
+      "size_bytes": 9893
+    },
+    {
+      "path": "src/ftir_workbench/display_units.py",
+      "sha256": "1ab99830cba73258431f06c8416bc1f4bc10df07a3370a2f251d97cee7b55703",
+      "size_bytes": 7869
+    },
+    {
+      "path": "src/ftir_workbench/services/baseline_service.py",
+      "sha256": "e3bfe543d8ef9d41463b9c91a114fb0ec3a4085d3382a92a3991e713a6bc9af8",
+      "size_bytes": 4912
+    },
+    {
+      "path": "src/ftir_workbench/services/twodcos_service.py",
+      "sha256": "1a7e4306d3f2dc631df90c0cd16de745c511755270776d5045391e68d88605dc",
+      "size_bytes": 31440
+    }
+  ]
+}

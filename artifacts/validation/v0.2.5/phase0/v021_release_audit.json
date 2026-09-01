@@ -1,0 +1,109 @@
+{
+  "audit": "FTIR Spectral Workbench v0.2.1 local release audit",
+  "base_commit": "5976ecedeee4a22391a9d426280b272ad66d802a",
+  "checks": {
+    "legacy_bundle_compatibility": {
+      "base_commit_requested": "5976ecedeee4a22391a9d426280b272ad66d802a",
+      "base_commit_resolved": "5976ecedeee4a22391a9d426280b272ad66d802a",
+      "checks": {
+        "baseline_legacy_manifest": true,
+        "baseline_prepared_exact_reload": true,
+        "baseline_workbench_manifest": true,
+        "generated_artifact_hashes": true,
+        "project_bundle": true,
+        "project_config_reload": true,
+        "project_nested_baseline_byte_identical": true,
+        "project_nested_baseline_manifest": true,
+        "project_nested_baseline_prepared_exact_reload": true,
+        "project_nested_prepared_checkpoints_equal": true,
+        "project_nested_twodcos_bundle": true,
+        "project_nested_twodcos_byte_identical": true,
+        "project_nested_twodcos_source_prepared_exact_reload": true,
+        "standalone_prepared_checkpoints_equal": true,
+        "twodcos_bundle": true,
+        "twodcos_numeric_payloads_present": true,
+        "twodcos_source_prepared_exact_reload": true
+      },
+      "failed_checks": [],
+      "generation": {
+        "artifacts": {
+          "baseline": {
+            "file": "baseline_run_v020.zip",
+            "sha256": "a25da4a1cd3bc9e1440830e09f93c9ba508a842dcf6fb0d3c9ff8bf7e3e28a20",
+            "size_bytes": 17887
+          },
+          "project": {
+            "file": "project_v020.ftirw",
+            "sha256": "e97dec64449f28b69082b257bc4ea94de6f4c689db74624a93f09ca65f6614f0",
+            "size_bytes": 45203
+          },
+          "twodcos": {
+            "file": "twodcos_run_v020.zip",
+            "sha256": "e712501eab21bb25c4dcad897c2548ee0cc67ce5cfe9142f0683658f62ce63b7",
+            "size_bytes": 33643
+          }
+        },
+        "base_workbench_version": "0.2.0",
+        "module_sources": {
+          "ftir2dcos": "src/ftir2dcos/__init__.py",
+          "ftir_baseline": "src/ftir_baseline/__init__.py",
+          "ftir_workbench": "src/ftir_workbench/__init__.py"
+        }
+      },
+      "generation_environment": "temporary git archive; artifacts deleted after audit",
+      "matrix_members_verified": [
+        "synchronous_matrix.csv",
+        "asynchronous_matrix.csv",
+        "dynamic_spectra.csv"
+      ],
+      "numpy_comparison": "exact array equality; no tolerance, sorting, or interpolation",
+      "prepared_shape": [
+        3,
+        61
+      ],
+      "reload_scope": {
+        "not_claimed": "No public load_project or 2D-matrix loader exists.",
+        "project_reload": "verify .ftirw, open its documented ZIP members, verify nested bundles, and reload both nested Prepared checkpoints",
+        "public_apis": [
+          "ftir_baseline.export.verify_export_manifest",
+          "ftir_workbench.export.verify_workbench_manifest",
+          "ftir_workbench.export.verify_twodcos_bundle",
+          "ftir_workbench.export.verify_project_bundle",
+          "ftir_workbench.export.load_prepared"
+        ]
+      },
+      "status": "pass"
+    },
+    "repository_privacy": {
+      "allowed_original_files": [
+        "data/original/README.md"
+      ],
+      "failures": [],
+      "ignore_rule_checks": {
+        "generated_output_path_is_ignored": true,
+        "raw_spectrum_path_is_ignored": true
+      },
+      "scope": "Git index and ignore rules only; ignored spectrum contents were not read",
+      "status": "pass",
+      "tracked_forbidden_archives_or_binaries": [],
+      "tracked_original_files": [
+        "data/original/README.md"
+      ],
+      "tracked_outputs": [],
+      "tracked_sensitive_manifests": []
+    },
+    "science_freeze": {
+      "algorithm": "SHA-256 over exact file bytes",
+      "checked_file_count": 24,
+      "expected_file_count": 24,
+      "manifest": "artifacts/v0.2_science_freeze_manifest.json",
+      "manifest_base_commit": "5976ecedeee4a22391a9d426280b272ad66d802a",
+      "mismatches": [],
+      "status": "pass"
+    }
+  },
+  "failed_checks": [],
+  "repository": "ftir-spectral-workbench",
+  "schema_version": "1.0",
+  "status": "pass"
+}
