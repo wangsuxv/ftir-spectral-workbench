@@ -88,7 +88,7 @@ def test_cross2_ui_exposes_both_orientations_and_never_recomputes(
     app.session_state["twodcos_result"] = analysis
     app.session_state["twodcos_status"] = "TWODCOS_COMPLETED"
 
-    app.sidebar.radio[0].set_value("9. 2D-COS Results").run()
+    app.sidebar.radio[0].set_value("10. 2D-COS Results").run()
 
     assert not app.exception
     assert len(app.session_state["twodcos_result"].cross_results) == 1

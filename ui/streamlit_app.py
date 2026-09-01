@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import tempfile
-from collections.abc import MutableMapping
+from collections.abc import Mapping, MutableMapping
 from pathlib import Path
 from typing import Any
 
@@ -60,7 +60,12 @@ from ftir_workbench.export import (
     load_prepared,
     serialize_prepared,
 )
+from ftir_workbench.post_baseline_smoothing import (
+    PostBaselineSmoothingConfig,
+    PostBaselineSmoothingResult,
+)
 from ftir_workbench.services.baseline_service import BaselineWorkflowService
+from ftir_workbench.services.smoothing_service import PostBaselineSmoothingService
 from ftir_workbench.services.twodcos_service import (
     TwoDCOSWorkflowService,
     analyze_peak_order,
@@ -111,6 +116,25 @@ except ModuleNotFoundError:  # Streamlit script-directory import fallback.
         qc_trend_figures,
     )
 
+try:
+    from ui.components.smoothing_preview import (
+        resolve_smoothing_representative,
+        smoothing_overlay_figure,
+        smoothing_qc_table,
+        smoothing_removed_component_figure,
+        smoothing_representative_options,
+        smoothing_summary_payload,
+    )
+except ModuleNotFoundError:  # Streamlit script-directory import fallback.
+    from components.smoothing_preview import (  # type: ignore[no-redef]
+        resolve_smoothing_representative,
+        smoothing_overlay_figure,
+        smoothing_qc_table,
+        smoothing_removed_component_figure,
+        smoothing_representative_options,
+        smoothing_summary_payload,
+    )
+
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 BUNDLED_DATA = PROJECT_ROOT / "data" / "original"
 
@@ -122,8 +146,9 @@ PAGES = (
     "5. Series Consistency & QC",
     "6. Normalization / Branches",
     "7. Baseline Result & Export",
-    "8. Optional 2D-COS Setup",
-    "9. 2D-COS Results",
+    "8. Post-Baseline Smoothing",
+    "9. Optional 2D-COS Setup",
+    "10. 2D-COS Results",
 )
 
 
@@ -147,6 +172,13 @@ def _initial_state() -> None:
         "active_prepared": None,
         "prepared_source": None,
         "sensitivity_prepared": None,
+        "smoothing_draft_config": PostBaselineSmoothingConfig(),
+        "smoothing_preview_config": None,
+        "smoothing_preview_parent_hash": None,
+        "smoothing_preview_result": None,
+        "smoothing_result": None,
+        "smoothed_prepared": None,
+        "smoothing_bundle": None,
         "twodcos_result": None,
         "twodcos_config": None,
         "baseline_bundle": None,
@@ -182,6 +214,12 @@ _BASELINE_DESCENDANT_KEYS = (
     "active_prepared",
     "prepared_source",
     "sensitivity_prepared",
+    "smoothing_preview_config",
+    "smoothing_preview_parent_hash",
+    "smoothing_preview_result",
+    "smoothing_result",
+    "smoothed_prepared",
+    "smoothing_bundle",
     "twodcos_result",
     "twodcos_config",
     "baseline_bundle",
@@ -281,6 +319,121 @@ def _activate_prepared_for_twodcos(
     state["peak_order_result"] = None
     state["twodcos_status"] = (
         "PREPARED_FOR_2DCOS：校正谱分支已就绪，旧 2D 状态已失效。"
+        f" Active source: {source}; Prepared SHA-256: "
+        f"{prepared.prepared_data_sha256}."
+    )
+
+
+def _smoothing_page_source(
+    state: MutableMapping[str, Any],
+) -> tuple[Any | None, str | None, bool]:
+    """Prefer the primary baseline Prepared and explicitly mark any fallback."""
+
+    primary = state.get("prepared")
+    if primary is not None:
+        return primary, "primary unsmoothed Prepared from the current baseline run", False
+    active = state.get("active_prepared")
+    if active is None:
+        return None, None, False
+    source = str(state.get("prepared_source") or "active Prepared")
+    return active, f"fallback active Prepared: {source}", True
+
+
+def _prepared_branch_lineage(prepared: Any) -> dict[str, str]:
+    """Return display lineage without using source labels as scientific evidence."""
+
+    recipe = getattr(prepared, "baseline_recipe", {})
+    contract = recipe.get("prepared_data_contract") if isinstance(recipe, Mapping) else None
+    contract = contract if isinstance(contract, Mapping) else {}
+    branch_kind = str(
+        contract.get("branch_kind")
+        or contract.get("kind")
+        or "primary_unsmoothed"
+    )
+    return {
+        "branch_kind": branch_kind,
+        "parent_prepared_data_sha256": str(
+            contract.get("parent_prepared_data_sha256") or "not applicable"
+        ),
+        "current_prepared_data_sha256": str(prepared.prepared_data_sha256),
+        "smoothing_algorithm": str(contract.get("algorithm") or "not applied"),
+        "smoothing_fingerprint": str(
+            contract.get("smoothing_fingerprint") or "not applicable"
+        ),
+    }
+
+
+def _is_smoothed_prepared(prepared: Any) -> bool:
+    return _prepared_branch_lineage(prepared)["branch_kind"] == (
+        "post_baseline_smoothing"
+    )
+
+
+def _show_prepared_branch_lineage(prepared: Any) -> None:
+    lineage = _prepared_branch_lineage(prepared)
+    st.caption(f"Prepared branch kind: {lineage['branch_kind']}")
+    st.code(
+        f"Parent Prepared SHA-256: {lineage['parent_prepared_data_sha256']}\n"
+        f"Current Prepared SHA-256: {lineage['current_prepared_data_sha256']}\n"
+        f"Smoothing algorithm: {lineage['smoothing_algorithm']}\n"
+        f"Smoothing fingerprint: {lineage['smoothing_fingerprint']}"
+    )
+
+
+def _store_smoothing_preview(
+    state: MutableMapping[str, Any],
+    *,
+    parent: Any,
+    config: PostBaselineSmoothingConfig,
+    result: PostBaselineSmoothingResult,
+) -> None:
+    state["smoothing_preview_config"] = config
+    state["smoothing_preview_parent_hash"] = parent.prepared_data_sha256
+    state["smoothing_preview_result"] = result
+
+
+def _smoothing_preview_is_current(
+    state: MutableMapping[str, Any],
+    *,
+    parent: Any,
+    config: PostBaselineSmoothingConfig | None,
+) -> bool:
+    result = state.get("smoothing_preview_result")
+    return bool(
+        config is not None
+        and isinstance(result, PostBaselineSmoothingResult)
+        and result.parent_prepared is parent
+        and result.parent_prepared.prepared_data_sha256
+        == parent.prepared_data_sha256
+        and state.get("smoothing_preview_config") == config
+        and state.get("smoothing_preview_parent_hash")
+        == parent.prepared_data_sha256
+    )
+
+
+def _store_smoothed_branch(
+    state: MutableMapping[str, Any],
+    *,
+    result: PostBaselineSmoothingResult,
+    prepared: Any,
+) -> None:
+    state["smoothing_result"] = result
+    state["smoothed_prepared"] = prepared
+    state["smoothing_bundle"] = None
+
+
+def _formal_smoothing_matches_parent(
+    state: MutableMapping[str, Any],
+    parent: Any,
+) -> bool:
+    result = state.get("smoothing_result")
+    child = state.get("smoothed_prepared")
+    return bool(
+        isinstance(result, PostBaselineSmoothingResult)
+        and child is not None
+        and result.parent_prepared is parent
+        and result.parent_prepared.prepared_data_sha256
+        == parent.prepared_data_sha256
     )
 
 
@@ -1351,6 +1504,12 @@ def _run_baseline() -> None:
     st.session_state.prepared = prepared
     st.session_state.active_prepared = None
     st.session_state.prepared_source = None
+    st.session_state.smoothing_preview_config = None
+    st.session_state.smoothing_preview_parent_hash = None
+    st.session_state.smoothing_preview_result = None
+    st.session_state.smoothing_result = None
+    st.session_state.smoothed_prepared = None
+    st.session_state.smoothing_bundle = None
     st.session_state.twodcos_config = None
     st.session_state.twodcos_result = None
     st.session_state.baseline_bundle = None
@@ -1678,6 +1837,462 @@ def page_baseline_result() -> None:
     )
 
 
+def _smoothing_config_from_state(state: MutableMapping[str, Any]) -> PostBaselineSmoothingConfig:
+    value = state.get("smoothing_draft_config")
+    if isinstance(value, PostBaselineSmoothingConfig):
+        return value
+    if isinstance(value, Mapping):
+        return PostBaselineSmoothingConfig.from_dict(value)
+    return PostBaselineSmoothingConfig()
+
+
+def _smoothing_axis_diagnostics(
+    prepared: Any,
+    *,
+    uniformity_rtol: float,
+) -> tuple[float, float, bool]:
+    spacing = np.abs(np.diff(np.asarray(prepared.wavenumber, dtype=np.float64)))
+    median_spacing = float(np.median(spacing))
+    relative_max_deviation = float(
+        np.max(np.abs(spacing - median_spacing)) / median_spacing
+    )
+    approximately_uniform = bool(
+        np.allclose(
+            spacing,
+            median_spacing,
+            rtol=uniformity_rtol,
+            atol=1e-8,
+        )
+    )
+    return median_spacing, relative_max_deviation, approximately_uniform
+
+
+def _render_smoothing_preview(
+    parent: Any,
+    result: PostBaselineSmoothingResult,
+    *,
+    selection_key: str,
+    display_range: tuple[float, float],
+) -> None:
+    low, high = display_range
+    overlay = smoothing_overlay_figure(parent, result, selection_key)
+    residual = smoothing_removed_component_figure(parent, result, selection_key)
+    for figure in (overlay, residual):
+        for axes in figure.axes:
+            axes.set_xlim(high, low)
+    try:
+        st.pyplot(overlay, width="stretch")
+        st.pyplot(residual, width="stretch")
+    finally:
+        plt.close(overlay)
+        plt.close(residual)
+
+    summary = smoothing_summary_payload(parent, result)
+    st.subheader("Smoothing QC summary")
+    metric_columns = st.columns(5)
+    summary_metrics = summary["summary_metrics"]
+    assert isinstance(summary_metrics, Mapping)
+    metric_columns[0].metric(
+        "Mean relative RMS removed",
+        f"{float(summary_metrics['mean_relative_rms_removed']):.4g}",
+    )
+    metric_columns[1].metric(
+        "Min derivative correlation",
+        f"{float(summary_metrics['min_first_derivative_correlation']):.4g}",
+    )
+    metric_columns[2].metric(
+        "Max absolute-area change",
+        f"{float(summary_metrics['max_relative_absolute_area_change']):.4g}",
+    )
+    metric_columns[3].metric(
+        "Mean roughness ratio",
+        f"{float(summary_metrics['mean_roughness_ratio']):.4g}",
+    )
+    metric_columns[4].metric(
+        "Max edge-effect ratio",
+        f"{float(summary_metrics['max_edge_effect_ratio']):.4g}",
+    )
+    st.json(
+        {
+            "method": summary["method"],
+            "effective_parameters": summary["effective_parameters"],
+            "median_wavenumber_spacing": summary["median_wavenumber_spacing"],
+            "spacing_relative_max_deviation": summary[
+                "spacing_relative_max_deviation"
+            ],
+            "approximate_physical_width": summary["approximate_physical_width"],
+            "smoothing_fingerprint": summary["smoothing_fingerprint"],
+        }
+    )
+    qc_table = smoothing_qc_table(parent, result)
+    resolved_selection = resolve_smoothing_representative(parent, selection_key)
+    if resolved_selection.spectrum_index is not None:
+        selected_index = resolved_selection.spectrum_index
+        st.subheader("Selected-spectrum smoothing metrics")
+        st.dataframe(
+            qc_table.loc[qc_table["spectrum_index"] == selected_index],
+            hide_index=True,
+            width="stretch",
+        )
+    else:
+        st.caption(
+            "Mean/median preview curves are display-only aggregates; per-spectrum QC "
+            "below remains tied to actual spectra."
+        )
+    with st.expander("All-spectrum smoothing QC", expanded=False):
+        st.dataframe(qc_table, hide_index=True, width="stretch")
+    for warning in result.warnings:
+        st.warning(warning)
+
+
+def page_post_baseline_smoothing() -> None:
+    st.header("Post-Baseline Smoothing")
+    parent, source_description, using_fallback = _smoothing_page_source(st.session_state)
+    if parent is None:
+        st.info(
+            "请先完成基线以获得 Primary Prepared；也可以在 Import 页载入已有的 "
+            "corrected-absorbance Prepared。"
+        )
+        return
+    if using_fallback:
+        st.warning(
+            "当前没有本次 baseline run 的 Primary Prepared；本页明确回退到 active "
+            "Prepared。请核对 lineage 后再创建科学分支。"
+        )
+    else:
+        st.success(
+            "本页固定使用未平滑 Primary Prepared；active 2D 分支不会偷偷替换此来源。"
+        )
+    st.caption(f"Smoothing source: {source_description}")
+    _show_prepared_info(parent)
+    _show_prepared_branch_lineage(parent)
+    if parent.normalization_state == "scientific_explicit":
+        st.error(
+            "v0.2.5 不组合 scientific normalization 与 post-baseline smoothing；"
+            "请选择 Primary unnormalized Prepared。"
+        )
+        return
+    if _is_smoothed_prepared(parent):
+        st.error(
+            "v0.2.5 禁止 chained smoothing：当前 fallback active Prepared 已是 "
+            "post-baseline smoothing 分支，请先载入或创建未平滑 Primary Prepared。"
+        )
+        return
+
+    current = _smoothing_config_from_state(st.session_state)
+    enabled = st.checkbox(
+        "Enable post-baseline smoothing",
+        value=current.enabled,
+        key="smoothing_enabled",
+    )
+    methods = ("savgol", "gaussian", "moving_average", "median")
+    method_labels = {
+        "savgol": "Savitzky–Golay",
+        "gaussian": "Gaussian",
+        "moving_average": "Moving Average / Uniform",
+        "median": "Median / despike (expert)",
+    }
+    method = st.selectbox(
+        "Algorithm",
+        methods,
+        index=methods.index(current.method),
+        format_func=lambda value: method_labels[value],
+        key="smoothing_method",
+    )
+
+    savgol_window = current.savgol_window_length
+    savgol_polyorder = current.savgol_polyorder
+    savgol_mode = current.savgol_mode
+    gaussian_sigma = current.gaussian_sigma_points
+    gaussian_truncate = current.gaussian_truncate
+    moving_window = current.moving_average_window_length
+    median_window = current.median_window_length
+    convolution_mode = current.convolution_mode
+    if method == "savgol":
+        first, second, third = st.columns(3)
+        savgol_window = int(
+            first.number_input(
+                "Savitzky–Golay window length",
+                min_value=3,
+                value=current.savgol_window_length,
+                step=2,
+                key="smoothing_savgol_window_length",
+            )
+        )
+        savgol_polyorder = int(
+            second.number_input(
+                "Savitzky–Golay polynomial order",
+                min_value=0,
+                value=current.savgol_polyorder,
+                step=1,
+                key="smoothing_savgol_polyorder",
+            )
+        )
+        savgol_modes = ("interp", "mirror", "nearest")
+        savgol_mode = third.selectbox(
+            "Savitzky–Golay boundary mode",
+            savgol_modes,
+            index=savgol_modes.index(current.savgol_mode),
+            key="smoothing_savgol_mode",
+        )
+    elif method == "gaussian":
+        first, second, third = st.columns(3)
+        gaussian_sigma = float(
+            first.number_input(
+                "Gaussian sigma (points)",
+                min_value=0.01,
+                value=current.gaussian_sigma_points,
+                step=0.05,
+                key="smoothing_gaussian_sigma_points",
+            )
+        )
+        gaussian_truncate = float(
+            second.number_input(
+                "Gaussian truncate",
+                min_value=0.01,
+                value=current.gaussian_truncate,
+                step=0.25,
+                key="smoothing_gaussian_truncate",
+            )
+        )
+        convolution_modes = ("reflect", "mirror", "nearest")
+        convolution_mode = third.selectbox(
+            "Convolution boundary mode",
+            convolution_modes,
+            index=convolution_modes.index(current.convolution_mode),
+            key="smoothing_convolution_mode",
+        )
+    elif method == "moving_average":
+        first, second = st.columns(2)
+        moving_window = int(
+            first.number_input(
+                "Moving-average window length",
+                min_value=3,
+                value=current.moving_average_window_length,
+                step=2,
+                key="smoothing_moving_average_window_length",
+            )
+        )
+        convolution_modes = ("reflect", "mirror", "nearest")
+        convolution_mode = second.selectbox(
+            "Convolution boundary mode",
+            convolution_modes,
+            index=convolution_modes.index(current.convolution_mode),
+            key="smoothing_convolution_mode",
+        )
+    else:
+        first, second = st.columns(2)
+        median_window = int(
+            first.number_input(
+                "Median window length",
+                min_value=3,
+                value=current.median_window_length,
+                step=2,
+                key="smoothing_median_window_length",
+            )
+        )
+        convolution_modes = ("reflect", "mirror", "nearest")
+        convolution_mode = second.selectbox(
+            "Convolution boundary mode",
+            convolution_modes,
+            index=convolution_modes.index(current.convolution_mode),
+            key="smoothing_convolution_mode",
+        )
+        st.warning(
+            "Median / despike 是非线性 expert 方法，可能削平真实窄峰；"
+            "请检查 residual 与峰形保真指标。"
+        )
+
+    st.subheader("Wavenumber-axis diagnostics")
+    axis_left, axis_right = st.columns(2)
+    uniformity_rtol = float(
+        axis_left.number_input(
+            "Uniformity relative tolerance",
+            min_value=0.0,
+            value=current.uniformity_rtol,
+            format="%.6g",
+            key="smoothing_uniformity_rtol",
+        )
+    )
+    policies = ("error", "allow_index_space_with_warning")
+    nonuniform_axis_policy = axis_right.selectbox(
+        "Nonuniform wavenumber axis policy",
+        policies,
+        index=policies.index(current.nonuniform_axis_policy),
+        format_func=lambda value: (
+            "Error (recommended)"
+            if value == "error"
+            else "Expert override: index-space smoothing with warning"
+        ),
+        key="smoothing_nonuniform_axis_policy",
+    )
+
+    draft: PostBaselineSmoothingConfig | None = None
+    try:
+        draft = PostBaselineSmoothingConfig(
+            enabled=enabled,
+            method=method,
+            savgol_window_length=savgol_window,
+            savgol_polyorder=savgol_polyorder,
+            savgol_mode=savgol_mode,
+            gaussian_sigma_points=gaussian_sigma,
+            gaussian_truncate=gaussian_truncate,
+            moving_average_window_length=moving_window,
+            median_window_length=median_window,
+            convolution_mode=convolution_mode,
+            uniformity_rtol=uniformity_rtol,
+            nonuniform_axis_policy=nonuniform_axis_policy,
+        )
+        st.session_state.smoothing_draft_config = draft
+    except (TypeError, ValueError) as exc:
+        st.error(str(exc))
+
+    median_spacing, relative_deviation, approximately_uniform = (
+        _smoothing_axis_diagnostics(parent, uniformity_rtol=uniformity_rtol)
+    )
+    diagnostic_columns = st.columns(3)
+    diagnostic_columns[0].metric("Median spacing (cm⁻¹)", f"{median_spacing:.6g}")
+    diagnostic_columns[1].metric("Relative max deviation", f"{relative_deviation:.6g}")
+    diagnostic_columns[2].metric(
+        "Approximately uniform",
+        "PASS" if approximately_uniform else "FAIL",
+    )
+    if not approximately_uniform:
+        if nonuniform_axis_policy == "error":
+            st.error(
+                "当前轴超出近似等间隔容差；v0.2.5 不会自动重采样。"
+            )
+        else:
+            st.warning(
+                "Expert override 已选择：将按 index space 平滑并记录 warning；"
+                "波数轴不会重采样。"
+            )
+
+    representative_options = smoothing_representative_options(parent)
+    representative_key = st.selectbox(
+        "Preview spectrum",
+        tuple(item.key for item in representative_options),
+        format_func=lambda key: next(
+            item.label for item in representative_options if item.key == key
+        ),
+        key=f"smoothing_representative_{parent.prepared_data_sha256[:12]}",
+    )
+    axis_min = float(np.min(parent.wavenumber))
+    axis_max = float(np.max(parent.wavenumber))
+    display_range = st.slider(
+        "Preview display range (cm⁻¹)",
+        min_value=axis_min,
+        max_value=axis_max,
+        value=(axis_min, axis_max),
+        key=f"smoothing_display_range_{parent.prepared_data_sha256[:12]}",
+    )
+
+    if st.button(
+        "Generate Preview",
+        type="primary",
+        disabled=draft is None,
+    ):
+        try:
+            assert draft is not None
+            preview = PostBaselineSmoothingService().preview(parent, draft)
+            _store_smoothing_preview(
+                st.session_state,
+                parent=parent,
+                config=draft,
+                result=preview,
+            )
+            st.success("Preview 已生成；正式 smoothed branch 尚未创建或替换。")
+        except Exception as exc:
+            st.error(str(exc))
+
+    preview_result = st.session_state.smoothing_preview_result
+    preview_current = _smoothing_preview_is_current(
+        st.session_state,
+        parent=parent,
+        config=draft,
+    )
+    if preview_result is not None:
+        if not preview_current:
+            st.warning(
+                "当前 preview 已过期：draft 科学参数或 parent Prepared 已变化。"
+            )
+        try:
+            _render_smoothing_preview(
+                parent,
+                preview_result,
+                selection_key=representative_key,
+                display_range=display_range,
+            )
+        except Exception as exc:
+            st.error(f"Preview display unavailable: {exc}")
+
+    if st.button(
+        "Create Smoothed Scientific Branch",
+        type="primary",
+        disabled=not (preview_current and draft is not None and draft.enabled),
+    ):
+        try:
+            assert draft is not None
+            formal_result, smoothed_prepared = PostBaselineSmoothingService().apply(
+                parent,
+                draft,
+            )
+            _store_smoothed_branch(
+                st.session_state,
+                result=formal_result,
+                prepared=smoothed_prepared,
+            )
+            st.success(
+                "Smoothed scientific branch 已创建但未激活；Primary Prepared 保持不变。"
+            )
+        except Exception as exc:
+            st.error(str(exc))
+
+    formal_result = st.session_state.smoothing_result
+    smoothed_prepared = st.session_state.smoothed_prepared
+    formal_is_current = _formal_smoothing_matches_parent(st.session_state, parent)
+    if smoothed_prepared is not None:
+        st.subheader("Committed smoothed scientific branch")
+        if not formal_is_current:
+            st.warning("已提交的 smoothed branch 不属于当前 parent，不能激活。")
+        _show_prepared_info(smoothed_prepared)
+        _show_prepared_branch_lineage(smoothed_prepared)
+        if formal_result is not None:
+            st.json(dict(formal_result.summary_metrics))
+            if draft is not None and draft != formal_result.config:
+                st.warning("Current draft differs from committed smoothed branch.")
+        st.info(
+            "Smoothing bundle 下载将在 Phase 4 接入；本阶段不生成占位或不可验证 ZIP。"
+        )
+
+    primary_button, smoothed_button = st.columns(2)
+    if primary_button.button(
+        "Use Unsmoothed Branch for 2D-COS",
+        width="stretch",
+    ):
+        _activate_prepared_for_twodcos(
+            st.session_state,
+            parent,
+            source=(
+                "primary unsmoothed Prepared"
+                if not using_fallback
+                else "fallback active Prepared used as smoothing parent"
+            ),
+        )
+        st.success("已激活未平滑来源分支；smoothing preview/formal 结果均保留。")
+    if smoothed_button.button(
+        "Use Smoothed Branch for 2D-COS",
+        disabled=not formal_is_current,
+        width="stretch",
+    ):
+        _activate_prepared_for_twodcos(
+            st.session_state,
+            smoothed_prepared,
+            source=f"post-baseline smoothing branch ({formal_result.config.method})",
+        )
+        st.success("已激活 smoothed Prepared；旧 2D descendants 已清除。")
+
+
 def _default_twodcos_ranges(axis: np.ndarray) -> list[dict[str, Any]]:
     minimum, maximum = float(np.min(axis)), float(np.max(axis))
     candidates = (
@@ -1782,8 +2397,13 @@ def page_twodcos_setup() -> None:
         )
         return
     st.success("2D-COS 阶段不会重新执行单位转换、平滑、基线校正或默认归一化。")
+    st.caption(
+        "当前 active Prepared 可以是未平滑主分支，也可以是用户显式创建的 "
+        "post-baseline smoothing 分支；2D-COS 阶段本身不执行 smoothing。"
+    )
     st.caption(f"Data source: {st.session_state.prepared_source}")
     _show_prepared_info(prepared)
+    _show_prepared_branch_lineage(prepared)
     current_config = st.session_state.twodcos_config
     defaults_key = f"range_editor_{prepared.prepared_data_sha256[:12]}"
     frame = st.data_editor(
@@ -2049,6 +2669,7 @@ def page_twodcos_results() -> None:
         f"Parent baseline: {result.parent_baseline_run_id} · "
         f"Prepared SHA-256: {result.parent_prepared_data_sha256}"
     )
+    _show_prepared_branch_lineage(prepared)
     percentile = config.display.display_percentile
     contour_levels = config.display.contour_levels
     for index, item in enumerate(result.homo_results, start=1):
@@ -2231,21 +2852,28 @@ def page_twodcos_results() -> None:
     )
     baseline_bundle = st.session_state.baseline_bundle
     if baseline_bundle is not None:
-        project_bundle = build_project_bundle(
-            baseline_bundle,
-            twodcos_bundles=(bundle,),
-            project_config={
-                "baseline": st.session_state.baseline_config,
-                "twodcos": config.to_dict(),
-            },
-        )
-        right.download_button(
-            "下载完整 project.ftirw",
-            data=project_bundle,
-            file_name="project.ftirw",
-            mime="application/zip",
-            width="stretch",
-        )
+        if _is_smoothed_prepared(prepared):
+            right.info(
+                "v0.2.5 保持旧 .ftirw project schema 不变，因此不会把 smoothed "
+                "Prepared 的 2D bundle 强行嵌入 primary baseline project。"
+                "2D bundle 可独立下载；切回 Primary Prepared 后可继续生成 project.ftirw。"
+            )
+        else:
+            project_bundle = build_project_bundle(
+                baseline_bundle,
+                twodcos_bundles=(bundle,),
+                project_config={
+                    "baseline": st.session_state.baseline_config,
+                    "twodcos": config.to_dict(),
+                },
+            )
+            right.download_button(
+                "下载完整 project.ftirw",
+                data=project_bundle,
+                file_name="project.ftirw",
+                mime="application/zip",
+                width="stretch",
+            )
 
 
 def main() -> None:
@@ -2272,8 +2900,9 @@ def main() -> None:
         PAGES[4]: page_series_qc,
         PAGES[5]: page_normalization,
         PAGES[6]: page_baseline_result,
-        PAGES[7]: page_twodcos_setup,
-        PAGES[8]: page_twodcos_results,
+        PAGES[7]: page_post_baseline_smoothing,
+        PAGES[8]: page_twodcos_setup,
+        PAGES[9]: page_twodcos_results,
     }
     handlers[page]()
 
