@@ -1,0 +1,4 @@
+Command: .venv/bin/python -m pytest -q tests/import_compat/test_text_extensions.py tests/baseline_regression/test_io.py tests/ui/test_unified_streamlit.py
+
+.......................................                                  [100%]
+39 passed in 11.06s

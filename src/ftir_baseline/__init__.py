@@ -23,6 +23,8 @@ _LAZY_EXPORTS = {
     "convert_to_absorbance": "units",
     "to_absorbance": "units",
     "SpectrumReadError": "io",
+    "SUPPORTED_EXTENSIONS": "io",
+    "SUPPORTED_TEXT_EXTENSIONS": "io",
     "load_spectrum_directory": "io",
     "load_spectrum_files": "io",
     "read_spectrum_file": "io",
@@ -76,6 +78,8 @@ def __dir__() -> list[str]:
 
 
 __all__ = [
+    "SUPPORTED_EXTENSIONS",
+    "SUPPORTED_TEXT_EXTENSIONS",
     "SYNTHETIC_SCENARIOS",
     "AnchorWindowConfig",
     "BaselineEstimationChannels",

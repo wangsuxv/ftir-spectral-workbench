@@ -467,8 +467,8 @@ def page_import() -> None:
     raw_tab, corrected_tab = st.tabs(("从原始 FTIR 开始", "Start from corrected absorbance"))
     with raw_tab:
         uploads = st.file_uploader(
-            "上传一个宽表 CSV/TXT，或多条二列 DPT",
-            type=("dpt", "csv", "txt"),
+            "上传一个宽表，或多条二列文本光谱 · 支持 CSV/TSV/TAB/TXT/DPT/ASC/DAT/XY",
+            type=("dpt", "csv", "tsv", "tab", "txt", "asc", "dat", "xy"),
             accept_multiple_files=True,
             key="raw_uploads",
         )

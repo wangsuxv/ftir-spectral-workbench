@@ -1,0 +1,3 @@
+Command: .venv/bin/python -m ruff check src tests ui scripts
+
+All checks passed!

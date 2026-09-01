@@ -1,4 +1,4 @@
-"""Strict readers for DPT, CSV, and text FTIR spectra."""
+"""Strict readers for delimited plain-text FTIR spectra."""
 
 from __future__ import annotations
 
@@ -20,7 +20,11 @@ SupportedUnit = Literal[
     "percent_transmittance",
     "fraction_transmittance",
 ]
-SUPPORTED_EXTENSIONS = frozenset({".csv", ".txt", ".dpt"})
+SUPPORTED_TEXT_EXTENSIONS = frozenset(
+    {".csv", ".tsv", ".tab", ".txt", ".dpt", ".asc", ".dat", ".xy"}
+)
+# Backward-compatible name used by callers and directory discovery.
+SUPPORTED_EXTENSIONS = SUPPORTED_TEXT_EXTENSIONS
 
 
 class SpectrumReadError(SpectrumValidationError):
@@ -169,7 +173,7 @@ def read_spectrum_file(
     metadata: Mapping[str, Any] | None = None,
     sort_by_perturbation: bool = False,
 ) -> SpectrumSet:
-    """Read one narrow or wide DPT/CSV/TXT file.
+    """Read one narrow or wide plain-text spectrum table.
 
     The supported wide layout is ``wavenumber, spectrum_1, spectrum_2, ...``.
     One optional header row is accepted.  Wavenumber rows are never sorted or
@@ -183,7 +187,9 @@ def read_spectrum_file(
         raise FileNotFoundError(f"spectrum file does not exist: {file_path}")
     if file_path.suffix.lower() not in SUPPORTED_EXTENSIONS:
         raise SpectrumReadError(
-            f"unsupported spectrum extension {file_path.suffix!r}; expected DPT, CSV, or TXT"
+            f"unsupported spectrum extension {file_path.suffix!r}; expected one of "
+            f"{sorted(SUPPORTED_TEXT_EXTENSIONS)}. Structured or vendor-binary spectra must "
+            "first be exported as a supported text table."
         )
     table, header, used_encoding, used_delimiter = _parse_numeric_table(
         file_path, delimiter=delimiter, encoding=encoding
@@ -306,7 +312,10 @@ def load_spectrum_files(
 
     original_paths = _resolve_paths(paths)
     if not original_paths:
-        raise SpectrumReadError("no supported DPT/CSV/TXT files were supplied")
+        raise SpectrumReadError(
+            "no supported text-spectrum files were supplied; expected one of "
+            f"{sorted(SUPPORTED_TEXT_EXTENSIONS)}"
+        )
     excluded_lookup = {name.casefold() for name in exclude_names}
     excluded = [path for path in original_paths if path.name.casefold() in excluded_lookup]
     selected = [path for path in original_paths if path.name.casefold() not in excluded_lookup]
@@ -462,6 +471,7 @@ read_spectrum_series = load_spectrum_files
 
 __all__ = [
     "SUPPORTED_EXTENSIONS",
+    "SUPPORTED_TEXT_EXTENSIONS",
     "SpectrumReadError",
     "load_spectrum_directory",
     "load_spectrum_files",
