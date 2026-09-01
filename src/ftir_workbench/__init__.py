@@ -40,6 +40,12 @@ from .fingerprints import (
     twodcos_fingerprint,
 )
 from .models import PreparedSpectralDataset
+from .post_baseline_smoothing import (
+    PostBaselineSmoothingConfig,
+    PostBaselineSmoothingResult,
+    apply_post_baseline_smoothing,
+    post_baseline_smoothing_fingerprint,
+)
 from .project import Project, WorkbenchProject, WorkflowState
 from .services import (
     BaselineWorkflowService,
@@ -79,6 +85,8 @@ __all__ = [
     "ImportConfig",
     "InvalidWorkflowTransition",
     "OrientedCrossView",
+    "PostBaselineSmoothingConfig",
+    "PostBaselineSmoothingResult",
     "PreparedDatasetValidationError",
     "PreparedSpectralDataset",
     "Project",
@@ -95,6 +103,7 @@ __all__ = [
     "absorbance_to_fraction_transmittance",
     "absorbance_to_percent_transmittance",
     "analyze_peak_order",
+    "apply_post_baseline_smoothing",
     "array_sha256",
     "baseline_fingerprint",
     "canonical_json_bytes",
@@ -107,6 +116,7 @@ __all__ = [
     "derived_transmittance_filename",
     "full_block_overview",
     "oriented_cross_views",
+    "post_baseline_smoothing_fingerprint",
     "prepared_data_sha256",
     "prepared_from_baseline_result",
     "prepared_scientific_branch_from_baseline_result",
