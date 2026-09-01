@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import tempfile
 from collections.abc import MutableMapping
@@ -22,8 +23,11 @@ from ftir_baseline.gallery import (
     starter_pchip_anchor_windows,
 )
 from ftir_baseline.io import (
+    ImportProbe,
+    TextImportOptions,
     load_spectrum_directory,
     load_spectrum_files,
+    probe_spectrum_file,
     read_spectrum_file,
 )
 from ftir_baseline.normalization import apply_normalization
@@ -285,6 +289,7 @@ def _uploaded_raw(
     *,
     unit: str,
     sort_by_perturbation: bool,
+    import_options: TextImportOptions | None = None,
 ) -> Any:
     names = [Path(item.name).name for item in uploads]
     folded = [name.casefold() for name in names]
@@ -303,6 +308,7 @@ def _uploaded_raw(
                 input_unit=unit,
                 source_name=names[0],
                 sort_by_perturbation=sort_by_perturbation,
+                import_options=import_options,
             )
         return load_spectrum_files(
             paths,
@@ -310,7 +316,93 @@ def _uploaded_raw(
             sort_by_perturbation=sort_by_perturbation,
             exclude_names=("BASELINE.dpt",),
             source_name=f"{len(paths)} uploaded FTIR spectra",
+            import_options=import_options,
         )
+
+
+def _uploaded_import_probes(
+    uploads: list[Any],
+    *,
+    import_options: TextImportOptions,
+) -> tuple[ImportProbe, ...]:
+    """Probe uploaded files without committing raw or scientific state."""
+
+    names = [Path(item.name).name for item in uploads]
+    folded = [name.casefold() for name in names]
+    duplicates = sorted({name for name in names if folded.count(name.casefold()) > 1})
+    if duplicates:
+        raise ValueError("存在重复上传文件名：" + ", ".join(duplicates))
+    with tempfile.TemporaryDirectory(prefix="ftir_workbench_probe_") as directory:
+        probes: list[ImportProbe] = []
+        for item, name in zip(uploads, names, strict=True):
+            path = Path(directory) / name
+            path.write_bytes(item.getvalue())
+            probes.append(probe_spectrum_file(path, options=import_options))
+    return tuple(probes)
+
+
+def _import_probe_frame(probes: tuple[ImportProbe, ...]) -> pd.DataFrame:
+    """Return a concise, human-readable diagnosis table."""
+
+    return pd.DataFrame(
+        [
+            {
+                "File": probe.source_name,
+                "Extension": probe.extension,
+                "Encoding": probe.selected_encoding,
+                "Delimiter": probe.selected_delimiter,
+                "Decimal": probe.selected_decimal_mark,
+                "Header": "present" if probe.header_present else "absent",
+                "Layout": probe.layout,
+                "Rows": probe.data_rows,
+                "Columns": probe.columns,
+                "Warnings": "; ".join(probe.warnings),
+            }
+            for probe in probes
+        ]
+    )
+
+
+def _text_import_signature(
+    uploads: list[Any],
+    import_options: TextImportOptions,
+) -> str | None:
+    """Fingerprint the upload bytes, names, and parser controls for stale-state checks."""
+
+    if not uploads:
+        return None
+    payload = {
+        "files": [
+            {
+                "name": Path(item.name).name,
+                "size": len(item.getvalue()),
+                "sha256": hashlib.sha256(item.getvalue()).hexdigest(),
+            }
+            for item in uploads
+        ],
+        "text_import_options": import_options.to_dict(),
+    }
+    encoded = json.dumps(payload, ensure_ascii=True, sort_keys=True).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _raw_import_signature(
+    text_signature: str | None,
+    *,
+    unit: str,
+    sort_by_perturbation: bool,
+) -> str | None:
+    """Extend the text fingerprint with explicit scientific import choices."""
+
+    if text_signature is None:
+        return None
+    payload = {
+        "text_signature": text_signature,
+        "unit": unit,
+        "sort_by_perturbation": sort_by_perturbation,
+    }
+    encoded = json.dumps(payload, ensure_ascii=True, sort_keys=True).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
 
 
 def _line_figure(
@@ -478,21 +570,155 @@ def page_import() -> None:
             horizontal=True,
             key="raw_unit",
         )
-        sort_values = st.checkbox("按文件名中的扰动数值显式排序", value=True)
-        left, right = st.columns(2)
-        if left.button("载入上传数据", type="primary", disabled=not uploads):
+        sort_values = st.checkbox(
+            "按文件名中的扰动数值显式排序",
+            value=True,
+            key="raw_sort_by_perturbation",
+        )
+        with st.expander("Advanced text import options"):
+            first, second = st.columns(2)
+            delimiter = first.selectbox(
+                "Delimiter",
+                ("Auto", "Comma", "Tab", "Semicolon", "Whitespace"),
+                key="raw_text_delimiter",
+            )
+            decimal_mark = second.selectbox(
+                "Decimal mark",
+                ("Auto", "Dot", "Comma"),
+                key="raw_text_decimal_mark",
+            )
+            encoding = first.selectbox(
+                "Encoding",
+                (
+                    "Auto",
+                    "UTF-8",
+                    "UTF-16",
+                    "UTF-16 LE",
+                    "UTF-16 BE",
+                    "GB18030",
+                    "CP1252",
+                ),
+                key="raw_text_encoding",
+            )
+            header_mode = second.selectbox(
+                "Header",
+                ("Auto", "Present", "Absent"),
+                key="raw_text_header_mode",
+            )
+            skip_rows = first.number_input(
+                "Skip leading rows",
+                min_value=0,
+                value=0,
+                step=1,
+                key="raw_text_skip_rows",
+            )
+            trim_empty_edge_columns = second.checkbox(
+                "Trim all-empty edge columns",
+                value=True,
+                key="raw_text_trim_empty_edge_columns",
+            )
+
+        import_options: TextImportOptions | None
+        try:
+            encoding_value = {
+                "Auto": "auto",
+                "UTF-8": "utf-8",
+                "UTF-16": "utf-16",
+                "UTF-16 LE": "utf-16-le",
+                "UTF-16 BE": "utf-16-be",
+                "GB18030": "gb18030",
+                "CP1252": "cp1252",
+            }[encoding]
+            import_options = TextImportOptions(
+                delimiter=delimiter.casefold(),
+                decimal_mark=decimal_mark.casefold(),
+                encoding=encoding_value,
+                header_mode=header_mode.casefold(),
+                skip_rows=int(skip_rows),
+                trim_empty_edge_columns=trim_empty_edge_columns,
+            )
+        except (TypeError, ValueError) as exc:
+            import_options = None
+            st.error(f"文本导入选项无效：{exc}")
+
+        upload_items = list(uploads or [])
+        text_signature = (
+            None
+            if import_options is None
+            else _text_import_signature(upload_items, import_options)
+        )
+        raw_signature = _raw_import_signature(
+            text_signature,
+            unit=unit,
+            sort_by_perturbation=sort_values,
+        )
+        loaded_signature = st.session_state.get("_loaded_upload_signature")
+        if loaded_signature is not None and loaded_signature != raw_signature:
+            st.session_state.raw_data = None
+            _invalidate_from_baseline()
+            st.session_state["_loaded_upload_signature"] = None
+            st.info("上传内容或导入选项已更改；旧的原始数据和下游结果已失效。")
+
+        diagnosis_signature = st.session_state.get("_import_diagnosis_signature")
+        if diagnosis_signature != text_signature:
+            st.session_state["_import_diagnosis"] = None
+            st.session_state["_import_diagnosis_signature"] = None
+
+        st.subheader("Import Diagnosis")
+        st.caption("Analyze 只解析并报告文本结构，不运行基线或修改科学配置。")
+        analyze_column, load_column = st.columns(2)
+        if analyze_column.button(
+            "Analyze uploaded files",
+            disabled=not upload_items or import_options is None,
+        ):
             try:
+                probes = _uploaded_import_probes(
+                    upload_items,
+                    import_options=import_options,
+                )
+                st.session_state["_import_diagnosis"] = probes
+                st.session_state["_import_diagnosis_signature"] = text_signature
+            except Exception as exc:
+                st.session_state["_import_diagnosis"] = None
+                st.session_state["_import_diagnosis_signature"] = None
+                st.error(str(exc))
+
+        if load_column.button(
+            "Load using these settings",
+            type="primary",
+            disabled=not upload_items or import_options is None,
+        ):
+            try:
+                probes = _uploaded_import_probes(
+                    upload_items,
+                    import_options=import_options,
+                )
+                st.session_state["_import_diagnosis"] = probes
+                st.session_state["_import_diagnosis_signature"] = text_signature
                 _set_raw_data(
                     _uploaded_raw(
-                        uploads,
+                        upload_items,
                         unit=unit,
                         sort_by_perturbation=sort_values,
+                        import_options=import_options,
                     )
                 )
+                st.session_state["_loaded_upload_signature"] = raw_signature
                 st.success("原始数据已载入；尚未执行基线。")
             except Exception as exc:
                 st.error(str(exc))
-        if right.button(
+
+        probes = st.session_state.get("_import_diagnosis")
+        if probes is not None:
+            st.dataframe(
+                _import_probe_frame(probes),
+                hide_index=True,
+                width="stretch",
+            )
+            with st.expander("Detection evidence"):
+                st.json([probe.to_dict() for probe in probes])
+
+        if st.button(
             "载入本机 data/original 中的 DPT",
             disabled=not _has_local_dpt_series(),
         ):
@@ -505,6 +731,7 @@ def page_import() -> None:
                     source_name="local DPT series",
                 )
                 _set_raw_data(local_data)
+                st.session_state["_loaded_upload_signature"] = None
                 st.success(
                     f"已数值排序 {local_data.n_spectra} 条本机光谱；"
                     "BASELINE.dpt 已按演示约定排除。"

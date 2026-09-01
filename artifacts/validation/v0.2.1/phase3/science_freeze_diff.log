@@ -1,0 +1,3 @@
+Command: git diff --name-only 5976ecedeee4a22391a9d426280b272ad66d802a -- <science-freeze paths>
+
+No output. No science-freeze file differs from the v0.2.0 base commit.
