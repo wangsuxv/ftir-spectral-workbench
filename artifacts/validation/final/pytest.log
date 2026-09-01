@@ -1,0 +1,4 @@
+Command: .venv/bin/pytest -q
+Result: PASS
+
+445 passed in 37.13s

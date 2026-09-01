@@ -1,0 +1,22 @@
+Baseline-frozen v0.2.0 build and installation smoke
+Result: PASS
+
+Build command:
+.venv/bin/python -m build --no-isolation --outdir <temporary-validation-dir>/dist
+
+Built:
+- ftir_spectral_workbench-0.2.0.tar.gz
+- ftir_spectral_workbench-0.2.0-py3-none-any.whl
+
+The wheel was installed without dependencies into an isolated temporary target.
+Smoke tests used the validated workspace dependency environment while forcing the
+installed wheel target to the front of sys.path.
+
+Passed checks:
+- imported ftir_workbench from the installed wheel target;
+- ftir_workbench.__version__ == 0.2.0;
+- installed metadata version == 0.2.0;
+- oriented_cross_views and convert_absorbance_for_display are exported;
+- ftir-workbench --help exits 0;
+- ftir-baseline --help exits 0;
+- ftir2dcos --help exits 0.

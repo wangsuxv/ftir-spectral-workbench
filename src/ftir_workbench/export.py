@@ -16,6 +16,7 @@ import zipfile
 from collections.abc import Mapping, Sequence
 from contextlib import suppress
 from dataclasses import asdict, dataclass, is_dataclass
+from itertools import combinations
 from pathlib import Path
 from typing import Any, BinaryIO, Literal, TextIO, cast
 
@@ -26,6 +27,7 @@ from ftir_baseline.export import build_export_zip as build_legacy_baseline_zip
 from ftir_baseline.export import verify_export_manifest as verify_legacy_baseline_manifest
 
 from .adapters import prepared_from_baseline_result
+from .cross_views import oriented_cross_views
 from .fingerprints import prepared_data_sha256
 from .models import PreparedSpectralDataset
 from .validation import wavenumber_direction
@@ -818,6 +820,42 @@ def _matrix_csv(
     return stream.getvalue().encode("utf-8")
 
 
+def _matrix_from_csv(payload: bytes) -> tuple[FloatArray, FloatArray, FloatArray]:
+    """Parse the deterministic matrix CSV emitted by :func:`_matrix_csv`."""
+
+    try:
+        rows = list(csv.reader(io.StringIO(payload.decode("utf-8-sig"), newline="")))
+    except UnicodeDecodeError as error:
+        raise ValueError("matrix CSV must be UTF-8") from error
+    while rows and not any(cell.strip() for cell in rows[-1]):
+        rows.pop()
+    if len(rows) < 2 or len(rows[0]) < 2:
+        raise ValueError("matrix CSV requires row and column wavenumbers")
+    if rows[0][0].strip().casefold() != "wavenumber_cm-1":
+        raise ValueError("matrix CSV first cell must be wavenumber_cm-1")
+    expected_width = len(rows[0])
+    if any(len(row) != expected_width for row in rows[1:]):
+        raise ValueError("matrix CSV rows have inconsistent widths")
+    try:
+        column_axis = np.asarray([float(value) for value in rows[0][1:]], dtype=np.float64)
+        row_axis = np.asarray([float(row[0]) for row in rows[1:]], dtype=np.float64)
+        matrix = np.asarray(
+            [[float(value) for value in row[1:]] for row in rows[1:]],
+            dtype=np.float64,
+        )
+    except ValueError as error:
+        raise ValueError("matrix CSV contains non-numeric data") from error
+    if matrix.shape != (row_axis.size, column_axis.size):
+        raise ValueError("matrix CSV shape does not match its axes")
+    if not (
+        np.isfinite(row_axis).all()
+        and np.isfinite(column_axis).all()
+        and np.isfinite(matrix).all()
+    ):
+        raise ValueError("matrix CSV contains NaN or infinite values")
+    return row_axis, column_axis, matrix
+
+
 def _unwrap_homo_result(result: Any) -> Any:
     candidate = result
     homo_results = getattr(candidate, "homo_results", None)
@@ -963,10 +1001,14 @@ def build_twodcos_bundle(
     if cross_items:
         directories.append("cross_ranges/")
         for index, item in enumerate(cross_items, start=1):
-            core = _core_result(item)
             prefix = f"cross_ranges/cross_{index:02d}"
-            cross_row_axis = np.asarray(core.row_wavenumber, dtype=np.float64)
-            cross_column_axis = np.asarray(core.column_wavenumber, dtype=np.float64)
+            stored, reverse = oriented_cross_views(item, pair_index=index)
+            if not np.array_equal(reverse.synchronous, stored.synchronous.T):
+                raise ValueError("reverse synchronous matrix must equal stored transpose")
+            if not np.array_equal(reverse.asynchronous, -stored.asynchronous.T):
+                raise ValueError(
+                    "reverse asynchronous matrix must equal stored negative transpose"
+                )
             files[f"{prefix}/ranges.json"] = _json_bytes(
                 {
                     "first_range": getattr(item, "first_range", None),
@@ -974,16 +1016,53 @@ def build_twodcos_bundle(
                 }
             )
             files[f"{prefix}/synchronous_matrix.csv"] = _matrix_csv(
-                core.synchronous,
-                cross_row_axis,
-                cross_column_axis,
+                stored.synchronous,
+                stored.row_wavenumber,
+                stored.column_wavenumber,
             )
             files[f"{prefix}/asynchronous_matrix.csv"] = _matrix_csv(
-                core.asynchronous,
-                cross_row_axis,
-                cross_column_axis,
+                stored.asynchronous,
+                stored.row_wavenumber,
+                stored.column_wavenumber,
             )
+            files[f"{prefix}/reverse_synchronous_matrix.csv"] = _matrix_csv(
+                reverse.synchronous,
+                reverse.row_wavenumber,
+                reverse.column_wavenumber,
+            )
+            files[f"{prefix}/reverse_asynchronous_matrix.csv"] = _matrix_csv(
+                reverse.asynchronous,
+                reverse.row_wavenumber,
+                reverse.column_wavenumber,
+            )
+            files[f"{prefix}/orientations.json"] = _json_bytes(
+                {
+                    "pair_index": index,
+                    "stored": {
+                        "row_range": stored.row_range,
+                        "column_range": stored.column_range,
+                        "row_variable": stored.row_variable,
+                        "column_variable": stored.column_variable,
+                        "synchronous_file": "synchronous_matrix.csv",
+                        "asynchronous_file": "asynchronous_matrix.csv",
+                    },
+                    "reverse": {
+                        "row_range": reverse.row_range,
+                        "column_range": reverse.column_range,
+                        "row_variable": reverse.row_variable,
+                        "column_variable": reverse.column_variable,
+                        "synchronous_file": "reverse_synchronous_matrix.csv",
+                        "asynchronous_file": "reverse_asynchronous_matrix.csv",
+                    },
+                    "identities": {
+                        "synchronous": "reverse = stored.T",
+                        "asynchronous": "reverse = -stored.T",
+                    },
+                }
+            )
+            core = _core_result(item)
             files[f"{prefix}/qc_metrics.json"] = _json_bytes(core.qc_metrics)
+    cross_count = len(cross_items) if cross_items is not None else 0
     manifest_base = {
         "schema_version": "1.0",
         "artifact_type": "twodcos_run",
@@ -992,9 +1071,20 @@ def build_twodcos_bundle(
         "parent_prepared_data_sha256": prepared.prepared_data_sha256,
         "convention": str(getattr(analysis, "convention", "unknown")),
         "homo_result_count": len(homo_items) if homo_items is not None else 1,
-        "cross_result_count": len(cross_items) if cross_items is not None else 0,
+        "cross_result_count": cross_count,
         "twodcos_fingerprint": getattr(result, "twodcos_fingerprint", None),
     }
+    if cross_items is not None:
+        # These fields identify the additive v0.2 orientation contract.  A raw
+        # TwoDCOSResult has no cross-results collection and keeps the v0.1
+        # manifest shape for backwards-compatible low-level bundle callers.
+        manifest_base.update(
+            {
+                "cross_pair_count": cross_count,
+                "oriented_cross_map_count": 2 * cross_count,
+                "reverse_cross_exported": True,
+            }
+        )
     bundle = _build_manifest_archive(
         files,
         directories=directories,
@@ -1227,6 +1317,304 @@ def verify_workbench_manifest(
     return True
 
 
+_CROSS_V2_MANIFEST_FIELDS = frozenset(
+    {"cross_pair_count", "oriented_cross_map_count", "reverse_cross_exported"}
+)
+_CROSS_PREFIX_PATTERN = re.compile(r"^cross_ranges/cross_(\d+)/")
+_CROSS_V2_MEMBER_SUFFIXES = frozenset(
+    {
+        "reverse_synchronous_matrix.csv",
+        "reverse_asynchronous_matrix.csv",
+        "orientations.json",
+    }
+)
+
+
+def _json_object_member(
+    archive: zipfile.ZipFile,
+    name: str,
+    *,
+    context: str,
+) -> dict[str, Any]:
+    value = json.loads(archive.read(name))
+    if not isinstance(value, Mapping):
+        raise ValueError(f"{context} JSON root must be an object")
+    return dict(value)
+
+
+def _nonnegative_manifest_count(manifest: Mapping[str, Any], name: str) -> int:
+    value = manifest.get(name)
+    if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+        raise ValueError(f"{name} must be a non-negative integer")
+    return value
+
+
+def _axis_belongs_to_range(axis: FloatArray, value: Mapping[str, Any]) -> bool:
+    try:
+        high = float(value["high_wavenumber"])
+        low = float(value["low_wavenumber"])
+    except (KeyError, TypeError, ValueError):
+        return False
+    return bool(
+        np.isfinite(high)
+        and np.isfinite(low)
+        and high > low
+        and np.all(axis >= low)
+        and np.all(axis <= high)
+    )
+
+
+def _configured_cross_ranges(value: object) -> tuple[dict[str, Any], ...]:
+    """Validate and normalize the v0.2 config ranges used by cross exports."""
+
+    if not isinstance(value, list) or not value:
+        raise ValueError("v0.2 2D-COS config ranges must be a non-empty list")
+    normalized: list[dict[str, Any]] = []
+    seen_bounds: set[tuple[float, float]] = set()
+    for index, candidate in enumerate(value, start=1):
+        if not isinstance(candidate, Mapping):
+            raise ValueError(f"configured 2D range {index} must be an object")
+        supplied = dict(candidate)
+        raw_high = supplied.get("high_wavenumber")
+        raw_low = supplied.get("low_wavenumber")
+        if (
+            raw_high is None
+            or raw_low is None
+            or isinstance(raw_high, bool)
+            or isinstance(raw_low, bool)
+        ):
+            raise ValueError(f"configured 2D range {index} endpoints must be numeric")
+        try:
+            high = float(raw_high)
+            low = float(raw_low)
+        except (TypeError, ValueError) as error:
+            raise ValueError(
+                f"configured 2D range {index} endpoints must be numeric"
+            ) from error
+        label = supplied.get("label")
+        if label is not None and (not isinstance(label, str) or not label.strip()):
+            raise ValueError(f"configured 2D range {index} label must be text or null")
+        canonical = {
+            "high_wavenumber": high,
+            "low_wavenumber": low,
+            "label": label,
+        }
+        if (
+            not np.isfinite(high)
+            or not np.isfinite(low)
+            or high <= low
+            or supplied != canonical
+        ):
+            raise ValueError(f"configured 2D range {index} is not canonical")
+        bounds = (low, high)
+        if bounds in seen_bounds:
+            raise ValueError("configured 2D ranges must use unique intervals")
+        seen_bounds.add(bounds)
+        normalized.append(canonical)
+    return tuple(normalized)
+
+
+def _verify_cross_v2_contract(
+    archive: zipfile.ZipFile,
+    manifest: Mapping[str, Any],
+) -> None:
+    """Verify additive v0.2 reverse exports while accepting untouched v0.1 bundles."""
+
+    names = set(archive.namelist())
+    present_fields = _CROSS_V2_MANIFEST_FIELDS.intersection(manifest)
+    new_members = {
+        name
+        for name in names
+        if name.rsplit("/", 1)[-1] in _CROSS_V2_MEMBER_SUFFIXES
+        and _CROSS_PREFIX_PATTERN.match(name)
+    }
+    if not present_fields and not new_members:
+        # A v0.1 bundle has stored cross maps only.  Reverse artifacts are an
+        # additive contract and must not be retroactively required.
+        return
+    if present_fields != _CROSS_V2_MANIFEST_FIELDS:
+        raise ValueError("v0.2 cross manifest fields must be present together")
+    if manifest.get("reverse_cross_exported") is not True:
+        raise ValueError("v0.2 bundles must mark reverse cross exports as complete")
+
+    cross_count = _nonnegative_manifest_count(manifest, "cross_pair_count")
+    result_count = _nonnegative_manifest_count(manifest, "cross_result_count")
+    oriented_count = _nonnegative_manifest_count(manifest, "oriented_cross_map_count")
+    if result_count != cross_count:
+        raise ValueError("cross_result_count must equal the unique cross_pair_count")
+    if oriented_count != 2 * cross_count:
+        raise ValueError("oriented_cross_map_count must be twice cross_pair_count")
+
+    config_payload = _json_object_member(
+        archive,
+        "twodcos_config.json",
+        context="2D-COS config",
+    )
+    configured_ranges = _configured_cross_ranges(config_payload.get("ranges"))
+    cross_enabled = config_payload.get("cross_range_enabled")
+    if not isinstance(cross_enabled, bool):
+        raise ValueError("v0.2 2D-COS config cross_range_enabled must be a bool")
+    expected_pairs = (
+        tuple(combinations(configured_ranges, 2)) if cross_enabled else ()
+    )
+    if cross_count != len(expected_pairs):
+        raise ValueError("cross_pair_count does not match configured unique pairs")
+
+    actual_indices: set[int] = set()
+    for name in names:
+        match = _CROSS_PREFIX_PATTERN.match(name)
+        if match is None:
+            continue
+        index = int(match.group(1))
+        if match.group(1) != f"{index:02d}":
+            raise ValueError("cross bundle directories must use canonical zero-padded indices")
+        actual_indices.add(index)
+    if actual_indices != set(range(1, cross_count + 1)):
+        raise ValueError("cross bundle members do not match cross_pair_count")
+
+    convention_value = manifest.get("convention")
+    expected_variables: tuple[str, str] | None = {
+        "canonical": ("nu1", "nu2"),
+        "2dpy_compatible": ("nu2", "nu1"),
+    }.get(convention_value if isinstance(convention_value, str) else "")
+    if cross_count and expected_variables is None:
+        raise ValueError("cross exports require a recognized matrix convention")
+
+    for index in range(1, cross_count + 1):
+        prefix = f"cross_ranges/cross_{index:02d}"
+        required_members = {
+            f"{prefix}/ranges.json",
+            f"{prefix}/synchronous_matrix.csv",
+            f"{prefix}/asynchronous_matrix.csv",
+            f"{prefix}/reverse_synchronous_matrix.csv",
+            f"{prefix}/reverse_asynchronous_matrix.csv",
+            f"{prefix}/orientations.json",
+            f"{prefix}/qc_metrics.json",
+        }
+        if not required_members.issubset(names):
+            raise ValueError(f"cross pair {index} is missing required v0.2 artifacts")
+
+        stored_sync_rows, stored_sync_columns, stored_synchronous = _matrix_from_csv(
+            archive.read(f"{prefix}/synchronous_matrix.csv")
+        )
+        stored_async_rows, stored_async_columns, stored_asynchronous = _matrix_from_csv(
+            archive.read(f"{prefix}/asynchronous_matrix.csv")
+        )
+        reverse_sync_rows, reverse_sync_columns, reverse_synchronous = _matrix_from_csv(
+            archive.read(f"{prefix}/reverse_synchronous_matrix.csv")
+        )
+        reverse_async_rows, reverse_async_columns, reverse_asynchronous = _matrix_from_csv(
+            archive.read(f"{prefix}/reverse_asynchronous_matrix.csv")
+        )
+        if not np.array_equal(stored_sync_rows, stored_async_rows) or not np.array_equal(
+            stored_sync_columns,
+            stored_async_columns,
+        ):
+            raise ValueError("stored cross CSV axes differ")
+        if not np.array_equal(reverse_sync_rows, reverse_async_rows) or not np.array_equal(
+            reverse_sync_columns,
+            reverse_async_columns,
+        ):
+            raise ValueError("reverse cross CSV axes differ")
+        if not np.array_equal(reverse_sync_rows, stored_sync_columns) or not np.array_equal(
+            reverse_sync_columns,
+            stored_sync_rows,
+        ):
+            raise ValueError("reverse cross CSV axes are not the stored axes swapped")
+        if not np.array_equal(reverse_synchronous, stored_synchronous.T):
+            raise ValueError("reverse synchronous CSV is not stored.T")
+        if not np.array_equal(reverse_asynchronous, -stored_asynchronous.T):
+            raise ValueError("reverse asynchronous CSV is not -stored.T")
+
+        ranges = _json_object_member(
+            archive,
+            f"{prefix}/ranges.json",
+            context="cross ranges",
+        )
+        first_range = ranges.get("first_range")
+        second_range = ranges.get("second_range")
+        if not isinstance(first_range, Mapping) or not isinstance(second_range, Mapping):
+            raise ValueError("cross ranges must describe first_range and second_range")
+        range_by_variable = {"nu1": dict(first_range), "nu2": dict(second_range)}
+        expected_first_range, expected_second_range = expected_pairs[index - 1]
+        if (
+            range_by_variable["nu1"] != expected_first_range
+            or range_by_variable["nu2"] != expected_second_range
+        ):
+            raise ValueError(
+                "cross ranges must follow configured combinations in canonical order"
+            )
+
+        orientations = _json_object_member(
+            archive,
+            f"{prefix}/orientations.json",
+            context="cross orientations",
+        )
+        pair_index = orientations.get("pair_index")
+        if (
+            isinstance(pair_index, bool)
+            or not isinstance(pair_index, int)
+            or pair_index != index
+        ):
+            raise ValueError("cross orientation pair_index is invalid")
+        stored = orientations.get("stored")
+        reverse = orientations.get("reverse")
+        identities = orientations.get("identities")
+        if not isinstance(stored, Mapping) or not isinstance(reverse, Mapping):
+            raise ValueError("cross orientations must describe stored and reverse maps")
+        if not isinstance(identities, Mapping):
+            raise ValueError("cross orientations must record transpose identities")
+
+        stored_row_variable = stored.get("row_variable")
+        stored_column_variable = stored.get("column_variable")
+        if not isinstance(stored_row_variable, str) or not isinstance(
+            stored_column_variable,
+            str,
+        ):
+            raise ValueError("stored cross variables must be strings")
+        if (stored_row_variable, stored_column_variable) != expected_variables:
+            raise ValueError("stored cross variables do not match the matrix convention")
+        if reverse.get("row_variable") != stored_column_variable or reverse.get(
+            "column_variable"
+        ) != stored_row_variable:
+            raise ValueError("reverse cross variables are not swapped")
+        if stored.get("row_range") != range_by_variable[stored_row_variable] or stored.get(
+            "column_range"
+        ) != range_by_variable[stored_column_variable]:
+            raise ValueError("stored cross ranges do not match their variables")
+        if reverse.get("row_range") != range_by_variable[stored_column_variable] or reverse.get(
+            "column_range"
+        ) != range_by_variable[stored_row_variable]:
+            raise ValueError("reverse cross ranges are not swapped")
+        if not _axis_belongs_to_range(
+            stored_sync_rows,
+            range_by_variable[stored_row_variable],
+        ) or not _axis_belongs_to_range(
+            stored_sync_columns,
+            range_by_variable[stored_column_variable],
+        ):
+            raise ValueError("stored cross CSV axes do not belong to the oriented ranges")
+
+        expected_files = {
+            "stored": {
+                "synchronous_file": "synchronous_matrix.csv",
+                "asynchronous_file": "asynchronous_matrix.csv",
+            },
+            "reverse": {
+                "synchronous_file": "reverse_synchronous_matrix.csv",
+                "asynchronous_file": "reverse_asynchronous_matrix.csv",
+            },
+        }
+        for orientation_name, orientation in (("stored", stored), ("reverse", reverse)):
+            for field_name, expected_file in expected_files[orientation_name].items():
+                if orientation.get(field_name) != expected_file:
+                    raise ValueError("cross orientation filenames are invalid")
+        if identities.get("synchronous") != "reverse = stored.T" or identities.get(
+            "asynchronous"
+        ) != "reverse = -stored.T":
+            raise ValueError("cross orientation identity metadata is invalid")
+
+
 def verify_twodcos_bundle(
     bundle: bytes | bytearray | memoryview | str | Path,
 ) -> bool:
@@ -1251,6 +1639,12 @@ def verify_twodcos_bundle(
         with zipfile.ZipFile(io.BytesIO(payload), "r") as archive:
             if not required.issubset(archive.namelist()):
                 return False
+            manifest = _json_object_member(
+                archive,
+                "manifest.json",
+                context="2D-COS manifest",
+            )
+            _verify_cross_v2_contract(archive, manifest)
         _twodcos_lineage_from_verified_bundle(payload)
     except (
         KeyError,

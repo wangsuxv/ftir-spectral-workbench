@@ -1,0 +1,7 @@
+Command: .venv/bin/mypy src/ftir_workbench --no-incremental
+Result: PASS
+
+Success: no issues found in 17 source files
+
+Note: Mypy reported the existing unused override-section notice for optional
+third-party modules; it reported no type-checking errors.

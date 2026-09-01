@@ -1,0 +1,12 @@
+Baseline-frozen v0.2.0 final audit
+Result: PASS
+
+Start commit: 30faec99e6980c656d4a50a782e5cdbd8e1e5427
+Frozen roots:
+- src/ftir_baseline/**
+- tests/baseline_regression/**
+- legacy/baseline_streamlit_app.py
+
+Manifest audit: 41/41 files match recorded size and SHA-256.
+Frozen-path git diff against the start commit: empty.
+Baseline regression: 135 passed in 14.91s.
