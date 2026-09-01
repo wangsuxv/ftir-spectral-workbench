@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-FTIR Spectral Workbench 的 v0.2.0 基线冻结版已在本地分支 `feat/v0.2-baseline-frozen` 完成发布验收并形成本地阶段提交。项目版本 metadata 为 `0.2.0`；本次没有打 tag、创建 GitHub release 或推送远端，远程公开项目未被改变。
+FTIR Spectral Workbench 的 v0.2.0 基线冻结版已完成发布验收，并通过 PR #1 更新公开 GitHub 仓库的默认 `main`。项目版本 metadata 为 `0.2.0`；本次发布保留 MIT 许可证且不包含实验原始数据或私有派生产物。
 
 本版本从冻结的 v0.1.0 科学基线开始，只实施四项 UI/协调层增量，不改变 baseline 数值模型、配置 schema、workflow state 或 baseline bundle。
 
@@ -54,7 +54,7 @@ FTIR Spectral Workbench 的 v0.2.0 基线冻结版已在本地分支 `feat/v0.2-
 | 冻结路径相对起始 commit 的 Git diff | empty |
 | Git 跟踪范围隐私审计 | passed，无原始谱/私有 bundle |
 
-可公开复核的完整结果保存在 `artifacts/validation/final/`。这些结果说明本地候选通过验收，但不表示已经发布或同步到 GitHub。
+可公开复核的完整结果保存在 `artifacts/validation/final/`。这些结果对应已合并到默认分支的 v0.2.0 源码；GitHub Actions 也已通过。
 
 ## 私有数据验证
 
