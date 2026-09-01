@@ -10,10 +10,12 @@ from uuid import uuid4
 import numpy as np
 from numpy.typing import ArrayLike
 
+from ftir_baseline.models import thaw_mapping
 from ftir_baseline.pipeline import PipelineResult
 
 from .fingerprints import baseline_fingerprint, prepared_data_sha256
 from .models import AxisDirection, NormalizationState, PreparedSpectralDataset
+from .post_baseline_smoothing import PostBaselineSmoothingResult
 from .validation import wavenumber_direction
 
 
@@ -206,12 +208,126 @@ def prepared_scientific_branch_from_baseline_result(
     )
 
 
+def prepared_from_smoothed_result(
+    result: PostBaselineSmoothingResult,
+) -> PreparedSpectralDataset:
+    """Create an explicit Prepared child from one post-baseline smoothing result.
+
+    The parent baseline lineage and QC remain unchanged.  Spectra are taken from
+    the smoothing result, the Prepared-data dependency hash is recomputed, and
+    the recipe gains an auditable description of the new scientific branch.
+    """
+
+    if not isinstance(result, PostBaselineSmoothingResult):
+        raise TypeError("result must be a PostBaselineSmoothingResult")
+    if not result.config.enabled:
+        raise ValueError(
+            "creating a smoothed Prepared branch requires smoothing to be enabled"
+        )
+    parent = result.parent_prepared
+    if parent.normalization_state == "scientific_explicit":
+        raise ValueError(
+            "v0.2.5 does not combine scientific normalization and post-baseline "
+            "smoothing. Select the primary unnormalized Prepared branch."
+        )
+    parent_contract = parent.baseline_recipe.get("prepared_data_contract")
+    if "post_baseline_smoothing" in parent.baseline_recipe or (
+        isinstance(parent_contract, Mapping)
+        and parent_contract.get("branch_kind") == "post_baseline_smoothing"
+    ):
+        raise ValueError(
+            "The selected Prepared dataset is already a post-baseline smoothing branch. "
+            "Chained smoothing is disabled in v0.2.5."
+        )
+    scientific_config = result.config.scientific_dict()
+    parameters = scientific_config.get("parameters")
+    if not isinstance(parameters, Mapping):  # defensive: enabled config always has this
+        raise ValueError("enabled smoothing config must define effective parameters")
+    recipe = thaw_mapping(parent.baseline_recipe)
+    previous_contract = deepcopy(recipe.get("prepared_data_contract"))
+    summary_metrics = {
+        str(name): float(value) for name, value in result.summary_metrics.items()
+    }
+    per_spectrum_metrics = {
+        str(name): np.asarray(values, dtype=np.float64).tolist()
+        for name, values in result.per_spectrum_metrics.items()
+    }
+    effective_parameters = deepcopy(dict(parameters))
+    recipe["prepared_data_contract"] = {
+        "source_channel": "parent PreparedSpectralDataset.spectra",
+        "branch_kind": "post_baseline_smoothing",
+        "parent_prepared_data_sha256": parent.prepared_data_sha256,
+        "smoothing_fingerprint": result.smoothing_fingerprint,
+        "algorithm": result.config.method,
+        "parameters": effective_parameters,
+        "nonuniform_axis_policy": result.config.nonuniform_axis_policy,
+    }
+    smoothing_recipe: dict[str, Any] = {
+        "schema": "ftir-workbench-post-baseline-smoothing-v1",
+        "parent_prepared_data_sha256": parent.prepared_data_sha256,
+        "smoothing_fingerprint": result.smoothing_fingerprint,
+        "method": result.config.method,
+        "parameters": deepcopy(effective_parameters),
+        "config": scientific_config,
+        "nonuniform_axis_policy": result.config.nonuniform_axis_policy,
+        "axis_diagnostics": {
+            "median_wavenumber_spacing": result.median_wavenumber_spacing,
+            "spacing_relative_max_deviation": (
+                result.spacing_relative_max_deviation
+            ),
+            "approximate_physical_width": dict(result.approximate_physical_width),
+        },
+        "summary_metrics": summary_metrics,
+        "per_spectrum_metrics": per_spectrum_metrics,
+        "warnings": list(result.warnings),
+    }
+    if previous_contract is not None:
+        smoothing_recipe["parent_prepared_data_contract"] = previous_contract
+    recipe["post_baseline_smoothing"] = smoothing_recipe
+
+    prepared_hash = prepared_data_sha256(
+        parent.wavenumber,
+        parent.perturbation,
+        parent.perturbation_labels,
+        result.smoothed_spectra,
+        normalization_state=parent.normalization_state,
+    )
+    branch_warning = (
+        "This Prepared dataset is an explicit post-baseline smoothing scientific "
+        f"branch ({result.config.method}); the primary unsmoothed Prepared remains "
+        "the reference branch."
+    )
+    warnings = tuple(
+        dict.fromkeys((*parent.warnings, branch_warning, *result.warnings))
+    )
+    return PreparedSpectralDataset(
+        wavenumber=parent.wavenumber,
+        perturbation=parent.perturbation,
+        perturbation_labels=parent.perturbation_labels,
+        spectra=result.smoothed_spectra,
+        intensity_unit="absorbance",
+        source_name=parent.source_name,
+        source_sha256=parent.source_sha256,
+        baseline_run_id=parent.baseline_run_id,
+        baseline_fingerprint=parent.baseline_fingerprint,
+        prepared_data_sha256=prepared_hash,
+        original_axis_direction=parent.original_axis_direction,
+        current_axis_direction=parent.current_axis_direction,
+        perturbation_order_policy=parent.perturbation_order_policy,
+        baseline_recipe=recipe,
+        baseline_qc=parent.baseline_qc,
+        warnings=warnings,
+        normalization_state=parent.normalization_state,
+    )
+
+
 # Short alias for callers that already describe the source object as a result.
 to_prepared_dataset = prepared_from_baseline_result
 
 
 __all__ = [
     "prepared_from_baseline_result",
+    "prepared_from_smoothed_result",
     "prepared_scientific_branch_from_baseline_result",
     "to_prepared_dataset",
 ]

@@ -2,6 +2,7 @@
 
 from .adapters import (
     prepared_from_baseline_result,
+    prepared_from_smoothed_result,
     prepared_scientific_branch_from_baseline_result,
     to_prepared_dataset,
 )
@@ -52,6 +53,7 @@ from .services import (
     CrossPreparedConfirmationRequired,
     CrossRangeResult,
     HomoRangeResult,
+    PostBaselineSmoothingService,
     ProjectService,
     TwoDCOSAnalysisResult,
     TwoDCOSWorkflowService,
@@ -87,6 +89,7 @@ __all__ = [
     "OrientedCrossView",
     "PostBaselineSmoothingConfig",
     "PostBaselineSmoothingResult",
+    "PostBaselineSmoothingService",
     "PreparedDatasetValidationError",
     "PreparedSpectralDataset",
     "Project",
@@ -119,6 +122,7 @@ __all__ = [
     "post_baseline_smoothing_fingerprint",
     "prepared_data_sha256",
     "prepared_from_baseline_result",
+    "prepared_from_smoothed_result",
     "prepared_scientific_branch_from_baseline_result",
     "project_fingerprint",
     "to_prepared_dataset",
