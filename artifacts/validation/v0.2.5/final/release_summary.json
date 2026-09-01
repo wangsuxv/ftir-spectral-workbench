@@ -1,0 +1,79 @@
+{
+  "base_commit": "92513def080001de4c226fcea0fde484ae8d97fb",
+  "branch": "feat/v0.2.5-post-baseline-smoothing",
+  "build": {
+    "sdist": {
+      "path": "dist/ftir_spectral_workbench-0.2.5.tar.gz",
+      "sha256": "485612e6fc9aa2fcc5fd137f9c4264389f504015de54628fba2570ccf117c6b8",
+      "size_bytes": 448749
+    },
+    "status": "pass",
+    "wheel": {
+      "path": "dist/ftir_spectral_workbench-0.2.5-py3-none-any.whl",
+      "sha256": "c382f230997ac29b7a2cdc445dca0ce10411f04ca55788b4c984de24c7f3c316",
+      "size_bytes": 255283
+    }
+  },
+  "phase_commits_before_release": {
+    "phase_0": "a33757f",
+    "phase_1": "45a34a1",
+    "phase_2": "67e4f82",
+    "phase_3": "9a7c585",
+    "phase_4": "87fd88f"
+  },
+  "privacy": {
+    "absolute_private_paths_in_logs": false,
+    "distribution_artifacts_checked": true,
+    "ignored_raw_spectra_read": false,
+    "sdist_original_members": [
+      "data/original/README.md"
+    ],
+    "status": "pass",
+    "tracked_original_files": [
+      "data/original/README.md"
+    ],
+    "wheel_original_members": []
+  },
+  "pytest": {
+    "passed": 723,
+    "status": "pass",
+    "warnings": 5
+  },
+  "release_audit": {
+    "old_v0.2.1_baseline_twodcos_project_reload": "pass",
+    "release_audit_sha256": "c3bd668abc390651272f011bb1ede85c8a7a3e2ce400491fabafe1772d74fe9f",
+    "smoothing_and_twodcos": {
+      "child_prepared_data_sha256": "76de9d80d46a5b29b0339018f2f96c7bdbee5e9e11d1b947efce554d1a76e8b6",
+      "parent_prepared_data_sha256": "dbfa02d5483915a872059916962c280a2ca1648e27d15c970c217e1d08fc8370",
+      "smoothed_twodcos_fingerprint": "07e4cf12f011b00553218d25160e935d4dce7648c28b79a9d8b117b3a41a6a6d",
+      "smoothing_fingerprint": "8b5fbdc36440c84c8d86c5a5f6e2ad6557253b3b248a2c48f47cacb1fa087a9c",
+      "status": "pass",
+      "unsmoothed_twodcos_fingerprint": "27ca519e33a0bdadc78d5412722e161804583e38ec98013ad67177563453b70a"
+    },
+    "status": "pass"
+  },
+  "ruff": {
+    "status": "pass"
+  },
+  "science_freeze": {
+    "files_matched": 34,
+    "files_recorded": 34,
+    "frozen_git_diff": "empty",
+    "frozen_root_extra_files": 0,
+    "frozen_root_missing_files": 0,
+    "status": "pass"
+  },
+  "type_check": {
+    "source_files": 20,
+    "status": "pass"
+  },
+  "validation_date": "2026-09-01",
+  "version": "0.2.5",
+  "wheel_smoke": {
+    "dependency_source": "verified workspace dependency layer",
+    "installed_distribution_version": "0.2.5",
+    "module_source": "fresh wheel virtual environment",
+    "smooth_verify_twodcos_verify": "pass",
+    "status": "pass"
+  }
+}

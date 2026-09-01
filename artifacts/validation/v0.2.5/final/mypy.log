@@ -1,0 +1,2 @@
+pyproject.toml: note: unused section(s): module = ['plotly', 'plotly.*', 'pybaselines', 'streamlit', 'streamlit.*']
+Success: no issues found in 20 source files

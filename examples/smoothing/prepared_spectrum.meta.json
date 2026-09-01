@@ -1,0 +1,55 @@
+{
+  "artifact_type": "prepared_spectral_dataset",
+  "axis_direction": "descending",
+  "baseline_fingerprint": "80d1d9ba903824b1bbc5b4f01ad976e02fa669b602ae64cd0b9ea6f857681435",
+  "baseline_qc": {
+    "passed": true,
+    "synthetic_example": true
+  },
+  "baseline_recipe": {
+    "prepared_data_contract": {
+      "branch_kind": "primary_unsmoothed",
+      "scientific_normalization": false,
+      "source_channel": "synthetic corrected absorbance example"
+    },
+    "synthetic_example": {
+      "contains_experimental_data": false,
+      "description": "Small deterministic corrected-absorbance curves for documentation and tests"
+    }
+  },
+  "baseline_run_id": "synthetic-smoothing-example",
+  "csv_file": "synthetic_corrected_prepared.csv",
+  "csv_sha256": "6db69487ed4671dbc5942cf95b681897e2b22113f2bf842c0a7ddc148f3f42d2",
+  "current_axis_direction": "descending",
+  "intensity_unit": "absorbance",
+  "normalization_state": "none",
+  "original_axis_direction": "descending",
+  "perturbation_labels": [
+    "0 min",
+    "5 min",
+    "10 min"
+  ],
+  "perturbation_order_policy": "preserve_file_order",
+  "perturbation_values": [
+    0.0,
+    5.0,
+    10.0
+  ],
+  "prepared_data_sha256": "ff1c816e4a21320b6de2e6957430ca890989a685cbcce6e59e0904f4140bebb3",
+  "recipe_file": null,
+  "schema_version": "1.0",
+  "shape": [
+    3,
+    13
+  ],
+  "source_name": "synthetic_corrected_prepared.csv",
+  "source_sha256": "6db69487ed4671dbc5942cf95b681897e2b22113f2bf842c0a7ddc148f3f42d2",
+  "spectra_shape": [
+    3,
+    13
+  ],
+  "unit": "absorbance",
+  "warnings": [
+    "Synthetic Prepared example only; contains no experimental or original instrument data."
+  ]
+}

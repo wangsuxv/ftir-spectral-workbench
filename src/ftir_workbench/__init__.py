@@ -79,7 +79,7 @@ from .validation import (
 )
 from .workflow import ChangeScope, InvalidWorkflowTransition
 
-__version__ = "0.2.1"
+__version__ = "0.2.5"
 
 __all__ = [
     "SMOOTHING_ARTIFACT_TYPE",
