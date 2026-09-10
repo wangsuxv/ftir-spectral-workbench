@@ -124,6 +124,7 @@ class StageSnapshot:
     result: PipelineResult
     parent_coarse_fingerprint: str | None = None
     implementation_fingerprint: str = ""
+    parent_coarse_implementation_fingerprint: str | None = None
 
 
 @dataclass(slots=True)

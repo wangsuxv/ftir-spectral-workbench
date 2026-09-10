@@ -91,6 +91,9 @@ def _preview(workspace: BatchWorkspace, spectrum_id: str, stage: Stage,
                 config=config, fingerprint=fingerprint, result=result,
                 parent_coarse_fingerprint=parent_hash,
                 implementation_fingerprint=implementation_fingerprint(),
+                parent_coarse_implementation_fingerprint=(
+                    None if parent is None else parent.implementation_fingerprint
+                ),
             )
         _validate_snapshot(workspace, spectrum_id, snapshot)
         if parent is not None:

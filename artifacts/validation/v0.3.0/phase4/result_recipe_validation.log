@@ -1,0 +1,8 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m pytest -q tests/batch/test_export.py tests/batch/test_workspace_roundtrip.py
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private cache>
+...................................................                      [100%]
+51 passed in 2.42s
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 2.715

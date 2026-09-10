@@ -1,0 +1,392 @@
+{
+  "packages": [
+    {
+      "package": "altair",
+      "expected": "==6.2.2",
+      "actual": "6.2.2",
+      "matches": true
+    },
+    {
+      "package": "annotated-types",
+      "expected": "==0.8.0",
+      "actual": "0.8.0",
+      "matches": true
+    },
+    {
+      "package": "anyio",
+      "expected": "==4.14.2",
+      "actual": "4.14.2",
+      "matches": true
+    },
+    {
+      "package": "ast_serialize",
+      "expected": "==0.8.0",
+      "actual": "0.8.0",
+      "matches": true
+    },
+    {
+      "package": "attrs",
+      "expected": "==26.1.0",
+      "actual": "26.1.0",
+      "matches": true
+    },
+    {
+      "package": "blinker",
+      "expected": "==1.9.0",
+      "actual": "1.9.0",
+      "matches": true
+    },
+    {
+      "package": "certifi",
+      "expected": "==2026.7.22",
+      "actual": "2026.7.22",
+      "matches": true
+    },
+    {
+      "package": "charset-normalizer",
+      "expected": "==3.5.1",
+      "actual": "3.5.1",
+      "matches": true
+    },
+    {
+      "package": "click",
+      "expected": "==8.4.2",
+      "actual": "8.4.2",
+      "matches": true
+    },
+    {
+      "package": "contourpy",
+      "expected": "==1.3.3",
+      "actual": "1.3.3",
+      "matches": true
+    },
+    {
+      "package": "coverage",
+      "expected": "==7.15.4",
+      "actual": "7.15.4",
+      "matches": true
+    },
+    {
+      "package": "cycler",
+      "expected": "==0.12.1",
+      "actual": "0.12.1",
+      "matches": true
+    },
+    {
+      "package": "fonttools",
+      "expected": "==4.63.0",
+      "actual": "4.63.0",
+      "matches": true
+    },
+    {
+      "package": "h11",
+      "expected": "==0.16.0",
+      "actual": "0.16.0",
+      "matches": true
+    },
+    {
+      "package": "httptools",
+      "expected": "==0.8.0",
+      "actual": "0.8.0",
+      "matches": true
+    },
+    {
+      "package": "hypothesis",
+      "expected": "==6.165.10",
+      "actual": "6.165.10",
+      "matches": true
+    },
+    {
+      "package": "idna",
+      "expected": "==3.19",
+      "actual": "3.19",
+      "matches": true
+    },
+    {
+      "package": "iniconfig",
+      "expected": "==2.3.0",
+      "actual": "2.3.0",
+      "matches": true
+    },
+    {
+      "package": "itsdangerous",
+      "expected": "==2.2.0",
+      "actual": "2.2.0",
+      "matches": true
+    },
+    {
+      "package": "Jinja2",
+      "expected": "==3.1.6",
+      "actual": "3.1.6",
+      "matches": true
+    },
+    {
+      "package": "jsonschema",
+      "expected": "==4.26.0",
+      "actual": "4.26.0",
+      "matches": true
+    },
+    {
+      "package": "jsonschema-specifications",
+      "expected": "==2025.9.1",
+      "actual": "2025.9.1",
+      "matches": true
+    },
+    {
+      "package": "kiwisolver",
+      "expected": "==1.5.0",
+      "actual": "1.5.0",
+      "matches": true
+    },
+    {
+      "package": "librt",
+      "expected": "==0.15.0",
+      "actual": "0.15.0",
+      "matches": true
+    },
+    {
+      "package": "MarkupSafe",
+      "expected": "==3.0.3",
+      "actual": "3.0.3",
+      "matches": true
+    },
+    {
+      "package": "matplotlib",
+      "expected": "==3.11.1",
+      "actual": "3.11.1",
+      "matches": true
+    },
+    {
+      "package": "mypy",
+      "expected": "==2.3.1",
+      "actual": "2.3.1",
+      "matches": true
+    },
+    {
+      "package": "mypy_extensions",
+      "expected": "==1.1.0",
+      "actual": "1.1.0",
+      "matches": true
+    },
+    {
+      "package": "narwhals",
+      "expected": "==2.25.0",
+      "actual": "2.25.0",
+      "matches": true
+    },
+    {
+      "package": "numpy",
+      "expected": "==2.5.2",
+      "actual": "2.5.2",
+      "matches": true
+    },
+    {
+      "package": "packaging",
+      "expected": "==26.3",
+      "actual": "26.3",
+      "matches": true
+    },
+    {
+      "package": "pandas",
+      "expected": "==3.0.5",
+      "actual": "3.0.5",
+      "matches": true
+    },
+    {
+      "package": "pandas-stubs",
+      "expected": "==3.0.5.260730",
+      "actual": "3.0.5.260730",
+      "matches": true
+    },
+    {
+      "package": "pathspec",
+      "expected": "==1.1.1",
+      "actual": "1.1.1",
+      "matches": true
+    },
+    {
+      "package": "pillow",
+      "expected": "==12.3.0",
+      "actual": "12.3.0",
+      "matches": true
+    },
+    {
+      "package": "plotly",
+      "expected": "==6.9.0",
+      "actual": "6.9.0",
+      "matches": true
+    },
+    {
+      "package": "pluggy",
+      "expected": "==1.6.0",
+      "actual": "1.6.0",
+      "matches": true
+    },
+    {
+      "package": "protobuf",
+      "expected": "==7.36.0",
+      "actual": "7.36.0",
+      "matches": true
+    },
+    {
+      "package": "pyarrow",
+      "expected": "==25.0.1",
+      "actual": "25.0.1",
+      "matches": true
+    },
+    {
+      "package": "pybaselines",
+      "expected": "==1.2.1",
+      "actual": "1.2.1",
+      "matches": true
+    },
+    {
+      "package": "pydantic",
+      "expected": "==2.13.4",
+      "actual": "2.13.4",
+      "matches": true
+    },
+    {
+      "package": "pydantic_core",
+      "expected": "==2.46.4",
+      "actual": "2.46.4",
+      "matches": true
+    },
+    {
+      "package": "pydeck",
+      "expected": "==0.9.3",
+      "actual": "0.9.3",
+      "matches": true
+    },
+    {
+      "package": "Pygments",
+      "expected": "==2.21.0",
+      "actual": "2.21.0",
+      "matches": true
+    },
+    {
+      "package": "pyparsing",
+      "expected": "==3.3.2",
+      "actual": "3.3.2",
+      "matches": true
+    },
+    {
+      "package": "pytest",
+      "expected": "==9.1.1",
+      "actual": "9.1.1",
+      "matches": true
+    },
+    {
+      "package": "pytest-cov",
+      "expected": "==7.1.0",
+      "actual": "7.1.0",
+      "matches": true
+    },
+    {
+      "package": "python-dateutil",
+      "expected": "==2.9.0.post0",
+      "actual": "2.9.0.post0",
+      "matches": true
+    },
+    {
+      "package": "python-multipart",
+      "expected": "==0.0.32",
+      "actual": "0.0.32",
+      "matches": true
+    },
+    {
+      "package": "referencing",
+      "expected": "==0.37.0",
+      "actual": "0.37.0",
+      "matches": true
+    },
+    {
+      "package": "requests",
+      "expected": "==2.34.2",
+      "actual": "2.34.2",
+      "matches": true
+    },
+    {
+      "package": "rpds-py",
+      "expected": "==2026.6.3",
+      "actual": "2026.6.3",
+      "matches": true
+    },
+    {
+      "package": "ruff",
+      "expected": "==0.16.4",
+      "actual": "0.16.4",
+      "matches": true
+    },
+    {
+      "package": "scipy",
+      "expected": "==1.18.1",
+      "actual": "1.18.1",
+      "matches": true
+    },
+    {
+      "package": "six",
+      "expected": "==1.17.0",
+      "actual": "1.17.0",
+      "matches": true
+    },
+    {
+      "package": "sortedcontainers",
+      "expected": "==2.4.0",
+      "actual": "2.4.0",
+      "matches": true
+    },
+    {
+      "package": "starlette",
+      "expected": "==1.6.0",
+      "actual": "1.6.0",
+      "matches": true
+    },
+    {
+      "package": "streamlit",
+      "expected": "==1.62.0",
+      "actual": "1.62.0",
+      "matches": true
+    },
+    {
+      "package": "toml",
+      "expected": "==0.10.2",
+      "actual": "0.10.2",
+      "matches": true
+    },
+    {
+      "package": "typing_extensions",
+      "expected": "==4.16.0",
+      "actual": "4.16.0",
+      "matches": true
+    },
+    {
+      "package": "typing-inspection",
+      "expected": "==0.4.4",
+      "actual": "0.4.4",
+      "matches": true
+    },
+    {
+      "package": "urllib3",
+      "expected": "==2.7.0",
+      "actual": "2.7.0",
+      "matches": true
+    },
+    {
+      "package": "uvicorn",
+      "expected": "==0.52.4",
+      "actual": "0.52.4",
+      "matches": true
+    },
+    {
+      "package": "websockets",
+      "expected": "==16.1.1",
+      "actual": "16.1.1",
+      "matches": true
+    }
+  ],
+  "all_match": true,
+  "installed_workbench_metadata_at_start": "0.1.0",
+  "workbench_source_version_at_start": "0.2.5",
+  "note": "Editable distribution metadata was stale before this upgrade; resolved by final local installation, no numeric dependency changes."
+}

@@ -63,6 +63,20 @@ def _validate_snapshot(workspace: BatchWorkspace, spectrum_id: str,
                        snapshot: StageSnapshot) -> None:
     result = snapshot.result
     require_independent_config(snapshot.config)
+    if snapshot.stage == "coarse":
+        if snapshot.parent_coarse_implementation_fingerprint is not None:
+            raise BatchError("PREVIEW_OUTDATED", "coarse snapshot has an unexpected parent implementation")
+    elif snapshot.stage == "fine":
+        parent_implementation = snapshot.parent_coarse_implementation_fingerprint
+        if not parent_implementation:
+            raise BatchError("PREVIEW_OUTDATED", "fine snapshot is missing its parent implementation")
+        expected_parent = stage_fingerprint(
+            workspace, spectrum_id,
+            coarse_config(preparation_from_config(snapshot.config), snapshot.config.coarse_baseline),
+            "coarse", implementation=parent_implementation,
+        )
+        if snapshot.parent_coarse_fingerprint != expected_parent:
+            raise BatchError("PREVIEW_OUTDATED", "fine snapshot parent implementation or fingerprint mismatch")
     if snapshot.spectrum_id != spectrum_id:
         raise BatchError("PREVIEW_OUTDATED", "preview belongs to a different spectrum")
     expected = stage_fingerprint(
@@ -109,7 +123,8 @@ def _validate_snapshot(workspace: BatchWorkspace, spectrum_id: str,
 
 
 def validate_parent(coarse: StageSnapshot, fine: StageSnapshot) -> None:
-    if fine.parent_coarse_fingerprint != coarse.fingerprint:
+    if (fine.parent_coarse_fingerprint != coarse.fingerprint
+            or fine.parent_coarse_implementation_fingerprint != coarse.implementation_fingerprint):
         raise BatchError("FINE_STALE", "fine result belongs to another coarse parent")
     if coarse_config(preparation_from_config(fine.config),
                      fine.config.coarse_baseline) != coarse.config:
@@ -205,6 +220,7 @@ def skip_fine(workspace: BatchWorkspace, spectrum_id: str) -> StageSnapshot:
                                       implementation=coarse.implementation_fingerprint),
         parent_coarse_fingerprint=coarse.fingerprint,
         implementation_fingerprint=coarse.implementation_fingerprint,
+        parent_coarse_implementation_fingerprint=coarse.implementation_fingerprint,
     )
     state.fine_snapshot = snapshot
     state.fine_committed = FineBaselineConfig(**snapshot.config.fine_baseline.to_dict())

@@ -1,0 +1,31 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m pytest -q tests/batch/test_export.py tests/batch/test_workspace_roundtrip.py
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private cache>
+........F..........................                                      [100%]
+=================================== FAILURES ===================================
+_ test_e09_derived_transmittance_preserves_negative_absorbance_and_provenance __
+
+    def test_e09_derived_transmittance_preserves_negative_absorbance_and_provenance() -> None:
+        ws, a, _ = workspace_pair()
+        set_coarse_draft(ws, a, CoarseBaselineConfig(method="offset"))
+        preview_coarse(ws, a)
+        confirm_coarse(ws, a)
+        artifact = build_batch_export(ws, [a], stage="coarse", derived_units=("percent_transmittance",))
+        entry = artifact.metadata["spectra"][0]
+        with zipfile.ZipFile(io.BytesIO(artifact.zip_bytes)) as archive:
+            derived = np.loadtxt(io.BytesIO(archive.read(entry["derived_outputs"][0]["filename"])),
+                                 delimiter=",", skiprows=2)
+            y = ws.states[a].coarse_snapshot.result.analysis_data[0]
+            np.testing.assert_array_equal(derived[:, 1], 100 * np.power(10.0, -y))
+>           assert np.any(y < 0) and np.any(derived[:, 1] > 100)
+E           assert (np.False_)
+E            +  where np.False_ = <function any at 0x10b01f8b0>(array([0.08943024, 0.08961797, 0.09066514, 0.0915581 , 0.0913842 ,\n       0.0899298 , 0.08782019, 0.08610995, 0.085592...046271 , 0.00303413, 0.00268313,\n       0.00347647, 0.00456679, 0.00491215, 0.00395869, 0.00200351,\n       0.        ]) < 0)
+E            +    where <function any at 0x10b01f8b0> = np.any
+
+tests/batch/test_export.py:152: AssertionError
+=========================== short test summary info ============================
+FAILED tests/batch/test_export.py::test_e09_derived_transmittance_preserves_negative_absorbance_and_provenance
+1 failed, 34 passed in 1.83s
+
+EXIT_CODE: 1
+ELAPSED_SECONDS: 2.128
