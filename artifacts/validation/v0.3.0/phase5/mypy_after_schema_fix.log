@@ -1,0 +1,8 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: env -u MYPYPATH .venv/bin/python -m mypy
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private cache>
+pyproject.toml: note: unused section(s): module = ['plotly', 'plotly.*', 'pybaselines', 'streamlit', 'streamlit.*']
+Success: no issues found in 29 source files
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 0.680

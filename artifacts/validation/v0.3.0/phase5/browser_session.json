@@ -1,0 +1,60 @@
+{
+  "date": "2026-09-11 Asia/Shanghai",
+  "tool": "Playwright browser_* tools against real Streamlit localhost:8503",
+  "server": "Streamlit 1.62.0, --server.fileWatcherType none",
+  "input_scope": "Only the three deterministic synthetic example files; no experimental data",
+  "steps": [
+    {
+      "action": "Reload; select 普通光谱模式; input[type=file].setInputFiles for three real CSV files; choose A/%T/T per source; confirm import",
+      "result": "已导入 5 条独立光谱。"
+    },
+    {
+      "action": "For M1, M2, PHEMA, sample_percent_T, sample_fraction_T: compute coarse preview, confirm and next",
+      "result": "Five distinct headings traversed, returned to M1"
+    },
+    {
+      "action": "Scope 全部条目; verify wide checkbox disabled; package and click coarse download; save actual Playwright Download",
+      "result": "coarse.zip"
+    },
+    {
+      "action": "For first four records: compute endpoint_window_linear fine preview, confirm and next; fifth explicitly skip",
+      "result": "4 applied + 1 explicitly_skipped"
+    },
+    {
+      "action": "Package final results, click actual final download; click Plotly Zoom in and Reset axes",
+      "result": "final.zip; plot buttons operated"
+    },
+    {
+      "action": "Page 5, prepare workspace, click actual save download",
+      "result": "workspace.zip; stException count 0"
+    },
+    {
+      "action": "Reload to fresh Streamlit session; ordinary mode has no records; upload saved workspace through restore file uploader; click restore",
+      "result": "已恢复工作区：5 条光谱；正式结果与草稿分别恢复，预览待重新请求。"
+    },
+    {
+      "action": "Re-export all final results and re-save restored workspace through download buttons",
+      "result": "restored-final.zip and restored-workspace.zip; stException count 0"
+    },
+    {
+      "action": "Audit actual downloads against restored formal snapshots, exact array/header/ID/source/parent checks",
+      "result": "See browser_download_audit.json and corresponding real command log"
+    }
+  ],
+  "automation_retries": [
+    "Development server hot reload during implementation left stale Python class identities; server was restarted before this complete session.",
+    "Custom radio input check was intercepted by styled label; subsequent page selection clicked the observed label.",
+    "Initial page-label exact query matched sidebar and heading; used first sidebar label.",
+    "Caption queries initially omitted range suffix or used endpoint rather than observed endpoint_window_linear; corrected locators after reading actual page.",
+    "Several immediate selectbox dropdown clicks were lost during Streamlit rerender and timed out; retried against the settled page.",
+    "The download audit first treated mappingproxy as a scalar and expected ZIP byte identity. It was corrected to compare mappings and all scientific files exactly; QC metric rows reorder on JSON restoration but retain exact values, with separately verified manifest hashes."
+  ],
+  "limits": "Browser zoom was operated visually; no browser-side pipeline counter was installed. No-fit assertions for widget reruns/export/restore are independently exercised in real AppTest and service tests. ZIP payloads stay ignored; public evidence contains names/hashes and synthetic screenshots.",
+  "final_schema_fix_recheck": {
+    "server_restarted_with_final_source": true,
+    "restored_records": 5,
+    "stException_count": 0,
+    "actual_final_download_byte_identical_to_previous_restored_export": true,
+    "sha256": "d46d8d195bf602aba55e6adc6a70ef23d514f509cb88ff5bae6a4df69b5a46f5"
+  }
+}

@@ -1,0 +1,13 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m pip install --no-deps --no-cache-dir --force-reinstall dist/ftir_spectral_workbench-0.3.0-py3-none-any.whl
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private cache>
+Processing ./dist/ftir_spectral_workbench-0.3.0-py3-none-any.whl
+Installing collected packages: ftir-spectral-workbench
+  Attempting uninstall: ftir-spectral-workbench
+    Found existing installation: ftir-spectral-workbench 0.3.0
+    Uninstalling ftir-spectral-workbench-0.3.0:
+      Successfully uninstalled ftir-spectral-workbench-0.3.0
+Successfully installed ftir-spectral-workbench-0.3.0
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 0.348

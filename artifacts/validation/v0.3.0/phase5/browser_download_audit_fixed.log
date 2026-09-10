@@ -1,0 +1,16 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python scripts/audit_v030_browser_downloads.py outputs/validation-private/browser --output artifacts/validation/v0.3.0/phase5/browser_download_audit.json
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private cache>
+Traceback (most recent call last):
+  File "<repository>/scripts/audit_v030_browser_downloads.py", line 117, in <module>
+    main()
+  File "<repository>/scripts/audit_v030_browser_downloads.py", line 109, in main
+    report = json.dumps(audit(args.directory), ensure_ascii=False, indent=2) + "\n"
+                        ^^^^^^^^^^^^^^^^^^^^^
+  File "<repository>/scripts/audit_v030_browser_downloads.py", line 91, in audit
+    assert payloads["final.zip"] == payloads["restored-final.zip"]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+EXIT_CODE: 1
+ELAPSED_SECONDS: 0.859

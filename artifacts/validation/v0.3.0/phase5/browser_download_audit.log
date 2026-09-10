@@ -1,0 +1,29 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python scripts/audit_v030_browser_downloads.py outputs/validation-private/browser --output artifacts/validation/v0.3.0/phase5/browser_download_audit.json
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private cache>
+Traceback (most recent call last):
+  File "<repository>/scripts/audit_v030_browser_downloads.py", line 116, in <module>
+    main()
+  File "<repository>/scripts/audit_v030_browser_downloads.py", line 108, in main
+    report = json.dumps(audit(args.directory), ensure_ascii=False, indent=2) + "\n"
+                        ^^^^^^^^^^^^^^^^^^^^^
+  File "<repository>/scripts/audit_v030_browser_downloads.py", line 60, in audit
+    _exact(before, after)
+  File "<repository>/scripts/audit_v030_browser_downloads.py", line 35, in _exact
+    _exact(getattr(a, field.name), getattr(b, field.name), path + "." + field.name)
+  File "<repository>/scripts/audit_v030_browser_downloads.py", line 41, in _exact
+    _exact(a[key], b[key], path + "." + str(key))
+  File "<repository>/scripts/audit_v030_browser_downloads.py", line 35, in _exact
+    _exact(getattr(a, field.name), getattr(b, field.name), path + "." + field.name)
+  File "<repository>/scripts/audit_v030_browser_downloads.py", line 35, in _exact
+    _exact(getattr(a, field.name), getattr(b, field.name), path + "." + field.name)
+  File "<repository>/scripts/audit_v030_browser_downloads.py", line 35, in _exact
+    _exact(getattr(a, field.name), getattr(b, field.name), path + "." + field.name)
+  [Previous line repeated 1 more time]
+  File "<repository>/scripts/audit_v030_browser_downloads.py", line 49, in _exact
+    assert a == b, path
+           ^^^^^^
+AssertionError: workspace.states.0243329d4ad74cb0a69a4afc0f22812f.coarse_snapshot.result.qc.per_spectrum
+
+EXIT_CODE: 1
+ELAPSED_SECONDS: 1.028

@@ -1,0 +1,75 @@
+{
+  "status": "pass",
+  "data_scope": "Fixed-seed synthetic spectra only; no experimental input read or saved.",
+  "workload": {
+    "spectra": 100,
+    "points_per_spectrum": 4000,
+    "seed": 3030,
+    "input_layout": "one independent wide CSV",
+    "input_unit": "absorbance",
+    "input_bytes": 8075095,
+    "coarse_method": "arpls"
+  },
+  "environment": {
+    "python": "3.12.14",
+    "system": "Darwin",
+    "machine": "arm64",
+    "implementation_fingerprint": "d441f3036623830888416125fa5ef29837c1f4ab7315600b520bde0f6840641e"
+  },
+  "seconds": {
+    "generate_and_serialize_synthetic_input": 0.11445700004696846,
+    "import_probe_parse_and_split": 2.6618995830067433,
+    "all_coarse_previews_and_confirmations": 1.071680083987303,
+    "per_spectrum_median": 0.010265041491948068,
+    "per_spectrum_maximum": 0.026935250032693148,
+    "repeat_all_previews_from_cache": 0.027601708949077874,
+    "A_alone_preview_and_confirmation": 0.010313125036191195,
+    "total": 4.01951175002614
+  },
+  "process_peak_rss_mib": {
+    "at_start": 137.125,
+    "at_finish": 300.484375,
+    "scope": "Whole benchmark process peak, including imports, parser and NumPy arrays; not incremental workspace memory."
+  },
+  "pipeline_calls": {
+    "batch_coarse": 100,
+    "repeated_previews_additional": 0,
+    "A_alone": 1,
+    "after_B_edit_delete_and_reorder_additional": 0,
+    "total": 101
+  },
+  "cache_reused_exact_snapshot_objects": true,
+  "A_independence": {
+    "wavenumber": {
+      "array_equal": true,
+      "maximum_absolute_difference": 0.0
+    },
+    "raw_absorbance": {
+      "array_equal": true,
+      "maximum_absolute_difference": 0.0
+    },
+    "estimation_channel": {
+      "array_equal": true,
+      "maximum_absolute_difference": 0.0
+    },
+    "coarse_baseline": {
+      "array_equal": true,
+      "maximum_absolute_difference": 0.0
+    },
+    "fine_baseline": {
+      "array_equal": true,
+      "maximum_absolute_difference": 0.0
+    },
+    "total_baseline": {
+      "array_equal": true,
+      "maximum_absolute_difference": 0.0
+    },
+    "corrected_absorbance": {
+      "array_equal": true,
+      "maximum_absolute_difference": 0.0
+    }
+  },
+  "A_stage_fingerprint_unchanged_after_B_edit_delete_and_reorder": true,
+  "provenance": "A-alone and batch source identities differ intentionally; numerical arrays are compared exactly.",
+  "cache_scope": "One coarse preview and one confirmed coarse reference per record; workspace-local only."
+}

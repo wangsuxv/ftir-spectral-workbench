@@ -1,0 +1,7 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m ruff check src/ftir_workbench/batch/workspace.py tests/batch/test_workspace_roundtrip.py
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private cache>
+All checks passed!
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 0.026

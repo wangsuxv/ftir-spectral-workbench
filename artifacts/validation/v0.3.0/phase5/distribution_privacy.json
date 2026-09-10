@@ -1,0 +1,23 @@
+{
+  "status": "pass",
+  "archives": {
+    "ftir_spectral_workbench-0.3.0-py3-none-any.whl": {
+      "members": 79,
+      "bytes": 281710,
+      "sha256": "18f13f0d4a95bc99670d60b0bac1032a04c146e585466cefb2bcfca17235a001",
+      "private_output_or_raw_members": [],
+      "public_original_readme_only": []
+    },
+    "ftir_spectral_workbench-0.3.0.tar.gz": {
+      "members": 382,
+      "bytes": 1070404,
+      "sha256": "0836cde61f3110eab04ed39d5591537960002fa823fef330d619e69f07ca971b",
+      "private_output_or_raw_members": [],
+      "public_original_readme_only": [
+        "data/original/README.md"
+      ]
+    }
+  },
+  "all_final_batch_sources_match_wheel": true,
+  "final_workspace_source_matches_wheel": true
+}

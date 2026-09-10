@@ -1,0 +1,74 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python scripts/audit_v030_browser_downloads.py outputs/validation-private/browser --output artifacts/validation/v0.3.0/phase5/browser_download_audit.json
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private cache>
+{
+  "status": "pass",
+  "source": "actual Playwright upload/download UI session; synthetic files only",
+  "stable_ids_sources_drafts_formal_arrays_parents_exact": true,
+  "ignored_comparison_fields": [
+    "export_history",
+    "last_export_summary (new export event)"
+  ],
+  "spectra": 5,
+  "sources": 3,
+  "fine_applied": 4,
+  "fine_explicitly_skipped": 1,
+  "lengths": [
+    291,
+    401,
+    401,
+    401,
+    581
+  ],
+  "wide_export_disabled": true,
+  "final_zip_before_after_restore_byte_identical": false,
+  "differing_zip_members": [
+    "manifest.json",
+    "qc_summary.csv"
+  ],
+  "qc_metric_value_rows_exact_ignoring_row_order": true,
+  "all_spectra_components_recipes_metadata_reports_byte_identical": true,
+  "pipeline_calls_during_download_audit": 0,
+  "exports": [
+    {
+      "download": "coarse.zip",
+      "confirmed_arrays_exact": 5,
+      "stage": "coarse"
+    },
+    {
+      "download": "final.zip",
+      "confirmed_arrays_exact": 5,
+      "stage": "fine"
+    },
+    {
+      "download": "restored-final.zip",
+      "confirmed_arrays_exact": 5,
+      "stage": "fine"
+    }
+  ],
+  "downloads": {
+    "coarse.zip": {
+      "bytes": 144086,
+      "sha256": "51252b78fbe561e249e64ebb6237bd4c8a6abf559fd527203f3730cb38f041f9"
+    },
+    "final.zip": {
+      "bytes": 167619,
+      "sha256": "cb0565fc2cf7b11453885b473afb49ecb1282157de28c095c4b32c07023644cc"
+    },
+    "workspace.zip": {
+      "bytes": 628177,
+      "sha256": "306f7829b27c3667def4129d1853d04237f0e0ee077916535932aa07df692ad7"
+    },
+    "restored-final.zip": {
+      "bytes": 167609,
+      "sha256": "d46d8d195bf602aba55e6adc6a70ef23d514f509cb88ff5bae6a4df69b5a46f5"
+    },
+    "restored-workspace.zip": {
+      "bytes": 628171,
+      "sha256": "e88984bd3973e9c026297f46bbaecf9288e6b8a2d02738bfdec201d53f158611"
+    }
+  }
+}
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 0.979

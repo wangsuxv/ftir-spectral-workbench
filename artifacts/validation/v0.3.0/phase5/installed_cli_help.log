@@ -1,0 +1,24 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: env -u PYTHONPATH .venv/bin/ftir-workbench --help
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private cache>
+usage: ftir-workbench [-h] {inspect,baseline,twodcos,smooth,demo,verify} ...
+
+Baseline-first FTIR processing with optional prepared-only 2D-COS
+
+positional arguments:
+  {inspect,baseline,twodcos,smooth,demo,verify}
+    inspect             Validate and summarize raw FTIR input
+    baseline            Run and export a baseline-only workflow
+    twodcos             Run 2D-COS from a prepared CSV, sidecar, baseline ZIP,
+                        or smoothing bundle
+    smooth              Create an explicit post-baseline smoothed Prepared
+                        branch and bundle
+    demo                Run a local DPT series through baseline and optional
+                        2D demonstration
+    verify              Verify a workbench ZIP/.ftirw manifest
+
+options:
+  -h, --help            show this help message and exit
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 2.057
