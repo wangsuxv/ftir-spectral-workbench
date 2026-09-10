@@ -796,6 +796,25 @@ def page_import() -> None:
             st.error(f"文本导入选项无效：{exc}")
 
         upload_items = list(uploads or [])
+        # Mode switches remove uploader widgets, while the in-situ workspace survives.
+        # Keep uploaded bytes in business state; never assign a value to file_uploader.
+        if st.session_state.get("_in_situ_import_suspended"):
+            if upload_items:
+                st.session_state["_in_situ_import_suspended"] = False
+            elif st.session_state.get("_in_situ_retained_uploads"):
+                upload_items = st.session_state["_in_situ_retained_uploads"]
+                st.info("已保留模式切换前的原位输入；重新上传可替换。")
+                if st.button("清除保留的原位上传"):
+                    upload_items = []
+                    st.session_state["_in_situ_import_suspended"] = False
+        st.session_state["_in_situ_retained_uploads"] = upload_items
+        st.session_state["_in_situ_import_widgets"] = {
+            key: st.session_state[key] for key in (
+                "raw_unit", "raw_sort_by_perturbation", "raw_text_delimiter",
+                "raw_text_decimal_mark", "raw_text_encoding", "raw_text_header_mode",
+                "raw_text_skip_rows", "raw_text_trim_empty_edge_columns",
+            )
+        }
         text_signature = (
             None
             if import_options is None
@@ -2919,6 +2938,19 @@ def main() -> None:
     _initial_state()
     st.title("FTIR Spectral Workbench")
     st.caption("唯一基线路径 · 可独立结束 · prepared-only 2D-COS · SHA-256 lineage")
+    mode = st.sidebar.selectbox("数据模式", ("原位序列模式", "普通光谱模式"), key="workflow_mode")
+    if mode == "普通光谱模式":
+        st.session_state["_in_situ_import_suspended"] = True
+        try:
+            from ui.batch_workflow import render_batch_workflow
+        except ModuleNotFoundError:
+            from batch_workflow import render_batch_workflow
+        render_batch_workflow()
+        return
+    if st.session_state.get("_in_situ_import_suspended"):
+        for key, value in st.session_state.get("_in_situ_import_widgets", {}).items():
+            if key not in st.session_state:
+                st.session_state[key] = value
     page = st.sidebar.radio("工作流", PAGES)
     st.sidebar.divider()
     st.sidebar.code(

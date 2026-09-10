@@ -1,0 +1,107 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m pytest -q tests/batch/test_ui.py
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private cache>
+....F.F.                                                                 [100%]
+=================================== FAILURES ===================================
+_ test_view_changes_selection_filter_sort_and_confirmation_do_not_run_pipeline _
+
+pipeline_calls = ['c41198b2b9d84261b6fc65adceabdf9f']
+
+    def test_view_changes_selection_filter_sort_and_confirmation_do_not_run_pipeline(
+        pipeline_calls: list[str],
+    ) -> None:
+        app = uploaded_app()
+        ws = workspace(app)
+        a, b, c = ws.display_order
+        coarse_confirm(app)
+        snapshot = ws.states[a].coarse_snapshot
+        assert snapshot is not None
+        assert pipeline_calls == [a]
+        element(app.selectbox, "校正谱派生显示单位").set_value("percent_transmittance").run()
+        element(app.radio, "显示结果").set_value("已确认结果").run()
+        element(app.text_input, "展示名称").set_value("Renamed A").run()
+>       element(app.sidebar.multiselect, "批量勾选（独立于当前光谱）").set_value([b, c]).run()
+
+tests/batch/test_ui.py:244: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:179: in run
+    return self.root.run(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2530: in run
+    widget_states = self.get_widget_states()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2513: in get_widget_states
+    w = get_widget_state(node)
+        ^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2457: in get_widget_state
+    return node._widget_state
+           ^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1541: in _widget_state
+    if self.index is not None and len(self.options) > 0:
+       ^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Selectbox(key='batch_current_916f6ffe7d714230b2f1228d892b054c__全部', _value=InitialValue(), label='当前光谱', options=['A · wide.csv · 列1 · c41198', 'B · wide.csv · 列2 · c3c49b', 'C · other.csv · 列1 · 35176f'])
+
+    @property
+    def index(self) -> int | None:
+        """The index of the current selection. (int)"""  # noqa: D400
+        if self.value is None:
+            return None
+    
+        if len(self.options) == 0:
+            return 0
+        formatted_value = _format_value_for_widget(self.format_func, self.value)
+>       return self.options.index(formatted_value)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: 'Renamed A · wide.csv · 列1 · c41198' is not in list
+
+.venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1501: ValueError
+----------------------------- Captured stderr call -----------------------------
+2026-09-10 23:38:24.004 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+------------------------------ Captured log call -------------------------------
+WARNING  streamlit.runtime.scriptrunner_utils.script_run_context:script_run_context.py:476 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+_____ test_switching_modes_preserves_real_in_situ_input_and_batch_snapshot _____
+
+pipeline_calls = ['f22a245966d448fb81f8da7ef6f567ec']
+
+    def test_switching_modes_preserves_real_in_situ_input_and_batch_snapshot(
+        pipeline_calls: list[str],
+    ) -> None:
+        app = AppTest.from_file(APP_PATH, default_timeout=30).run()
+        x = np.linspace(1800.0, 900.0, 181)
+        data = table_bytes(x, 0.1 + x / 5000.0, 0.2 + x / 5000.0, labels=("0MIN", "1MIN"))
+        app.get("file_uploader")[0].set_value([("series.csv", data, "text/csv")]).run()
+        element(app.radio, "已确认输入单位").set_value("absorbance").run()
+        element(app.button, "Load using these settings").click().run()
+        assert_ok(app)
+        legacy_input = app.session_state["raw_data"]
+        legacy_config = dict(app.session_state["baseline_config"])
+        assert legacy_input.n_spectra == 2
+    
+        element(app.selectbox, "数据模式").set_value("普通光谱模式").run()
+        element(app.get("file_uploader"), "上传普通光谱文本文件").set_value(synthetic_uploads()).run()
+        element(app.button, "确认单位并导入").click().run()
+        assert_ok(app)
+        ws = workspace(app)
+        a = ws.display_order[0]
+        coarse_confirm(app)
+        snapshot = ws.states[a].coarse_snapshot
+        element(app.selectbox, "粗调方法").set_value("offset").run()
+        element(app.selectbox, "数据模式").set_value("原位序列模式").run()
+        assert_ok(app)
+>       assert app.session_state["raw_data"] is legacy_input
+E       AssertionError: assert None is SpectrumSet(wavenumber=array([1800., 1795., 1790., 1785., 1780., 1775., 1770., 1765., 1760.,\n       1755., 1750., 1745...nal_spectrum_order': ('0MIN', '1MIN'), 'sorted_by_perturbation': True, 'order_policy': 'numeric_perturbation_stable'}))
+
+tests/batch/test_ui.py:320: AssertionError
+----------------------------- Captured stderr call -----------------------------
+2026-09-10 23:38:26.292 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+------------------------------ Captured log call -------------------------------
+WARNING  streamlit.runtime.scriptrunner_utils.script_run_context:script_run_context.py:476 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+=========================== short test summary info ============================
+FAILED tests/batch/test_ui.py::test_view_changes_selection_filter_sort_and_confirmation_do_not_run_pipeline
+FAILED tests/batch/test_ui.py::test_switching_modes_preserves_real_in_situ_input_and_batch_snapshot
+2 failed, 6 passed in 8.96s
+
+EXIT_CODE: 1
+ELAPSED_SECONDS: 9.292

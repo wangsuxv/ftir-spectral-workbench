@@ -1,0 +1,8 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m pytest -q tests/batch/test_ui.py -k preparation_unit or prefilled_fine or explicit_batch_preview
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private cache>
+...                                                                      [100%]
+3 passed, 8 deselected in 5.60s
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 6.012
