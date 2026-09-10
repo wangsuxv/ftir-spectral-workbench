@@ -1,0 +1,6 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: <repository>/.venv/bin/python -m ruff check src tests ui scripts
+All checks passed!
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 0.188

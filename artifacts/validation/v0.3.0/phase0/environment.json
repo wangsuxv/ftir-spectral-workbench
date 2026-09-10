@@ -1,0 +1,17 @@
+{
+  "base_commit": "8cf6cc8bd38491d6549595564f2c57715bc69ef0",
+  "initial_dirty_files": [],
+  "python": "3.12.14 (main, Aug 25 2026, 13:50:33) [Clang 22.1.3 ]",
+  "packages": {
+    "numpy": "2.5.2",
+    "scipy": "1.18.1",
+    "pandas": "3.0.5",
+    "pybaselines": "1.2.1",
+    "pydantic": "2.13.4",
+    "streamlit": "1.62.0",
+    "pytest": "9.1.1",
+    "ruff": "0.16.4",
+    "mypy": "2.3.1"
+  },
+  "specified_remote_commit_available": false
+}

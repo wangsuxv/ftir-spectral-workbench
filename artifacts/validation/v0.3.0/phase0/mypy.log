@@ -1,0 +1,7 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: <repository>/.venv/bin/python -m mypy
+Package 'ftir_workbench' cannot be type checked due to missing py.typed marker.
+See https://mypy.readthedocs.io/en/stable/installed_packages.html for more details
+
+EXIT_CODE: 2
+ELAPSED_SECONDS: 0.367

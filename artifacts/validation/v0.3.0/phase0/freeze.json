@@ -1,0 +1,17 @@
+{
+  "status": "pass",
+  "manifest": "artifacts/v0.2.1_science_freeze_manifest.json",
+  "start_commit": "92513def080001de4c226fcea0fde484ae8d97fb",
+  "start_tree": "0f5fb43486e39bc9158cad07860c5bc9c149d5ff",
+  "expected_file_count": 34,
+  "manifest_file_count": 34,
+  "start_tree_frozen_file_count": 34,
+  "current_frozen_file_count": 34,
+  "current_frozen_extra_paths": [],
+  "current_frozen_missing_paths": [],
+  "checked_worktree_count": 34,
+  "checked_start_commit_count": 34,
+  "git_diff_changed_paths": [],
+  "mismatches": [],
+  "algorithm": "SHA-256 over exact bytes; no tolerance or normalization"
+}
