@@ -1,0 +1,61 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m pytest -q tests/batch/test_method_parity.py
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private cache>
+........................F......                                          [100%]
+=================================== FAILURES ===================================
+_________ test_all_fine_methods_equal_single_authoritative_run[none-1] _________
+
+method = 'none', order = 1
+
+    @pytest.mark.parametrize("method,order", [("none", 1), ("endpoint_window_linear", 1), ("piecewise_linear", 1), ("pchip", 1), ("polynomial", 1), ("polynomial", 2), ("polynomial", 3)])
+    def test_all_fine_methods_equal_single_authoritative_run(method: str, order: int) -> None:
+        from ftir_workbench.batch.service import IndependentBatchBaselineService
+        from ftir_workbench.batch.state import confirm_coarse, set_fine_draft
+    
+        ws, sid = synthetic_workspace()
+        service = IndependentBatchBaselineService()
+        service.preview_coarse(ws, sid)
+        confirm_coarse(ws, sid)
+        anchors = [{"start": center - 4, "end": center + 4} for center in [900, 1150, 1600, 1800]]
+        set_fine_draft(ws, sid, FineBaselineConfig(method=method, polynomial_order=order, anchors=anchors))
+>       fine = service.preview_fine(ws, sid)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/batch/test_method_parity.py:63: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/ftir_workbench/batch/service.py:145: in preview_fine
+    return preview_fine(workspace, spectrum_id, runner=self.runner)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/ftir_workbench/batch/service.py:118: in preview_fine
+    return _preview(workspace, spectrum_id, "fine", runner)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/ftir_workbench/batch/service.py:108: in _preview
+    raise error from (None if error is exc else exc)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+workspace = BatchWorkspace(schema_version='1.0', workspace_id='d0909cb846fe492b85c38b00851c876b', workflow_mode='independent_batch...selected_spectrum_id='f52240fdb0bf4b18ac0460f07492d100', import_issues=[], export_history=[], last_export_summary=None)
+spectrum_id = 'f52240fdb0bf4b18ac0460f07492d100', stage = 'fine', runner = None
+
+    def _preview(workspace: BatchWorkspace, spectrum_id: str, stage: Stage,
+                 runner: Runner | None) -> StageSnapshot:
+        state = workspace.states[spectrum_id]
+        record = workspace.records[spectrum_id]
+        try:
+            validate_preparation(record, state.preparation_committed)
+            parent = None
+            if stage == "coarse":
+                config = coarse_config(state.preparation_committed, state.coarse_draft)
+                candidates = (state.coarse_preview, state.coarse_snapshot)
+            else:
+                parent = get_ready_snapshot(workspace, spectrum_id, "coarse")
+                if not state.fine_draft.enabled or state.fine_draft.method == "none":
+>                   raise BatchError("FINE_REQUIRED", "use explicit skip to confirm no fine adjustment")
+E                   ftir_workbench.batch.models.BatchError: FINE_REQUIRED: use explicit skip to confirm no fine adjustment
+
+src/ftir_workbench/batch/service.py:79: BatchError
+=========================== short test summary info ============================
+FAILED tests/batch/test_method_parity.py::test_all_fine_methods_equal_single_authoritative_run[none-1]
+1 failed, 30 passed in 1.12s
+
+EXIT_CODE: 1
+ELAPSED_SECONDS: 1.349

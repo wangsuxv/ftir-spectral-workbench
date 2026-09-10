@@ -1,0 +1,54 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m ruff check src/ftir_workbench/batch tests/batch
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private cache>
+I001 [*] Import block is un-sorted or un-formatted
+  --> src/ftir_workbench/batch/state.py:3:1
+   |
+ 1 |   """Explicit draft, preview and commit transitions; no numerical fitting occurs here."""
+ 2 |
+ 3 | / from __future__ import annotations
+ 4 | |
+ 5 | | from collections.abc import Sequence
+ 6 | | from dataclasses import replace
+ 7 | |
+ 8 | | import numpy as np
+ 9 | |
+10 | | from ftir_baseline.config import CoarseBaselineConfig, FineBaselineConfig
+11 | |
+12 | | from .fingerprints import stage_fingerprint
+13 | | from .models import (
+14 | |     BatchError, BatchWorkspace, PreparationConfig, Stage, StageSnapshot, scientific_input_hash,
+15 | | )
+16 | | from .recipes import (
+17 | |     coarse_config, fine_config, preparation_from_config, require_independent_config,
+18 | |     validate_fine, validate_preparation,
+19 | | )
+   | |_^
+help: Organize imports
+   |
+13 | from .models import (
+   -     BatchError, BatchWorkspace, PreparationConfig, Stage, StageSnapshot, scientific_input_hash,
+14 +     BatchError,
+15 +     BatchWorkspace,
+16 +     PreparationConfig,
+17 +     Stage,
+18 +     StageSnapshot,
+19 +     scientific_input_hash,
+20 | )
+21 | from .recipes import (
+   -     coarse_config, fine_config, preparation_from_config, require_independent_config,
+   -     validate_fine, validate_preparation,
+22 +     coarse_config,
+23 +     fine_config,
+24 +     preparation_from_config,
+25 +     require_independent_config,
+26 +     validate_fine,
+27 +     validate_preparation,
+28 | )
+   |
+
+Found 1 error.
+[*] 1 fixable with the `--fix` option.
+
+EXIT_CODE: 1
+ELAPSED_SECONDS: 0.028

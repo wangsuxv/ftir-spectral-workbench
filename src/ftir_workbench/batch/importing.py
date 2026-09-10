@@ -51,7 +51,7 @@ def import_sources(
                 loaded = read_spectrum_file(
                     path,
                     input_unit=input_unit,
-                    perturbation=np.arange(probe.columns - 1, dtype=np.float64),
+                    perturbation=[float(index) for index in range(probe.columns - 1)],
                     source_name=original_name,
                     sort_by_perturbation=False,
                     import_options=selected_options,
