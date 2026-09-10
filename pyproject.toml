@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ftir-spectral-workbench"
-version = "0.2.5"
-description = "Auditable baseline correction and optional prepared-data-only 2D-COS for FTIR series"
+version = "0.3.0"
+description = "Independent batch and in-situ FTIR baseline workflows with optional prepared-data-only 2D-COS"
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.11"
@@ -75,6 +75,7 @@ select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
 ignore = ["E501", "RUF001"]
 
 [tool.mypy]
+mypy_path = "src"
 warn_unused_configs = true
 warn_redundant_casts = true
 warn_unused_ignores = true

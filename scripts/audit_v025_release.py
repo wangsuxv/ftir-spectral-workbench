@@ -329,8 +329,12 @@ def audit_science_freeze(
     }
 
 
-def audit_release_metadata(repository: Path) -> dict[str, Any]:
-    """Confirm the distribution/workbench version without changing frozen packages."""
+def audit_release_metadata(
+    repository: Path,
+    *,
+    expected_version: str = "0.2.5",
+) -> dict[str, Any]:
+    """Require the selected workbench version; retain strict v0.2.5 by default."""
 
     import ftir2dcos
     import ftir_baseline
@@ -347,17 +351,19 @@ def audit_release_metadata(repository: Path) -> dict[str, Any]:
         module_sources = _runtime_module_sources(repository)
     except RuntimeError:
         module_sources = {}
+    version_label = expected_version.replace(".", "_")
     checks = {
         "runtime_modules_from_repository": set(module_sources)
         == {"ftir_baseline", "ftir2dcos", "ftir_workbench"},
-        "distribution_version_is_0_2_5": distribution_version == "0.2.5",
-        "workbench_version_is_0_2_5": ftir_workbench.__version__ == "0.2.5",
+        f"distribution_version_is_{version_label}": distribution_version == expected_version,
+        f"workbench_version_is_{version_label}": ftir_workbench.__version__ == expected_version,
         "baseline_package_version_frozen": ftir_baseline.__version__ == "0.1.0",
         "twodcos_package_version_frozen": ftir2dcos.__version__ == "0.4.0",
     }
     failed_checks = sorted(name for name, passed in checks.items() if not passed)
     return {
         "status": "pass" if not failed_checks else "fail",
+        "expected_version": expected_version,
         "distribution_version": distribution_version,
         "workbench_version": ftir_workbench.__version__,
         "baseline_package_version": ftir_baseline.__version__,
@@ -831,8 +837,9 @@ def run_release_audit(
     repository: Path,
     *,
     manifest_path: Path | None = None,
+    expected_version: str = "0.2.5",
 ) -> dict[str, Any]:
-    """Run every v0.2.5 release check and return a safe JSON object."""
+    """Keep every historical check, with an explicit expected workbench version."""
 
     repository = repository.resolve()
     _configure_private_runtime()
@@ -844,7 +851,7 @@ def run_release_audit(
             ),
             _safe_check(
                 "release_metadata",
-                lambda: audit_release_metadata(repository),
+                lambda: audit_release_metadata(repository, expected_version=expected_version),
             ),
             _safe_check(
                 "smoothing_and_2d",
@@ -863,7 +870,8 @@ def run_release_audit(
         head_commit = "unavailable"
     return {
         "schema_version": "1.0",
-        "audit": "FTIR Spectral Workbench v0.2.5 local release audit",
+        "audit": f"FTIR Spectral Workbench v{expected_version} local release audit",
+        "expected_version": expected_version,
         "status": "pass" if not failed_checks else "fail",
         "repository": repository.name,
         "audited_head_commit": head_commit,
@@ -891,6 +899,11 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--manifest", type=Path)
     parser.add_argument("--output", type=Path)
+    parser.add_argument(
+        "--expected-version",
+        default="0.2.5",
+        help="Required distribution/workbench version (default: 0.2.5); frozen package versions stay fixed.",
+    )
     return parser
 
 
@@ -915,7 +928,9 @@ def main(argv: list[str] | None = None) -> int:
     manifest = namespace.manifest
     if manifest is not None and not manifest.is_absolute():
         manifest = repository / manifest
-    summary = run_release_audit(repository, manifest_path=manifest)
+    summary = run_release_audit(
+        repository, manifest_path=manifest, expected_version=namespace.expected_version
+    )
     rendered = json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
     if namespace.output is not None:
         output = namespace.output.resolve()

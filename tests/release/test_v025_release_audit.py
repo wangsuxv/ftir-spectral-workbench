@@ -22,7 +22,7 @@ REPOSITORY = Path(__file__).resolve().parents[2]
 
 
 def test_v025_release_audit_passes_without_private_path_or_raw_data_output() -> None:
-    summary = run_release_audit(REPOSITORY)
+    summary = run_release_audit(REPOSITORY, expected_version="0.3.0")
     serialized = json.dumps(summary, ensure_ascii=False, sort_keys=True)
 
     assert summary["status"] == "pass"
@@ -45,8 +45,8 @@ def test_v025_release_audit_passes_without_private_path_or_raw_data_output() -> 
 
     release_metadata = summary["checks"]["release_metadata"]
     assert release_metadata["status"] == "pass"
-    assert release_metadata["distribution_version"] == "0.2.5"
-    assert release_metadata["workbench_version"] == "0.2.5"
+    assert release_metadata["distribution_version"] == "0.3.0"
+    assert release_metadata["workbench_version"] == "0.3.0"
     assert all(release_metadata["checks"].values())
 
     smoothing = summary["checks"]["smoothing_and_2d"]
@@ -64,6 +64,31 @@ def test_v025_release_audit_passes_without_private_path_or_raw_data_output() -> 
     assert compatibility["legacy_base_commit"] == freeze["start_commit"]
     assert compatibility["legacy_generator_version"] == "0.2.1"
     assert all(compatibility["checks"].values())
+
+
+def test_default_v025_metadata_check_rejects_v030_without_explicit_target() -> None:
+    historical = audit_release_metadata(REPOSITORY)
+    assert historical["status"] == "fail"
+    assert historical["expected_version"] == "0.2.5"
+    assert historical["distribution_version"] == "0.3.0"
+    assert historical["workbench_version"] == "0.3.0"
+    assert historical["failed_checks"] == [
+        "distribution_version_is_0_2_5", "workbench_version_is_0_2_5",
+    ]
+
+    current = audit_release_metadata(REPOSITORY, expected_version="0.3.0")
+    assert current["status"] == "pass"
+    assert current["expected_version"] == "0.3.0"
+    assert current["checks"]["distribution_version_is_0_3_0"] is True
+    assert current["checks"]["workbench_version_is_0_3_0"] is True
+    assert current["checks"]["baseline_package_version_frozen"] is True
+    assert current["checks"]["twodcos_package_version_frozen"] is True
+
+
+def test_cli_expected_version_is_explicit_and_defaults_to_v025() -> None:
+    parser = audit_module._build_parser()
+    assert parser.parse_args([]).expected_version == "0.2.5"
+    assert parser.parse_args(["--expected-version", "0.3.0"]).expected_version == "0.3.0"
 
 
 def test_v025_science_freeze_reports_manifest_tampering(tmp_path: Path) -> None:

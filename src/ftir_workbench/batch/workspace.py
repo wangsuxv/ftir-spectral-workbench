@@ -119,11 +119,155 @@ def read_verified_archive(payload: bytes, artifact_type: str) -> dict[str, bytes
         raise _failure(f"invalid archive: {type(exc).__name__}") from exc
 
 
+def _object(value: Any, path: str) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        raise _failure(f"{path} must be a JSON object")
+    return value
+
+
+def _string(value: Any, path: str, *, optional: bool = False) -> None:
+    if optional and value is None:
+        return
+    if not isinstance(value, str):
+        raise _failure(f"{path} must be a string")
+
+
+def _sequence(value: Any, path: str, item_type: type) -> None:
+    if not isinstance(value, list) or any(not isinstance(item, item_type) for item in value):
+        raise _failure(f"{path} must be a list of {item_type.__name__} values")
+    if len(value) > MAX_MEMBERS:
+        raise _failure(f"{path} exceeds workspace collection limit")
+
+
+def _business_value(value: Any, path: str) -> None:
+    """Business/UI metadata cannot contain executable or numerical-array codec nodes."""
+    if isinstance(value, dict):
+        if "__array__" in value or "__nonfinite__" in value:
+            raise _failure(f"{path} contains a reserved numerical codec marker")
+        for key, item in value.items():
+            _business_value(item, f"{path}.{key}")
+    elif isinstance(value, list):
+        for item in value:
+            _business_value(item, path)
+    elif value is not None and not isinstance(value, (str, int, float, bool)):
+        raise _failure(f"{path} contains an unsupported business value")
+
+
+def _editor_structure(preferences: dict[str, Any], state: dict[str, Any], path: str) -> None:
+    _business_value(preferences, path)
+    for name, value in preferences.items():
+        if name.startswith("error_"):
+            _string(value, f"{path}.{name}")
+        if not name.startswith("editor_"):
+            continue
+        editor = _object(value, f"{path}.{name}")
+        stage = name.removeprefix("editor_")
+        if stage not in {"preparation", "coarse", "fine"}:
+            continue
+        expected = (set(state[stage + "_draft"]) if stage != "preparation" else {
+            "input_unit", "high", "low", "smoothing", "window_length", "polyorder", "use_floor", "floor"
+        })
+        if not expected.issubset(editor):
+            raise _failure(f"{path}.{name} is missing editor fields")
+        for key, item in editor.items():
+            label = f"{path}.{name}.{key}"
+            if key == "anchors":
+                _sequence(item, label, dict)
+                for anchor in item:
+                    for coordinate in ("start", "end"):
+                        number = anchor.get(coordinate)
+                        if number is not None and type(number) not in (int, float):
+                            raise _failure(f"{label}.{coordinate} must be numeric or null")
+                    if anchor.get("enabled") is not None and type(anchor["enabled"]) is not bool:
+                        raise _failure(f"{label}.enabled must be boolean or null")
+                    if anchor.get("statistic") not in {None, "mean", "median"}:
+                        raise _failure(f"{label}.statistic is invalid")
+            elif key in {"enabled", "strict_endpoint", "smoothing", "use_floor"}:
+                if type(item) is not bool:
+                    raise _failure(f"{label} must be boolean")
+            elif key in {"method", "input_unit", "statistic"}:
+                _string(item, label)
+                choices = {
+                    "input_unit": {"absorbance", "fraction_transmittance", "percent_transmittance"},
+                    "statistic": {"mean", "median"},
+                    "method": ({"none", "offset", "linear", "arpls", "asls", "airpls", "rubberband", "pspline_arpls"}
+                               if stage == "coarse" else {"none", "endpoint_window_linear", "piecewise_linear", "pchip", "polynomial"}),
+                }
+                if item not in choices[key]:
+                    raise _failure(f"{label} is not a supported editor choice")
+            elif key in expected and item is not None and type(item) not in (int, float):
+                raise _failure(f"{label} must be numeric or null")
+
+
+def _validate_business_structure(value: Any) -> dict[str, Any]:
+    data = _object(value, "workspace")
+    for name in ("artifact_type", "schema_version", "workflow_mode", "workspace_id", "saved_implementation_fingerprint"):
+        _string(data[name], name)
+    for name in ("sources", "records", "states"):
+        collection = _object(data[name], name)
+        if len(collection) > MAX_MEMBERS:
+            raise _failure(f"{name} exceeds workspace collection limit")
+    _sequence(data["display_order"], "display_order", str)
+    _string(data["selected_spectrum_id"], "selected_spectrum_id", optional=True)
+    for name in ("import_issues", "export_history"):
+        _sequence(data[name], name, dict)
+        _business_value(data[name], name)
+    if data["last_export_summary"] is not None:
+        _object(data["last_export_summary"], "last_export_summary")
+        _business_value(data["last_export_summary"], "last_export_summary")
+    for key, source_value in data["sources"].items():
+        source = _object(source_value, f"sources.{key}")
+        for name in ("source_id", "original_filename", "original_bytes_sha256", "default_input_unit", "bytes_member"):
+            _string(source[name], f"sources.{key}.{name}")
+        for name in ("import_options", "import_probe"):
+            _object(source[name], f"sources.{key}.{name}")
+            _business_value(source[name], f"sources.{key}.{name}")
+    for key, record_value in data["records"].items():
+        record = _object(record_value, f"records.{key}")
+        for name in ("spectrum_id", "source_id", "original_column_label", "display_name",
+                     "confirmed_input_unit", "original_axis_direction", "scientific_input_sha256"):
+            _string(record[name], f"records.{key}.{name}")
+        if type(record["original_column_index"]) is not int or record["original_column_index"] < 1:
+            raise _failure(f"records.{key}.original_column_index must be a positive integer")
+        for name in ("excluded", "duplicate_candidate"):
+            if type(record[name]) is not bool:
+                raise _failure(f"records.{key}.{name} must be boolean")
+    for key, state_value in data["states"].items():
+        state = _object(state_value, f"states.{key}")
+        for name in ("preparation_draft", "preparation_committed", "coarse_draft", "fine_draft"):
+            _object(state[name], f"states.{key}.{name}")
+        for name in ("coarse_committed", "fine_committed", "coarse_snapshot", "fine_snapshot"):
+            if state[name] is not None:
+                _object(state[name], f"states.{key}.{name}")
+        for stage in ("coarse", "fine"):
+            snapshot = state[stage + "_snapshot"]
+            if snapshot is not None:
+                for name in ("stage", "spectrum_id", "input_sha256", "fingerprint", "implementation_fingerprint"):
+                    _string(snapshot[name], f"states.{key}.{stage}_snapshot.{name}")
+                for name in ("parent_coarse_fingerprint", "parent_coarse_implementation_fingerprint"):
+                    _string(snapshot[name], f"states.{key}.{stage}_snapshot.{name}", optional=True)
+                _object(snapshot["config"], f"states.{key}.{stage}_snapshot.config")
+                result = _object(snapshot["result"], f"states.{key}.{stage}_snapshot.result")
+                for name in ("input_sha256", "software_version"):
+                    _string(result[name], f"states.{key}.{stage}_snapshot.result.{name}")
+        for name in ("coarse_stale", "fine_stale"):
+            if type(state[name]) is not bool:
+                raise _failure(f"states.{key}.{name} must be boolean")
+        for name in ("errors", "warnings"):
+            _sequence(state[name], f"states.{key}.{name}", str)
+        _string(state["fine_decision"], f"states.{key}.fine_decision")
+        _string(state["fine_parent_coarse_fingerprint"], f"states.{key}.fine_parent_coarse_fingerprint", optional=True)
+        preferences = _object(state["display_preferences"], f"states.{key}.display_preferences")
+        _editor_structure(preferences, state, f"states.{key}.display_preferences")
+    return data
+
+
 class _Arrays:
     def __init__(self, members: dict[str, bytes]) -> None:
         self.members = members
         self.counter = 0
         self.used: set[str] = set()
+        self.decoded_bytes = 0
 
     def encode(self, value: Any) -> Any:
         if isinstance(value, np.ndarray):
@@ -164,6 +308,9 @@ class _Arrays:
                         or any(not isinstance(n, int) or n < 0 for n in shape)
                         or math.prod(shape) * 8 != len(stream.getbuffer()) - stream.tell()):
                     raise _failure("invalid NPY dtype, shape or byte count")
+                self.decoded_bytes += math.prod(shape) * 8
+                if self.decoded_bytes > MAX_TOTAL_BYTES:
+                    raise _failure("decoded array references exceed expanded size limit")
                 stream.seek(0)
                 return np.load(stream, allow_pickle=False)
             if set(value) == {"__nonfinite__"}:
@@ -369,7 +516,7 @@ def load_batch_workspace(bundle_bytes: bytes) -> BatchWorkspace:
     try:
         members = read_verified_archive(bundle_bytes, "independent_baseline_workspace")
         arrays = _Arrays(members)
-        data = arrays.decode(_read_json(members["workspace.json"]))
+        data = arrays.decode(_validate_business_structure(_read_json(members["workspace.json"])))
         if (data["artifact_type"] != "independent_baseline_workspace"
                 or data["schema_version"] != "1.0" or data["workflow_mode"] != "independent_batch"):
             raise _failure("unsupported workspace schema")
@@ -448,7 +595,7 @@ def load_batch_workspace(bundle_bytes: bytes) -> BatchWorkspace:
             ):
                 raise _failure("explicit skip contains active fine correction")
         return workspace
-    except (KeyError, TypeError, ValueError, OSError, OverflowError, EOFError, RecursionError, zlib.error) as exc:
+    except (AttributeError, KeyError, TypeError, ValueError, OSError, OverflowError, EOFError, RecursionError, zlib.error) as exc:
         if isinstance(exc, BatchError) and exc.code == "WORKSPACE_INTEGRITY_FAILED":
             raise
         raise _failure(f"workspace validation failed: {exc}") from exc

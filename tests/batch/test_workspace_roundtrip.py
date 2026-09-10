@@ -46,7 +46,7 @@ def test_e07_full_workspace_restores_arrays_identity_drafts_parent_and_no_fit(mo
     ws.display_order.reverse()
     ws.selected_spectrum_id = b
     set_coarse_draft(ws, a, CoarseBaselineConfig(method="linear"))
-    ws.states[a].display_preferences = {"error_fine": "unfinished anchors", "editor_fine": {"anchors": [{"start": None, "end": float("nan")}]}}
+    ws.states[a].display_preferences = {"error_fine": "unfinished anchors", "editor_fine": {**ws.states[a].fine_draft.to_dict(), "anchors": [{"start": None, "end": float("nan")}]}}
     ws.export_history.append({"stage": "coarse", "exported_spectrum_ids": [a]})
     saved = save_batch_workspace(ws)
 
@@ -326,3 +326,78 @@ def test_nonstandard_json_or_duplicate_keys_are_rejected(json_payload: bytes) ->
     payload = make_archive({"workspace.json": json_payload}, "independent_baseline_workspace")
     with pytest.raises(BatchError, match="WORKSPACE_INTEGRITY_FAILED"):
         load_batch_workspace(payload)
+
+
+@pytest.mark.parametrize("mutation", [
+    "sources_list", "records_list", "states_list", "display_order_string", "issues_none",
+    "history_dict", "summary_list", "selected_int", "source_list", "source_name_list",
+    "source_options_list", "record_list", "record_label_none", "record_column_bool",
+    "excluded_string", "duplicate_int", "state_list", "prep_draft_none", "prep_committed_none",
+    "coarse_draft_none", "fine_draft_none", "coarse_committed_list", "coarse_stale_string",
+    "fine_stale_none", "errors_none", "warnings_none", "errors_object", "fine_decision_list",
+    "preferences_none", "editor_none", "editor_missing_fields", "editor_wrong_scalar",
+    "editor_choice_unknown", "editor_anchors_string", "editor_anchor_scalar",
+    "editor_numeric_codec", "snapshot_impl_list", "result_version_none",
+])
+def test_rehashed_malformed_business_schema_is_rejected_before_workspace_install(mutation: str) -> None:
+    ws, a, _ = ready_pair()
+
+    def corrupt(data, members):  # type: ignore[no-untyped-def]
+        source_key = next(iter(data["sources"]))
+        state = data["states"][a]
+        state["display_preferences"] = {"editor_fine": dict(state["fine_draft"])}
+        options = {
+            "sources_list": (data, "sources", []),
+            "records_list": (data, "records", []),
+            "states_list": (data, "states", []),
+            "display_order_string": (data, "display_order", a),
+            "issues_none": (data, "import_issues", None),
+            "history_dict": (data, "export_history", {}),
+            "summary_list": (data, "last_export_summary", []),
+            "selected_int": (data, "selected_spectrum_id", 12),
+            "source_list": (data["sources"], source_key, []),
+            "source_name_list": (data["sources"][source_key], "original_filename", []),
+            "source_options_list": (data["sources"][source_key], "import_options", []),
+            "record_list": (data["records"], a, []),
+            "record_label_none": (data["records"][a], "display_name", None),
+            "record_column_bool": (data["records"][a], "original_column_index", True),
+            "excluded_string": (data["records"][a], "excluded", "false"),
+            "duplicate_int": (data["records"][a], "duplicate_candidate", 0),
+            "state_list": (data["states"], a, []),
+            "prep_draft_none": (state, "preparation_draft", None),
+            "prep_committed_none": (state, "preparation_committed", None),
+            "coarse_draft_none": (state, "coarse_draft", None),
+            "fine_draft_none": (state, "fine_draft", None),
+            "coarse_committed_list": (state, "coarse_committed", []),
+            "coarse_stale_string": (state, "coarse_stale", "false"),
+            "fine_stale_none": (state, "fine_stale", None),
+            "errors_none": (state, "errors", None),
+            "warnings_none": (state, "warnings", None),
+            "errors_object": (state, "errors", [{}]),
+            "fine_decision_list": (state, "fine_decision", []),
+            "preferences_none": (state, "display_preferences", None),
+            "editor_none": (state["display_preferences"], "editor_fine", None),
+            "editor_missing_fields": (state["display_preferences"], "editor_fine", {}),
+            "editor_wrong_scalar": (state["display_preferences"]["editor_fine"], "polynomial_order", {}),
+            "editor_choice_unknown": (state["display_preferences"]["editor_fine"], "method", "not-a-method"),
+            "editor_anchors_string": (state["display_preferences"]["editor_fine"], "anchors", "invalid"),
+            "editor_anchor_scalar": (state["display_preferences"]["editor_fine"], "anchors", [{"start": []}]),
+            "editor_numeric_codec": (state["display_preferences"], "unknown", data["records"][a]["wavenumber"]),
+            "snapshot_impl_list": (state["fine_snapshot"], "implementation_fingerprint", []),
+            "result_version_none": (state["fine_snapshot"]["result"], "software_version", None),
+        }
+        target, field, replacement = options[mutation]
+        target[field] = replacement
+    with pytest.raises(BatchError, match="WORKSPACE_INTEGRITY_FAILED"):
+        load_batch_workspace(rewrite(save_batch_workspace(ws), corrupt))
+
+
+def test_repeated_array_references_obey_decoded_memory_budget(monkeypatch: pytest.MonkeyPatch) -> None:
+    from ftir_workbench.batch.workspace import _Arrays
+
+    stream = io.BytesIO()
+    np.save(stream, np.ones(20, dtype=np.float64), allow_pickle=False)
+    codec = _Arrays({"arrays/reused.npy": stream.getvalue()})
+    monkeypatch.setattr(workspace_module, "MAX_TOTAL_BYTES", 200)
+    with pytest.raises(BatchError, match="decoded array references exceed"):
+        codec.decode([{"__array__": "arrays/reused.npy"}] * 2)

@@ -1,8 +1,33 @@
 # Project Status
 
-更新日期：2026-09-01
+更新日期：2026-09-11
 
 ## 当前状态
+
+本次 v0.3.0 本地升级在 `feat/v0.3-independent-batch-baseline` 增加普通光谱独立批量基线模式，实际起点为 `8cf6cc8bd38491d6549595564f2c57715bc69ef0`（v0.2.5），起始 tracked worktree 干净。规格书引用的远程 `c0751bc2fa0e3a3716c70bc9da33766fcad2b746` 不在本地 Git 对象库；未 fetch、reset 或替换历史。起始 HEAD、未提交状态和环境见 [Phase 0](artifacts/validation/v0.3.0/phase0/)；本次起始测试是实际重跑的 723 passed，不用旧版本日志代替新增实现测试。
+
+普通模式已具备逐文件/逐列导入、异轴与三种单位、逐谱准备及粗细调草稿、预览/明确确认、参数复制、独立 stale 状态、每谱 CSV ZIP、严格同轴宽表及工作区保存/恢复。原位 `FTIR → baseline → Prepared → 可选 smoothing → 2D-COS` 流程继续保留。实现只复用现有单谱 pipeline，不新增科学算法或数值依赖，不重写旧冻结 manifest。
+
+业务边界为：草稿不自动提交，批量导出只汇总已确认数组，未做 fine 与明确跳过不同，A 的 coarse 更新不使 B 失效；普通模式不创建 Prepared、不运行 2D、不生成 `for_2dcos` 文件。输入不插值、填缺失或自动对齐；负 A 与派生 >100%T 不裁剪。宽表要求所选阶段实际 x 数组逐元素完全一致。
+
+运行入口仍是 `streamlit run ui/streamlit_app.py`，导入前在侧栏选择普通模式。本版没有新增普通批次 CLI 子命令。更新代码前先保存普通工作区，停止并重启 Streamlit，再恢复 ZIP；热重载不能充当工作区迁移。旧实现快照恢复时明确标注未由当前 pipeline 重算。
+
+工作区 reader 限额：压缩 ZIP 256 MiB、20,000 成员、单成员 64 MiB、解压总量 512 MiB；使用严格 JSON、`allow_pickle=False` 的 NPY，检查路径、成员集合、SHA-256、来源列和数组/父级一致性。恢复替换当前普通工作区，原位结果独立保留；保存工作区不等于确认草稿。
+
+| 本次阶段 | 已执行结果 | 真实日志 |
+|---|---:|---|
+| Phase 0：起始旧测试 | 723 passed | [phase0](artifacts/validation/v0.3.0/phase0/) |
+| Phase 1：导入及旧 importer | 139 passed | [phase1](artifacts/validation/v0.3.0/phase1/) |
+| Phase 2：独立核心 | 74 passed | [phase2](artifacts/validation/v0.3.0/phase2/) |
+| Phase 3：普通及旧 UI | 48 passed | [phase3](artifacts/validation/v0.3.0/phase3/) |
+| Phase 4：batch/UI 联合 | 177 passed | [phase4](artifacts/validation/v0.3.0/phase4/) |
+| Phase 5：最终验收 | 906 passed、5 个既有 warning；Ruff/Mypy/构建/冻结通过 | [phase5](artifacts/validation/v0.3.0/phase5/) |
+
+各行来自不同命令，不能相加为最终测试数。阶段日志保留初始失败及修复后的结果。真实浏览器以三份合成文件完成五条 A/%T/T 异轴光谱的上传、逐谱粗调、四条 fine + 一条明确跳过、两阶段下载与新会话工作区恢复；下载数组、来源身份和父级精确核对通过。100×4000 点合成粗调预览并确认约 1.07 秒，进程峰值 RSS 300.48 MiB；此为本机观测，不作响应时间保证。完整交付证据见 [验收报告](artifacts/validation/v0.3.0/REPORT.md)。完整用户流程见 [普通模式说明](docs/independent_batch_baseline.md)，可重现的混合单位/异轴输入见 [合成示例](examples/independent_batch/)。本次不自动推送、创建 PR、打 tag 或发布 Release，不提交实验原始或私有派生光谱。
+
+以下全部旧版本章节保留为历史说明，其中历史测试数字与发布状态仅属于相应旧版本。
+
+## v0.2.5 历史状态（记录日期：2026-09-01）
 
 FTIR Spectral Workbench 的本地版本为 v0.2.5；开发分支为 `feat/v0.2.5-post-baseline-smoothing`，严格基于 v0.2.1 提交 `92513def080001de4c226fcea0fde484ae8d97fb`。本次任务只升级本地仓库，未推送、打 tag 或创建 GitHub Release。
 

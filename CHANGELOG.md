@@ -1,6 +1,35 @@
 # Changelog
 
-本文件记录 FTIR Spectral Workbench 的用户可见变化。当前本地版本为 `0.2.5`。
+本文件记录 FTIR Spectral Workbench 的用户可见变化。v0.3.0 增加普通光谱工作区；下方旧版本的发布状态和测试数字均保留为历史记录。
+
+## [0.3.0] - 2026-09-11
+
+### Added
+
+- 导入前选择原位序列或普通光谱模式，两种工作区在同一 session 中隔离。
+- 普通模式逐文件使用公开文本 reader/probe，再将宽表每列拆成独立条目；支持异轴、混合 A/%T/T、同名文件及逐文件失败隔离。
+- 每谱稳定身份、完整域默认范围、准备/粗调/细调草稿、有限预览缓存、正式快照、显式 fine 跳过与 stale 父级状态。
+- 五页普通模式 UI，包含切谱草稿恢复、搜索/状态筛选、逐谱预览/确认、独立参数复制和按各自配方批量预览。
+- 每谱 CSV ZIP、分量/recipe/QC/排除报告、实际 x 完全一致时的可选宽表及明确标注的派生 T/%T。
+- 独立 workspace ZIP 保存/恢复，包含原始来源、稳定 ID、草稿、正式数组和父级关系；严格 JSON、非 pickle NPY、SHA-256 和 ZIP 资源限额验证。
+- [普通模式文档](docs/independent_batch_baseline.md)、[可重现纯合成示例](examples/independent_batch/) 与 100×4000 点性能基准脚本。
+
+### Scientific and state boundaries
+
+- 新逻辑位于 `ftir_workbench.batch` 和独立普通 UI；保留旧 manifest 与冻结根文件集合，不改变既有科学默认值或数值依赖。
+- 每次仅以单谱 `SpectrumSet` 调用 `run_pipeline`，显式固定 `independent_locked`、无归一化；普通模式不创建 Prepared、不调用 2D、不生成 `for_2dcos` 文件。
+- 粗调使用规范的 fine-disabled 配置；细调从相同原始输入和已确认 coarse 配方重跑，核对粗调父级并保持 estimate-only smoothing 的真实拟合通道。
+- 草稿不覆盖正式结果；改变 A 的 coarse 只使 A 的 fine 过期。导出不运行 pipeline，不自动确认草稿，也不把尚未决定 fine 当作明确跳过。
+- 不插值或自动对齐异轴，不静默裁剪负 A/派生 >100%T，不给普通批次做跨样品时间连续性评分。
+- 旧原位 baseline/Prepared/project/bundle、Post-Baseline Smoothing 和 2D 功能保留；没有新增普通批次 CLI 命令，也未改造桌面 GUI。
+- 实现 fingerprint 在进程内缓存。更新代码应先保存工作区、停止并重启 Streamlit、再恢复；热重载不替代迁移。旧实现恢复结果会注明未由当前 pipeline 重算。
+
+### Validation status
+
+- 本次实际阶段结果：Phase 0 旧测试 723 passed，Phase 1 导入及 importer 回归 139 passed，Phase 2 独立核心 74 passed，Phase 3 普通及旧 UI 48 passed，Phase 4 batch/UI 联合 177 passed。
+- 以上为各阶段独立命令结果，不作最终全量测试总数。初始失败与修复后的日志见 `artifacts/validation/v0.3.0/phase0/` 至 `phase4/`。
+- 最终全量 906 passed（5 个既有 warning），Ruff/Mypy、sdist/wheel 构建、64 项依赖不变、冻结 34/34、旧 bundle/smoothing/2D 审计通过；真实浏览器完成五条合成混合单位异轴谱的导出/恢复闭环。实际日志与局限见 `artifacts/validation/v0.3.0/REPORT.md` 和 `phase5/`。
+- 本次任务未自动推送、创建 PR、打 tag 或发布 Release；示例全为合成数据。
 
 ## [0.2.5] - 2026-09-01
 
