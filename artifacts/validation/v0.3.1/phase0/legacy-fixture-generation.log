@@ -1,0 +1,14 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python scripts/generate_v031_legacy_fixtures.py
+STARTED_UTC: 2026-09-11T05:02:36.703074+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v031 cache>
+Traceback (most recent call last):
+  File "<repository>/scripts/generate_v031_legacy_fixtures.py", line 212, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "<repository>/scripts/generate_v031_legacy_fixtures.py", line 199, in main
+    raise RuntimeError("unsafe member in baseline Git archive")
+RuntimeError: unsafe member in baseline Git archive
+
+EXIT_CODE: 1
+ELAPSED_SECONDS: 0.256

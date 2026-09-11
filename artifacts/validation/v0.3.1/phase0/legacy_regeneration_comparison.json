@@ -1,0 +1,27 @@
+{
+  "all_identical": true,
+  "base_commit": "9fc13c10ae34bd53cb220d0807edb18c9e2e41dc",
+  "files": {
+    "expected_arrays.npz": {
+      "identical": true,
+      "sha256": "b2f71f154975a6e56fa3a416542189ca9fdc0ae9ddc83fa9da8ccc9915cc152c"
+    },
+    "legacy_coarse_export_v030.zip": {
+      "identical": true,
+      "sha256": "0b056372b745fd1b06fe6f0cc8366a2eb8ea261dd92c2ff67db75bd32a53d2ef"
+    },
+    "legacy_fine_export_v030.zip": {
+      "identical": true,
+      "sha256": "69941fba77de6f62affcae2a9028a5acd7c0ca12c114559bdc7e03cbe9d075a5"
+    },
+    "legacy_generation.json": {
+      "identical": true,
+      "sha256": "f3aeb7285fb3ba5774f09847086dbb812c08f2c87731b451c93f37982f834652"
+    },
+    "legacy_workspace_v030.zip": {
+      "identical": true,
+      "sha256": "472f624ec7109e23417516046f41c84a96f59bb577cf3ee8e9cf90932fa69147"
+    }
+  },
+  "source": "two separate exact git archive extractions"
+}

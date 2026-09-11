@@ -1,0 +1,31 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m pytest -q
+STARTED_UTC: 2026-09-11T04:57:47.930178+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v031 cache>
+........................................................................ [  7%]
+........................................................................ [ 15%]
+........................................................................ [ 23%]
+........................................................................ [ 31%]
+........................................................................ [ 39%]
+........................................................................ [ 47%]
+........................................................................ [ 55%]
+........................................................................ [ 63%]
+........................................................................ [ 71%]
+........................................................................ [ 79%]
+........................................................................ [ 87%]
+........................................................................ [ 95%]
+..........................................                               [100%]
+=============================== warnings summary ===============================
+tests/integration/test_unified_cli.py::test_supported_extension_cli_entry_points[tab]
+tests/integration/test_unified_cli.py::test_supported_extension_cli_entry_points[dpt]
+tests/integration/test_unified_cli.py::test_supported_extension_cli_entry_points[asc]
+tests/integration/test_unified_cli.py::test_supported_extension_cli_entry_points[dat]
+tests/integration/test_unified_cli.py::test_supported_extension_cli_entry_points[xy]
+  <repository>/src/ftir_baseline/qc.py:372: UserWarning: Attempting to set identical low and high ylims makes transformation singular; automatically expanding.
+    image = axis.imshow(display_matrix, aspect="auto", origin="lower", extent=extent)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+906 passed, 5 warnings in 92.28s (0:01:32)
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 92.883

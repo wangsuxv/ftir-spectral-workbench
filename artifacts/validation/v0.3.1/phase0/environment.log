@@ -1,0 +1,13 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python outputs/validation-private/v031/record_environment.py
+STARTED_UTC: 2026-09-11T04:58:57.378915+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v031 cache>
+{
+  "lock_packages_checked": 64,
+  "all_match": true,
+  "source_version": "0.3.0",
+  "installed_workbench_version": "0.3.0"
+}
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 0.161

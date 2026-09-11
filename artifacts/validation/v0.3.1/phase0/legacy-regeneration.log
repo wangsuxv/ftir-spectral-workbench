@@ -1,0 +1,117 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python scripts/generate_v031_legacy_fixtures.py --output outputs/validation-private/v031/legacy/regeneration-check
+STARTED_UTC: 2026-09-11T05:04:38.882125+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v031 cache>
+{
+  "artifacts": {
+    "expected_arrays.npz": {
+      "sha256": "b2f71f154975a6e56fa3a416542189ca9fdc0ae9ddc83fa9da8ccc9915cc152c",
+      "size_bytes": 83182
+    },
+    "legacy_coarse_export_v030.zip": {
+      "sha256": "0b056372b745fd1b06fe6f0cc8366a2eb8ea261dd92c2ff67db75bd32a53d2ef",
+      "size_bytes": 36635
+    },
+    "legacy_fine_export_v030.zip": {
+      "sha256": "69941fba77de6f62affcae2a9028a5acd7c0ca12c114559bdc7e03cbe9d075a5",
+      "size_bytes": 25050
+    },
+    "legacy_workspace_v030.zip": {
+      "sha256": "472f624ec7109e23417516046f41c84a96f59bb577cf3ee8e9cf90932fa69147",
+      "size_bytes": 165786
+    }
+  },
+  "base_commit": "9fc13c10ae34bd53cb220d0807edb18c9e2e41dc",
+  "dataset": "fixed seed 3100; analytic Gaussian peaks and synthetic noise only",
+  "dependencies": {
+    "numpy": "2.5.2",
+    "pybaselines": "1.2.1",
+    "pydantic": "2.13.4",
+    "scipy": "1.18.1"
+  },
+  "experimental_data_read": false,
+  "generator": "scripts/generate_v031_legacy_fixtures.py",
+  "module_sources": {
+    "ftir_baseline": "src/ftir_baseline/__init__.py",
+    "ftir_workbench": "src/ftir_workbench/__init__.py"
+  },
+  "python": "3.12.14 (main, Aug 25 2026, 13:50:33) [Clang 22.1.3 ]",
+  "source_environment": "exact temporary Git archive",
+  "spectrum_ids": [
+    "380326e18f37562fa7ab80b140d173ca",
+    "afe252052b2d58cc8df67bf0b8aa29b1",
+    "ee15cfda28e9507b96498cb99895f066",
+    "4768fab151f55bb88f33f2eaa80625bb"
+  ],
+  "states": {
+    "380326e18f37562fa7ab80b140d173ca": {
+      "fine_decision": "applied",
+      "fine_stale": false,
+      "label": "A",
+      "snapshots": {
+        "coarse": {
+          "fingerprint": "d6a0a9b3190433b1f8799dd2fe60481adcfd0eba24bbf6a950a64505388ae703",
+          "implementation_fingerprint": "d441f3036623830888416125fa5ef29837c1f4ab7315600b520bde0f6840641e",
+          "parent_coarse_fingerprint": null
+        },
+        "fine": {
+          "fingerprint": "4489d5a3fb399bb21907e8bee56c1bdbb247f204004f17a1e619faf248b209be",
+          "implementation_fingerprint": "d441f3036623830888416125fa5ef29837c1f4ab7315600b520bde0f6840641e",
+          "parent_coarse_fingerprint": "d6a0a9b3190433b1f8799dd2fe60481adcfd0eba24bbf6a950a64505388ae703"
+        }
+      }
+    },
+    "4768fab151f55bb88f33f2eaa80625bb": {
+      "fine_decision": "applied",
+      "fine_stale": true,
+      "label": "D",
+      "snapshots": {
+        "coarse": {
+          "fingerprint": "6de802fa280bdb4e66be9d86b09236918e0b0b83387ca30710f908735aa4c7a5",
+          "implementation_fingerprint": "d441f3036623830888416125fa5ef29837c1f4ab7315600b520bde0f6840641e",
+          "parent_coarse_fingerprint": null
+        },
+        "fine": {
+          "fingerprint": "6f557431b1e331cd468df5a59b873fdeec56d74eb6469c76d44baf90d11777e1",
+          "implementation_fingerprint": "d441f3036623830888416125fa5ef29837c1f4ab7315600b520bde0f6840641e",
+          "parent_coarse_fingerprint": "bd5e2df52609da9facb26d9b8430c11f56a30d7ea12410b7a8c81438156b3a17"
+        }
+      }
+    },
+    "afe252052b2d58cc8df67bf0b8aa29b1": {
+      "fine_decision": "explicitly_skipped",
+      "fine_stale": false,
+      "label": "B",
+      "snapshots": {
+        "coarse": {
+          "fingerprint": "a10698c2e38b70d787790ce4c2a04f1416f32a8d85a9478e2a0ca65865a2ed40",
+          "implementation_fingerprint": "d441f3036623830888416125fa5ef29837c1f4ab7315600b520bde0f6840641e",
+          "parent_coarse_fingerprint": null
+        },
+        "fine": {
+          "fingerprint": "6b78d3e1abcc169e4943d02b88aec2ff52f887fe1451c9d47b9292d511eb5892",
+          "implementation_fingerprint": "d441f3036623830888416125fa5ef29837c1f4ab7315600b520bde0f6840641e",
+          "parent_coarse_fingerprint": "a10698c2e38b70d787790ce4c2a04f1416f32a8d85a9478e2a0ca65865a2ed40"
+        }
+      }
+    },
+    "ee15cfda28e9507b96498cb99895f066": {
+      "fine_decision": "not_decided",
+      "fine_stale": false,
+      "label": "C",
+      "snapshots": {
+        "coarse": {
+          "fingerprint": "86bcb448bd4c630ef9bbc53b9b480c0a4c5f72212175db845c8b038049df9db7",
+          "implementation_fingerprint": "d441f3036623830888416125fa5ef29837c1f4ab7315600b520bde0f6840641e",
+          "parent_coarse_fingerprint": null
+        }
+      }
+    }
+  },
+  "workbench_version": "0.3.0",
+  "workspace_id": "5d16056483815e2b954bfef35a9909f1",
+  "workspace_schema": "1.0"
+}
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 1.441

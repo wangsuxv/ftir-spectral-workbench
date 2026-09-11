@@ -1,0 +1,8 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m ruff check scripts/validate_v031.py scripts/generate_v031_legacy_fixtures.py
+STARTED_UTC: 2026-09-11T05:04:38.882153+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v031 cache>
+All checks passed!
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 0.064

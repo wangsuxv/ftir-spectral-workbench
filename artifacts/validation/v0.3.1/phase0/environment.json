@@ -1,0 +1,35 @@
+{
+  "base_commit": "9fc13c10ae34bd53cb220d0807edb18c9e2e41dc",
+  "base_tree": "9ba5edfe619a850153313ef9f889fa5df0a5cc8d",
+  "head_when_recorded": "9fc13c10ae34bd53cb220d0807edb18c9e2e41dc",
+  "implementation_branch": "feat/v0.3.1-ordinary-postprocessing",
+  "initial_branch": "feat/v0.3-independent-batch-baseline",
+  "initial_dirty_files": [],
+  "initial_state_evidence": "Read-only git status and rev-parse before creating the v031 runner; parent created the implementation branch without changing source.",
+  "machine": "arm64",
+  "packages": {
+    "matplotlib": "3.11.1",
+    "mypy": "2.3.1",
+    "numpy": "2.5.2",
+    "pandas": "3.0.5",
+    "pybaselines": "1.2.1",
+    "pydantic": "2.13.4",
+    "pytest": "9.1.1",
+    "ruff": "0.16.4",
+    "scipy": "1.18.1",
+    "streamlit": "1.62.0"
+  },
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "pyproject_sha256": "75b387f6cdacb7123414205d58cb8620098233e15c96aefc2449c6014dea21e4",
+  "python": "3.12.14 (main, Aug 25 2026, 13:50:33) [Clang 22.1.3 ]",
+  "python_executable": "<repository>/.venv/bin/python",
+  "recorded_at_utc": "2026-09-11T04:58:57.454561+00:00",
+  "requirements_lock_sha256": "9bde1d6a1205ed1c3d4ac460be9e5109aa108456ee55199a53a8d7a800ccac97",
+  "science_freeze_manifest_sha256": "1111c715b0627ce11d503095cd32e188d50df3a61eb89be4cc235307d096deec",
+  "status_when_recorded": [
+    "?? artifacts/validation/v0.3.1/",
+    "?? scripts/validate_v031.py"
+  ],
+  "tracked_source_test_ui_changes_when_recorded": [],
+  "workbench_source_version": "0.3.0"
+}
