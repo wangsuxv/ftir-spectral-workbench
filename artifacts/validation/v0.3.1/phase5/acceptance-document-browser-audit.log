@@ -1,0 +1,35 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -c 'import ast,json,re
+from pathlib import Path
+p=Path("docs/ordinary_postprocessing_acceptance.md")
+text=p.read_text()
+aliases=dict(re.findall(r"\| ([A-Z]+) \| \[(tests/[^]]+)\]",text))
+selectors=set(re.findall(r"\b([A-Z]+)::(test_[A-Za-z0-9_]+)",text))
+for alias,name in sorted(selectors):
+    tree=ast.parse(Path(aliases[alias]).read_text())
+    assert name in {n.name for n in ast.walk(tree) if isinstance(n,(ast.FunctionDef,ast.AsyncFunctionDef))},(alias,name)
+links=re.findall(r"\]\(([^)]+)\)",text)
+for target in links:
+    assert (p.parent/target).exists(),target
+assert re.findall(r"^\| PP-(\d{3}) \|",text,re.M)==[f"{i:03}" for i in range(1,67)]
+events=json.loads(Path("artifacts/validation/v0.3.1/phase5/browser_events.json").read_text())
+audit=json.loads(Path("artifacts/validation/v0.3.1/phase5/browser_artifact_audit.json").read_text())
+assert len(events["events"])==30
+assert audit["status"]=="pass" and not audit["failures"] and not audit["missing_required_files"]
+assert all(c["status"]=="pass" for c in audit["checks"].values())
+assert audit["checks"]["workspace_restore_equivalence"]["details"]["compared_arrays"]==660
+assert audit["checks"]["workspace_restore_equivalence"]["details"]["compared_array_elements"]==70860
+assert "1238 passed, 5 warnings in 132.47s" in Path("artifacts/validation/v0.3.1/phase5/pytest-final.log").read_text()
+assert Path("scripts/verify_v031_browser_artifacts.py").exists()
+print(f"PASS: 66 ordered scenarios, {len(selectors)} real AST selectors, {len(links)} existing document links.")
+print("PASS: 30 actual browser tool events; download audit complete/pass; workspace 660 arrays and 70,860 elements; final pytest 1238 passed / 5 existing warnings.")
+print("Browser metadata remains 0.3.0; final v0.3.1 restarted smoke is separately pending. Expert browser control exercised on uniform A, not a new nonuniform-axis upload.")
+'
+STARTED_UTC: 2026-09-11T06:38:24.369370+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v031 cache>
+PASS: 66 ordered scenarios, 94 real AST selectors, 61 existing document links.
+PASS: 30 actual browser tool events; download audit complete/pass; workspace 660 arrays and 70,860 elements; final pytest 1238 passed / 5 existing warnings.
+Browser metadata remains 0.3.0; final v0.3.1 restarted smoke is separately pending. Expert browser control exercised on uniform A, not a new nonuniform-axis upload.
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 0.304

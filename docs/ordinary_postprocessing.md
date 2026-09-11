@@ -18,7 +18,7 @@ B 必须通过已确认细调或明确跳过细调形成。只有粗调、尚未
 
 ## 操作与确认
 
-使用现有侧栏的当前条目和批量选择集，在后处理页分别编辑平滑和归一化。每条谱的 S、N_B、N_S 各有独立草稿、预览和确认版；切谱、切页、切归一化来源后草稿仍从工作区业务状态恢复。
+运行 `streamlit run ui/streamlit_app.py`，导入前选择“普通光谱模式”，完成最终基线后进入“普通光谱后处理”页。使用现有侧栏的当前条目和批量选择集，分别在“平滑 Smoothing”和“归一化 Normalization”页签编辑；“分支状态”汇总状态，“结果导出”选择下载内容。每条谱的 S、N_B、N_S 各有独立草稿、预览和确认版；切谱、切页、切归一化来源后草稿仍从工作区业务状态恢复。本版没有普通后处理 CLI 子命令。
 
 先预览，再明确确认。修改草稿保留有效确认版，页面标明未确认修改；确认操作核对谱 ID、来源、有效参数和父级。相同父级与有效参数重复确认不会创造新科学版本。未选中算法的闲置参数不进入科学 hash。
 
@@ -65,13 +65,15 @@ absolute 面积分母为对 `abs(y)` 按真实 x 的梯形积分，原谱输出�
 
 ## 导出与工作区
 
-旧普通粗调/最终基线导出路径保持原格式，仍输出基线 B。新导出显式选择 B、S、N_B、N_S 或全部，默认 B；没有目标分支时拒绝，不回退其他来源。只有用户明确选择“仅有效项”才排除缺失/过期/失败/手动排除项，并保留报告。
+旧普通粗调/最终基线导出路径保持原格式；旧最终导出仍使用 B。新导出显式选择 B、S、N_B、N_S 或全部四分支，默认 B；没有目标分支时拒绝，不回退其他来源。“全部分支”同样要求所有目标分支有效；只有用户明确勾选“只导出有效项（明确排除下表不可用项）”才排除缺失/过期/失败/手动排除项，并保留逐谱、逐分支报告。打包前先查看预检表；未确认草稿不会代替有效确认版参与导出。
 
 下载包是确认数组的序列化，生成后为固定 bytes。导出不调用 baseline、smooth 或 normalize。浮点 CSV 使用 17 位有效数字；逐谱路径包含稳定 ID 和明确分支/quantity。实际输出 x 逐元素一致才允许宽表；方向、长度或坐标不同必须逐谱 CSV 后 ZIP。
 
-新包单独标识普通后处理 artifact，`is_2d_ready=false`，无 `for_2dcos`。N_B 包含 B 父数据；N_S 包含 B 和 S 父数据，同时保存有效配方、完整编辑配方、source/parent/hash、scale/offset/参考区间、QC、警告和依赖版本。专用 verifier 可以显式重放 S/N 来验证父子关系，仍不重新拟合基线；SHA-256 是完整性校验，不是数字签名。
+新包标识为 `ordinary_spectrum_postprocess_bundle`，schema 1.0，`is_2d_ready=false`，无 `for_2dcos`。N_B 包含 B 父数据；N_S 包含 B 和 S 父数据，同时保存有效配方、完整编辑配方、source/parent/hash、scale/offset/参考区间、QC、警告和依赖版本。专用 verifier 可以显式重放 S/N 来验证父子关系，仍不重新拟合基线；B 只检查保存的基线锚点与数组完整性，不能据此证明原始实验数据的真实性。SHA-256 是完整性校验，不是数字签名。
 
-普通工作区沿用现有安全 ZIP/JSON/NPY 系统；新保存的 workspace.json 为 schema 2.0，通用归档 manifest 仍为 1.0。旧 workspace schema 1.0 读取后新功能为空/关闭，旧 B 保留；旧读取器明确拒绝新的内层 schema。批量勾选集也随工作区保存。保存草稿、确认版和历史父级，省略 preview；恢复不自动计算，未确认草稿需重新预览。ZIP 成员安全、资源上限和 `allow_pickle=False` 保持执行。
+普通工作区沿用现有安全 ZIP/JSON/NPY 系统；新保存的 workspace.json 为 schema 2.0，通用归档 manifest 仍为 1.0。旧 workspace schema 1.0 读取后新功能为空/关闭，旧 B 保留；旧读取器明确拒绝新的内层 schema。批量勾选集也随工作区保存。保存草稿、确认版和历史父级，省略 preview；恢复不自动计算，未确认草稿需重新预览。恢复会替换当前普通工作区，原位结果独立保留。更新代码前先保存工作区，停止并重启 Streamlit，再恢复 ZIP；热重载不能代替迁移。
+
+归档 reader 限制压缩包 256 MiB、20,000 个成员、单成员 64 MiB、解压总量 512 MiB，并校验成员路径、类型和 SHA-256，数组使用 `allow_pickle=False`。专用 verifier 重放来自归档的 Gaussian 时，还要求 `sigma_points × truncate ≤ 1,000,000`，以限制不可信配方的计算资源；超限包不能通过该重放检查。这是验证器资源限制，不改变平滑算法。
 
 可再生合成输入见 [示例](../examples/ordinary_postprocessing/README.md)。真实实验输入、校正/平滑/归一化输出及私有 hash 均应留在 Git 忽略的 `outputs/`，不要提交。
 
@@ -87,3 +89,5 @@ assert verify_postprocessing_export(payload, recompute=True)   # 另外重放 S 
 ```
 
 重放使用当前安装的数值实现；更换 NumPy/SciPy 版本后精确重放可能失败，应核查记录的环境。历史 B 的科学实现 hash 和 core 版本可保留，但旧快照未单独记录的历史依赖版本不能从 hash 反推；导出环境版本与当时计算环境分开标识。
+
+本次实际浏览器已完成合成异轴输入、独立三谱四分支、宽表、过期排除和新会话工作区恢复；最终 v0.3.1 服务重启后还再次恢复并确认、下载新 S/N_S，实际计算与导出版本均为 0.3.1。操作步骤、下载数组审计、失败定位尝试及未执行范围见 [浏览器验收记录](ordinary_postprocessing_browser_acceptance.md)。完整本地 v0.3.1 测试为 1238 passed、5 个既有 warning，见 [最终 pytest 日志](../artifacts/validation/v0.3.1/phase5/pytest-final.log)；实际基准与完成提交 SHA 见 [交付报告](../artifacts/validation/v0.3.1/REPORT.md)。

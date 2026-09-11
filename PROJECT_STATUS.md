@@ -4,6 +4,39 @@
 
 ## 当前状态
 
+当前本地版本为 v0.3.1，普通光谱后处理已完成全量测试、构建与真实浏览器导出/恢复验收，开发分支为 `feat/v0.3.1-ordinary-postprocessing`。实际基准为 `9fc13c10ae34bd53cb220d0807edb18c9e2e41dc`（v0.3.0），Phase 0–4 最近提交为 `c5072946508e5c0f6f9a71da803a99221bada743`；完成提交 SHA 与最终证据见 [交付报告](artifacts/validation/v0.3.1/REPORT.md)。未 reset 或覆盖用户工作，未对外发布。
+
+已实现逐谱 B、S、N_B、N_S 分支：B 为已确认细调或明确跳过后的最终基线；S 只从 B 平滑，N_B/N_S 分别从 B/S 归一化。平滑与归一化默认关闭，原位 Prepared、smoothing、2D 和旧普通基线流程保持原合同。平滑数组门面只追加到旧模块末尾，复用既有 helpers；归一化适配器调用冻结 core，不修改冻结算法、全局默认值或数值依赖。
+
+每谱、每分支分别保存完整草稿、预览和只读确认快照；科学 fingerprint 仅包含有效参数及实际来源/父级。复制参数只写目标草稿并验证各自的域、轴和窗口；切谱、切页、zoom、确认、导出和恢复均不自动拟合、滤波或归一化。改变 S 仅使旧 N_S 过期，改变 B 使同谱全部后处理过期，其他光谱不受影响。归一化按真实 x 计算面积并保护近零参考；Min–Max 使用 core 的显示结果和真实 scale/offset，不解释为吸光度或透过率。
+
+新普通后处理 ZIP 默认 B，显式选择全部时仍默认要求四分支全部有效，只有勾选“只导出有效项”才排除不可用项并逐项报告。导出直接序列化正式数组，CSV 使用 17 位有效数字；仅实际 x 完全相同才提供宽表，归一化包包含必要 B/S 父级。专用 verifier 可选择重放 S/N；B 只验证锚点完整性，不重新拟合，也不承诺证明原始实验数据真实性。历史 B 的依赖版本未知时明确区分导出环境，不能伪造当时环境。
+
+普通工作区内层 schema 2.0 保留后处理草稿、正式数组、历史父级、来源选择和批量勾选集；旧 schema 1.0 可迁移，新增功能默认为空/关闭。预览省略，恢复不自动运算。既有 ZIP/JSON/NPY 资源、路径、类型和完整性校验继续执行。运行入口仍为 `streamlit run ui/streamlit_app.py`；导入前选择普通模式，完成最终基线后进入后处理页。没有新增普通后处理 CLI。
+
+| v0.3.1 阶段 | 已执行结果 | 真实日志 |
+|---|---:|---|
+| Phase 0：实际起始全量与环境 | 906 passed、5 个既有 warning；Ruff/Mypy、64 项锁定依赖匹配 | [phase0](artifacts/validation/v0.3.1/phase0/) |
+| Phase 1：数值门面及旧 smoothing/normalization | 206 passed；旧模块前 35,105 bytes 保持不变 | [phase1](artifacts/validation/v0.3.1/phase1/) |
+| Phase 2：数值请求校验、状态与旧普通模式 | 数值 218 passed；状态 66 passed；旧 batch 181 passed | [phase2](artifacts/validation/v0.3.1/phase2/) |
+| Phase 3：实际 Streamlit AppTest | 48 passed | [UI gate](artifacts/validation/v0.3.1/phase3/ui-gate-final.log) |
+| Phase 4：导出、工作区与 UI | 导出 96 passed；工作区 39 passed；UI 54 passed | [phase4](artifacts/validation/v0.3.1/phase4/) |
+| Phase 5：版本更新前全量 | 1230 passed、5 个既有 warning，136.87 秒；Ruff/Mypy（32 source files）通过 | [phase5](artifacts/validation/v0.3.1/phase5/) |
+| Phase 5：最终 v0.3.1 全量 | 1238 passed、5 个既有 warning，132.47 秒；Ruff/Mypy（32 source files）通过 | [pytest](artifacts/validation/v0.3.1/phase5/pytest-final.log)、[Ruff](artifacts/validation/v0.3.1/phase5/ruff-final.log)、[Mypy](artifacts/validation/v0.3.1/phase5/mypy-final.log) |
+| Phase 5：构建与安装 | sdist/wheel 构建、当前环境 wheel `--no-deps` 安装通过 | [构建](artifacts/validation/v0.3.1/phase5/build-final.log)、[安装](artifacts/validation/v0.3.1/phase5/install-wheel-v031.log) |
+| Phase 5：真实浏览器及下载审计 | 三谱 12 分支、同轴宽表、stale 排除、新会话恢复；下载审计 pass | [浏览器记录](docs/ordinary_postprocessing_browser_acceptance.md) |
+| Phase 5：最终版本重启后浏览器 | 恢复、确认新 S/N_S、下载及工作区保存通过；计算/导出版本 0.3.1 | [最终版本浏览器审计](artifacts/validation/v0.3.1/phase5/browser-final-version-artifacts.log) |
+
+各行是实际运行的不同命令，覆盖存在重叠，不能相加；“状态 66 passed”也不等于规格书 66 个验收场景的独立测试计数。初始失败与修复后日志均保留。最终冻结/兼容审计确认 manifest 34/34 字节与 SHA-256 一致、冻结根无增删改；旧 baseline/2D/project bundle、旧 Prepared smoothing 与 self/cross 2D 精确重载及 v0.3.1 包版本检查通过，见 [最终审计日志](artifacts/validation/v0.3.1/phase5/freeze-and-legacy-final.log)。首次无隔离 editable 安装因环境缺少 `editables` 失败，未升级依赖；随后构建并 `--no-deps` 安装本地 wheel 成功。[失败日志](artifacts/validation/v0.3.1/phase5/install-editable-v031.log) 保留，不将此次安装描述为全新隔离环境验收。
+
+真实 Playwright 浏览器导入两份合成文件、拆为三条谱，逐谱确认 B/S/N_B/N_S，实际下载并在新会话上传工作区恢复。下载审计核对 660 个数组、70,860 个元素，稳定 ID、原始来源、草稿、确认版、父级、勾选集及显示偏好全部一致；12 个分支 CSV 与确认数组一致，A/B 宽表为 201 行、8 个独立结果列且逐列精确相同，加入异轴 C 时禁用宽表。A 新 S 只使其 N_S 过期，N_B 及 B/C 条目保持有效；严格导出阻止，明确有效项后只下载 B/C 的 N_S 及必要父级。实际 Plotly zoom 由 `[1900,900]` 变为 `[1650,1150]`，显示数据与版本不变。
+
+浏览器完整闭环的原始下载发生于统一版本号之前，导出环境实际记录 0.3.0，保留原包和原日志，不追改为 0.3.1。最终版本服务重启后，在新浏览器页恢复该工作区，确认 A 新 9 点 S 和新 N_S，实际下载两个包并保存新工作区；A 两个新快照及导出环境均为 0.3.1。审计确认 204 个基线数组不变，A 的 N_B 与无关 B/C 完全不变，两个包的 4/6 个 CSV 节点与正式数组精确匹配；[最终版本审计](artifacts/validation/v0.3.1/phase5/browser_final_artifact_audit.json) 为 pass。[依赖对照](artifacts/validation/v0.3.1/phase5/dependency_comparison.json) 确认 64 项版本与起点全部一致。
+
+审计 spy 只观察下载后的加载/验证调用，不是对浏览器服务器历史调用的追溯监测；非均匀轴拒绝/override 由数值测试覆盖，浏览器专家控件在均匀 A 上实际操作。完整证据与未执行范围见 [浏览器验收记录](docs/ordinary_postprocessing_browser_acceptance.md)。所有新增示例与测试输入为合成数据。本次不自动推送、创建 PR、打 tag 或发布 Release；实验原始谱和私有派生结果不进入 Git。操作与限制见 [普通后处理说明](docs/ordinary_postprocessing.md)，输入生成见 [合成示例](examples/ordinary_postprocessing/README.md)。
+
+## v0.3.0 历史验收状态
+
 本次 v0.3.0 本地升级在 `feat/v0.3-independent-batch-baseline` 增加普通光谱独立批量基线模式，实际起点为 `8cf6cc8bd38491d6549595564f2c57715bc69ef0`（v0.2.5），起始 tracked worktree 干净。规格书引用的远程 `c0751bc2fa0e3a3716c70bc9da33766fcad2b746` 不在本地 Git 对象库；未 fetch、reset 或替换历史。起始 HEAD、未提交状态和环境见 [Phase 0](artifacts/validation/v0.3.0/phase0/)；本次起始测试是实际重跑的 723 passed，不用旧版本日志代替新增实现测试。
 
 普通模式已具备逐文件/逐列导入、异轴与三种单位、逐谱准备及粗细调草稿、预览/明确确认、参数复制、独立 stale 状态、每谱 CSV ZIP、严格同轴宽表及工作区保存/恢复。原位 `FTIR → baseline → Prepared → 可选 smoothing → 2D-COS` 流程继续保留。实现只复用现有单谱 pipeline，不新增科学算法或数值依赖，不重写旧冻结 manifest。
@@ -176,7 +209,7 @@ v0.2.5 不实施多个独立 Baseline Blocks、全局基线后的局部 range co
 
 本补丁也不加入厂商二进制 reader、JCAMP-DX parser、Excel sheet/column mapping 或 raw ZIP ingestion。极短文件、多个同等可信数值块、encoding 多解和 delimiter/decimal 冲突需要用户显式选择；千位分隔符需要在导入前清理。
 
-Post-baseline smoothing 不提供自动最佳算法/参数、SNR 驱动推荐、Butterworth/Whittaker/wavelet/PCA、resampling、沿扰动轴平滑、连续多次 smoothing 或 smoothing + scientific normalization 组合。旧 `.ftirw` 不强制嵌入 smoothing-only branch；该分支通过独立 smoothing bundle 保存，而 smoothed 2D bundle 自包含其实际 source Prepared。
+原位 Prepared 的 Post-baseline smoothing 不提供自动最佳算法/参数、SNR 驱动推荐、Butterworth/Whittaker/wavelet/PCA、resampling、沿扰动轴平滑、连续多次 smoothing 或 smoothing + scientific normalization 组合。普通 v0.3.1 模式单独支持上文固定的 B→S→N_S 数据链。旧 `.ftirw` 不强制嵌入 smoothing-only branch；该分支通过独立 smoothing bundle 保存，而 smoothed 2D bundle 自包含其实际 source Prepared。
 
 ## 启动
 

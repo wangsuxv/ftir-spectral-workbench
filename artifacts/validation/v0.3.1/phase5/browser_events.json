@@ -1,0 +1,342 @@
+{
+  "evidence": "Actual Playwright tool responses; failed locator attempts retained. Absolute repository path redacted. Synthetic inputs only.",
+  "events": [
+    {
+      "step": "inspect_after_upload_confirmation_timeout",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "### Result\n{\"body\":\"数据模式\\n\\n工作流\\n\\n1. 普通光谱导入与检查\\n\\n2. 单位与处理范围\\n\\n3. 逐谱粗调\\n\\n4. 逐谱细调\\n\\n5. 普通光谱后处理\\n\\n6. 批量检查与导出\\n\\n普通光谱 → 逐谱粗调 / 细调 → 可选平滑 / 归一化 → 导出\\n\\nDeploy\\nFTIR Spectral Workbench\\n\\n唯一基线路径 · 可独立结束 · prepared-only 2D-COS · SHA-256 lineage\\n\\n1. 普通光谱导入与检查\\n\\n每列独立导入，保留各自波数轴。导入确认的是强度单位，不需要时间、温度或扰动坐标。\\n\\n新文件默认强度单位\\n\\nkeyboard_arrow_right\\n\\n文本解析选项\\n\\n上传普通光谱文本文件\\n\\nsynthetic_wide.csv\\n9.1KB\\nsynthet...r_axis.csv\\n6.4KB\\nadd\\n\\n文件单位 · synthetic_wide.csv [1]\\n\\n文件单位 · synthetic_other_axis.csv [2]\\n\\n确认单位并导入\\n\\n已导入 3 条独立光谱。\\n\\n重复上传只标记候选；可在任一处理页明确保留或排除。列序号以波数列为 0。\\n\\nkeyboard_arrow_right\\n\\n恢复普通光谱工作区\",\"fileInputs\":2,\"buttons\":[\"\",\"Deploy\",\"\",\"\",\"\",\"\",\"\",\"add\",\"\",\"\",\"确认单位并导入\",\"\",\"\",\"\",\"\"],\"exceptions\":0}\n### Ran Playwright code\n```js\nawait (async(page)=>{return {body:(await page.locator('body').innerText()).slice(0,7800),fileInputs:await page.locator('input[type=file]').count(),buttons:await page.getByRole('button').allTextContents(),exceptions:await page.getByTestId('stException').count()};})(page);\n```"
+          }
+        ]
+      }
+    },
+    {
+      "step": "import_three_spectra_open_coarse_page",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "### Result\n{\"body\":\"keyboard_double_arrow_left\\n\\n数据模式\\n\\n工作流\\n\\n1. 普通光谱导入与检查\\n\\n2. 单位与处理范围\\n\\n3. 逐谱粗调\\n\\n4. 逐谱细调\\n\\n5. 普通光谱后处理\\n\\n6. 批量检查与导出\\n\\n普通光谱 → 逐谱粗调 / 细调 → 可选平滑 / 归一化 → 导出\\n\\n搜索光谱\\n\\n状态筛选\\n\\n当前光谱\\n\\n批量勾选（独立于当前光谱）\\n\\n反转显示顺序\\n\\nDeploy\\nFTIR Spectral Workbench\\n\\n唯一基线路径 · 可独立结束 · prepared-only 2D-COS · SHA-256 lineage\\n\\n当前：synthetic_A\\n\\nsynthetic_wide.csv · 第 1 强度列 · A（吸光度） · 待处理\\n\\n展示名称\\n\\n从批量导出中排除此条目\\n\\n粗调方法\\n\\nLambda\\n\\nAsLS p\\n\\n最大迭代次数\\n\\n收敛容差\\n\\n计算粗调预览\\n\\n确认当前粗调\\n\\n确认粗调并下一条\\n\\n恢复已确认粗调参数\\n\\nkeyboard_arrow_right\\n\\n复制参数与批量预览\\n\\n显示结果\\n\\n当前预览\\n\\n已确认结果\\n\\n尚无此类结果。调整草稿后点击计算预览，再明确确认。\\n\\n已确认粗调结果导出\\n\\n粗调导出范围\\n\\n仅导出已就绪项（报告列出全部排除项）\\n\\n同时提供同轴宽表\\n\\n宽表不可用：EXPORT_NOT_READY: 9c27ff2a492949fda2a7d85729c3d2aa: COARSE_REQUIRED: a confirmed coarse result is required\\n\\n附加派生透过率副本\\n\\n存在未提交或无效草稿。此导出只使用各条已确认的正式数组，草稿不会被采用。\\n\\n打包已确认粗调结果\",\"exceptions\":0}\n### Ran Playwright code\n```js\nawait (async(page)=>{await page.getByText('3. 逐谱粗调',{exact:true}).first().click(); await page.getByRole('combobox',{name:'当前光谱',exact:true}).waitFor(); return {body:(await page.locator('body').innerText()).slice(0,8500),exceptions:await page.getByTestId('stException').count()};})(page);\n```"
+          }
+        ]
+      }
+    },
+    {
+      "step": "record_stable_spectrum_labels_choose_none_coarse_A",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "### Result\n{\"spectra\":[\"synthetic_A · synthetic_wide.csv · 列1 · 9c27ff\"],\"methods\":[\"arpls\"]}\n### Ran Playwright code\n```js\nawait (async(page)=>{await page.getByRole('combobox',{name:'当前光谱',exact:true}).click(); const spectra=await page.getByRole('option').allTextContents(); await page.keyboard.press('Escape'); await page.getByRole('combobox',{name:'粗调方法',exact:true}).click(); const methods=await page.getByRole('option').allTextContents(); await page.getByRole('option',{name:'none',exact:true}).click(); return {spectra,methods};})(page);\n```"
+          }
+        ]
+      }
+    },
+    {
+      "step": "confirm_three_coarse_none_through_real_UI",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "### Result\n{\"stages\":[\"synthetic_A coarse none confirmed\",\"synthetic_B coarse none confirmed\",\"synthetic_C coarse none confirmed\"],\"exceptions\":0,\"body\":\"8 options available.\\nnone, selected\\n8 options available.\\narpls, selected\\nnone\\nnone, selected\\n8 options available.\\narpls, selected\\nnone\\nnone, selected\\n\\n数据模式\\n\\n工作流\\n\\n1. 普通光谱导入与检查\\n\\n2. 单位与处理范围\\n\\n3. 逐谱粗调\\n\\n4. 逐谱细调\\n\\n5. 普通光谱后处理\\n\\n6. 批量检查与导出\\n\\n普通光谱 → 逐谱粗调 / 细调 → 可选平滑 / 归一化 → 导出\\n\\n搜索光谱\\n\\n状态筛选\\n\\n当前光谱\\n\\n批量勾选（独立于当前光谱）\\n\\n反转显示顺序\\n\\nDeploy\\nFTIR Spectral Workbench\\n\\n唯一基线路径 · 可独立结束 · prepared-only 2D-COS · SHA-256 lineage\\n\\n当前：synthetic_A\\n\\nsynthetic_wide.csv · 第 1 强度列 · A（吸光度） · 粗调完成\\n\\n展示名称\\n\\n从批量导出中排除此条目\\n\\n粗调方法\\n\\nLambda\\n\\nAsLS p\\n\\n最大迭代次数\\n\\n收敛容差\\n\\n计算粗调预览\\n\\n确认当前粗调\\n\\n确认粗调并下一条\\n\\n恢复已确认粗调参数\\n\\nkeyboard_arrow_right\\n\\n复制参数与批量预览\\n\\n显示结果\\n\\n当前预览\\n\\n已确认结果\\n\\n当前预览 · none / none · 范围 (1900.0, 900.0) cm⁻¹\\n\\n1800\\n1600\\n1400\\n1200\\n1000\\n0\\n0.2\\n0.4\\n0.6\\n0.8\\nRaw selected absorbance\\nBaseline-estimation channel\\nCoarse baseline\\nResidual after coarse baseline\\nCurrent coarse-baseline recipe preview\\nWavenumber (cm⁻¹)\\nAbsorbance\\n\\n校正谱派生显示单位\\n\\n1800\\n1600\\n1400\\n1200\\n1000\\n0.2\\n0.4\\n0.6\\n0.8\\nWavenumber / cm⁻¹\\nA（吸光度）\\n\\n基线分解始终为吸光度；派生透过率不裁剪负吸光度产生的 >100%T。\\n\\n时间连续性、相邻谱变化和扰动趋势：不适用。无峰区指标显示 N/A，诊断警告不自动删除或裁负值。\\n\\n已确认粗调结果导出\\n\\n粗调导出范围\\n\\n仅导出已就绪项（报告列出全部排除项）\\n\\n同时提供同轴宽表\\n\\n附加派生透过率副本\\n\\n存在未提交或无效草稿。此导出只使用各条已确认的正式数组，草稿不会被采用。\\n\\n打包已确认粗调结果\"}\n### Ran Playwright code\n```js\nawait (async(page)=>{const stages=[]; for (const [current,next] of [['synthetic_A','synthetic_B'],['synthetic_B','synthetic_C'],['synthetic_C','synthetic_A']]){await page.getByText('当前：'+current,{exact:true}).waitFor(); await page.getByRole('combobox',{name:'粗调方法',exact:true}).click(); await page.getByRole('option',{name:'none',exact:true}).click(); await page.getByRole('button',{name:'计算粗调预览',exact:true}).click(); await page.getByRole('button',{name:'确认粗调并下一条',exact:true}).click(); await page.getByText('当前：'+next,{exact:true}).waitFor(); stages.push(current+' coarse none confirmed');} return {stages,exceptions:await page.getByTestId('stException').count(),body:(await page.locator('body').innerText()).slice(0,1800)};})(page);\n```"
+          }
+        ]
+      }
+    },
+    {
+      "step": "explicitly_finalize_three_baselines_open_postprocessing",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "### Error\nTimeoutError: locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n  - waiting for getByText(/已跳过细调/).first() to be visible\n"
+          }
+        ],
+        "isError": true
+      }
+    },
+    {
+      "step": "explicit_fine_skip_BC_after_A_and_enter_postprocessing",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "### Result\n{\"done\":[\"synthetic_B\",\"synthetic_C\"],\"body\":\"3 options available.\\nsynthetic_A · synthetic_wide.csv · 列1 · 9c27ff, selected\\nsynthetic_B · synthetic_wide.csv · 列2 · 77d5fd\\nsynthetic_B · synthetic_wide.csv · 列2 · 77d5fd, selected\\n3 options available.\\nsynthetic_B · synthetic_wide.csv · 列2 · 77d5fd, selected\\nsynthetic_C · synthetic_other_axis.csv · 列1 · 61cc3a\\nsynthetic_C · synthetic_other_axis.csv · 列1 · 61cc3a, selected\\n3 options available.\\nsynthetic_C · synthetic_other_axis.csv · 列1 · 61cc3a, selected\\nsynthetic_A · synthetic_wide.csv · 列1 · 9c27ff\\nsynthetic_A · synthetic_wide.csv · 列1 · 9c27ff, selected\\nkeyboard_double_arrow_left\\n\\n数据模式\\n\\n工作流\\n\\n1. 普通光谱导入与检查\\n\\n2. 单位与处理范围\\n\\n3. 逐谱粗调\\n\\n4. 逐谱细调\\n\\n5. 普通光谱后处理\\n\\n6. 批量检查与导出\\n\\n普通光谱 → 逐谱粗调 / 细调 → 可选平滑 / 归一化 → 导出\\n\\n搜索光谱\\n\\n状态筛选\\n\\n当前光谱\\n\\n批量勾选（独立于当前光谱）\\n\\n反转显示顺序\\n\\nDeploy\\nFTIR Spectral Workbench\\n\\n唯一基线路径 · 可独立结束 · prepared-only 2D-COS · SHA-256 lineage\\n\\n当前：synthetic_A\\n\\nsynthetic_wide.csv · 第 1 强度列 · A（吸光度） · 已跳过细调\\n\\n展示名称\\n\\n从批量导出中排除此条目\\n\\n5. 普通光谱后处理\\n\\n最终母谱 B 已确认 · 版本 7e5fb34c974c\\n\\n平滑与归一化均为可选独立分支。确认 S 不改变归一化来源或导出选择；旧基线导出继续使用 B。\\n\\n平滑 Smoothing\\n\\n归一化 Normalization\\n\\n分支状态\\n\\n结果导出\\n\\n启用普通谱平滑\\n\\n普通谱平滑方法\\n\\nSG 窗口点数（奇数）\\n\\nSG 多项式阶数\\n\\nSG 边界模式\\n\\nkeyboard_arrow_right\\n\\n采样轴专家选项\\n\\n仅沿当前 B 的完整波数轴处理。图形缩放不改变范围；窗口宽度不是仪器分辨率。\\n\\n当前谱中位采样间距 5 cm⁻¹；窗口跨度 ≈ 30 cm⁻¹（按中位间距估算）。\\n\\n当前草稿 / 来源尚不可预览：POSTPROCESS_DISABLED: enable the selected operation before previewing or confirming\\n\\nS · 平滑校正谱：未创建 · 未启用\\n\\n计算当前平滑预览\\n\\n确认当前平滑\\n\\n确认平滑并下一条\\n\\n恢复已确认平滑参数\\n\\nkeyboard_arrow_right\\n\\n平滑参数复制与批量操作\"}\n### Ran Playwright code\n```js\nawait (async(page)=>{const done=[]; for(const next of ['synthetic_B','synthetic_C']){await page.getByRole('combobox',{name:'当前光谱',exact:true}).click(); await page.getByRole('option',{name:new RegExp('^'+next+' ·')}).click(); await page.getByText('当前：'+next,{exact:true}).waitFor(); await page.getByRole('button',{name:'确认不做细调',exact:true}).click(); await page.getByText('已确认跳过细调，最终结果使用当前已确认粗调数组。',{exact:true}).waitFor(); done.push(next);} await page.getByRole('combobox',{name:'当前光谱',exact:true}).click(); await page.getByRole('option',{name:/^synthetic_A ·/}).click(); await page.getByText('5. 普通光谱后处理',{exact:true}).first().click(); await page.getByRole('checkbox',{name:'启用普通谱平滑',exact:true}).waitFor(); return{done,body:(await page.locator('body').innerText()).slice(0,10000)};})(page);\n```"
+          }
+        ]
+      }
+    },
+    {
+      "step": "A_confirm_S_savgol",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "### Error\nTimeoutError: locator.check: Timeout 30000ms exceeded.\nCall log:\n  - waiting for getByRole('checkbox', { name: '启用普通谱平滑', exact: true })\n    - locator resolved to <input title=\"\" tabindex=\"0\" type=\"checkbox\" aria-label=\"启用普通谱平滑\" data-react-aria-pressable=\"true\"/>\n  - attempting click action\n    - waiting for element to be visible, enabled and stable\n    - element is visible, enabled and stable\n    - scrolling into view if needed\n    - done scrolling\n    - <div data-testid=\"stCheckbox\" class=\"row-widget stCheckbox st-emotion-cache-mo6sqg e1e6q2zh0\">…</div> intercepts pointer events\n  - retrying click action\n    - waiting for element to be visible, enabled and stable\n    - element is visible, enabled and stable\n    - scrolling into view if needed\n    - done scrolling\n    - <div data-testid=\"stMainBlockContainer\" class=\"stMainBlockContainer block-container st-emotion-cache-zy6yx3 e15ve43o4\">…</div> intercepts pointer events\n  - retrying click action\n    - waiting 20ms\n    - waiting for element to be visible, enabled and stable\n    - element is visible, enabled and stable\n    - scrolling into view if needed\n    - done scrolling\n    - <div data-testid=\"stMainBlockContainer\" class=\"stMainBlockContainer block-container st-emotion-cache-zy6yx3 e15ve43o4\">…</div> intercepts pointer events\n  2 × retrying click action\n      - waiting 100ms\n      - waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div data-testid=\"stToolbar\" class=\"stAppToolbar st-emotion-cache-14vh5up e1yxiy6j2\">…</div> from <header data-testid=\"stHeader\" class=\"stAppHeader st-emotion-cache-1up3yna e1yxiy6j1\">…</header> subtree intercepts pointer events\n  13 × retrying click action\n       - waiting 500ms\n       - waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <div data-testid=\"stMainBlockContainer\" class=\"stMainBlockContainer block-container st-emotion-cache-zy6yx3 e15ve43o4\">…</div> intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n       - waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <div data-testid=\"stMainBlockContainer\" class=\"stMainBlockContainer block-container st-emotion-cache-zy6yx3 e15ve43o4\">…</div> intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n       - waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <div data-testid=\"stToolbar\" class=\"stAppToolbar st-emotion-cache-14vh5up e1yxiy6j2\">…</div> from <header data-testid=\"stHeader\" class=\"stAppHeader st-emotion-cache-1up3yna e1yxiy6j1\">…</header> subtree intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n       - waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <div data-testid=\"stToolbar\" class=\"stAppToolbar st-emotion-cache-14vh5up e1yxiy6j2\">…</div> from <header data-testid=\"stHeader\" class=\"stAppHeader st-emotion-cache-1up3yna e1yxiy6j1\">…</header> subtree intercepts pointer events\n  2 × retrying click action\n      - waiting 500ms\n      - waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div data-testid=\"stMainBlockContainer\" class=\"stMainBlockContainer block-container st-emotion-cache-zy6yx3 e15ve43o4\">…</div> intercepts pointer events\n  - retrying click action\n    - waiting 500ms\n    - waiting for element to be visible, enabled and stable\n    - element is visible, enabled and stable\n    - scrolling into view if needed\n    - done scrolling\n    - <div data-testid=\"stToolbar\" class=\"stAppToolbar st-emotion-cache-14vh5up e1yxiy6j2\">…</div> from <header data-testid=\"stHeader\" class=\"stAppHeader st-emotion-cache-1up3yna e1yxiy6j1\">…</header> subtree intercepts pointer events\n  - retrying click action\n    - waiting 500ms\n"
+          }
+        ],
+        "isError": true
+      }
+    },
+    {
+      "step": "A_confirm_S_savgol_label_click",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "### Result\n{\"body\":\"数据模式\\n\\n工作流\\n\\n1. 普通光谱导入与检查\\n\\n2. 单位与处理范围\\n\\n3. 逐谱粗调\\n\\n4. 逐谱细调\\n\\n5. 普通光谱后处理\\n\\n6. 批量检查与导出\\n\\n普通光谱 → 逐谱粗调 / 细调 → 可选平滑 / 归一化 → 导出\\n\\n搜索光谱\\n\\n状态筛选\\n\\n当前光谱\\n\\n批量勾选（独立于当前光谱）\\n\\n反转显示顺序\\n\\nDeploy\\nFTIR Spectral Workbench\\n\\n唯一基线路径 · 可独立结束 · prepared-only 2D-COS · SHA-256 lineage\\n\\n当前：synthetic_A\\n\\nsynthetic_wide.csv · 第 1 强度列 · A（吸光度） · 已跳过细调\\n\\n展示名称\\n\\n从批量导出中排除此条目\\n\\n5. 普通光谱后处理\\n\\n最终母谱 B 已确认 · 版本 7e5fb34c974c\\n\\n平滑与归一化均为可选独立分支。确认 S 不改变归一化来源或导出选择；旧基线导出继续使用 B。\\n\\n平滑 Smoothing\\n\\n归一化 Normalization\\n\\n分支状态\\n\\n结果导出\\n\\n启用普通谱平滑\\n\\n普通谱平滑方法\\n\\nSG 窗口点数（奇数）\\n\\nSG 多项式阶数\\n\\nSG 边界模式\\n\\nkeyboard_arrow_right\\n\\n采样轴专家选项\\n\\n仅沿当前 B 的完整波数轴处理。图形缩放不改变范围；窗口宽度不是仪器分辨率。\\n\\n当前谱中位采样间距 5 cm⁻¹；窗口跨度 ≈ 30 cm⁻¹（按中位间距估算）。\\n\\nS · 平滑校正谱：预览未确认\\n\\n计算当前平滑预览\\n\\n确认当前平滑\\n\\n确认平滑并下一条\\n\\n恢复已确认平滑参数\\n\\nkeyboard_arrow_right\\n\\n平滑参数复制与批量操作\\n\\n显示后处理结果\\n\\n当前预览 · S · 平滑校正谱 · 版本 1f58247a8dd6 · 父级 7e5fb34c974c\\n\\nB / S 显示单位\\n\\n1800\\n1600\\n1400\\n1200\\n1000\\n0.2\\n0.4\\n0.6\\n0.8\\nB\\nS\\nB 与 S\\nWavenumber (cm⁻¹)\\nAbsorbance\\n1800\\n1600\\n1400\\n1200\\n1000\\n−0.01\\n0\\n0.01\\n平滑移除分量 / smoothing removed component\\nWavenumber (cm⁻¹)\\nAbsorbance difference\\n\\n移除分量可能包含真实谱峰；不等于真实噪声，不自动证明 SNR 或处理正确性提升。\\n\\nkeyboard_arrow_right\\n\\n当前版本诊断与配方\\n\\nFirst-derivative correlation is below the diagnostic threshold (0.95) for 1 spectrum/s; minimum=0.920545.\",\"plotButtons\":[{\"title\":\"Download plot as a PNG\",\"aria\":\"Download plot as a PNG\"},{\"title\":\"Zoom\",\"aria\":\"Zoom\"},{\"title\":\"Pan\",\"aria\":\"Pan\"},{\"title\":\"Zoom in\",\"aria\":\"Zoom in\"},{\"title\":\"Zoom out\",\"aria\":\"Zoom out\"},{\"title\":\"Autoscale\",\"aria\":\"Autoscale\"},{\"title\":\"Reset axes\",\"aria\":\"Reset axes\"},{\"title\":\"Fullscreen\",\"aria\":\"Fullscreen\"},{\"title\":\"Download plot as a PNG\",\"aria\":\"Download plot as a PNG\"},{\"title\":\"Zoom\",\"aria\":\"Zoom\"},{\"title\":\"Pan\",\"aria\":\"Pan\"},{\"title\":\"Zoom in\",\"aria\":\"Zoom in\"},{\"title\":\"Zoom out\",\"aria\":\"Zoom out\"},{\"title\":\"Autoscale\",\"aria\":\"Autoscale\"},{\"title\":\"Reset axes\",\"aria\":\"Reset axes\"},{\"title\":\"Fullscreen\",\"aria\":\"Fullscreen\"}]}\n### Ran Playwright code\n```js\nawait (async(page)=>{await page.getByText('启用普通谱平滑',{exact:true}).click(); await page.getByRole('button',{name:'计算当前平滑预览',exact:true}).click(); await page.getByRole('button',{name:'确认当前平滑',exact:true}).click(); return{body:(await page.locator('body').innerText()).slice(-14000),plotButtons:await page.locator('.modebar-btn').evaluateAll(es=>es.map(e=>({title:e.getAttribute('data-title'),aria:e.getAttribute('aria-label')})))};})(page);\n```"
+          }
+        ]
+      }
+    },
+    {
+      "step": "actual_plotly_zoom_confirmed_A_and_enter_normalization",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "### Result\n{\"zoom\":{\"rangeBefore\":[1900,900],\"rangeAfter\":[1650,1150],\"arraysUnchanged\":true,\"versionBefore\":\"已确认结果 · S · 平滑校正谱 · 版本 1f58247a8dd6 · 父级 7e5fb34c974c\",\"versionAfter\":\"已确认结果 · S · 平滑校正谱 · 版本 1f58247a8dd6 · 父级 7e5fb34c974c\"},\"body\":\"数据模式\\n\\n工作流\\n\\n1. 普通光谱导入与检查\\n\\n2. 单位与处理范围\\n\\n3. 逐谱粗调\\n\\n4. 逐谱细调\\n\\n5. 普通光谱后处理\\n\\n6. 批量检查与导出\\n\\n普通光谱 → 逐谱粗调 / 细调 → 可选平滑 / 归一化 → 导出\\n\\n搜索光谱\\n\\n状态筛选\\n\\n当前光谱\\n\\n批量勾选（独立于当前光谱）\\n\\n反转显示顺序\\n\\nDeploy\\nFTIR Spectral Workbench\\n\\n唯一基线路径 · 可独立结束 · prepared-only 2D-COS · SHA-256 lineage\\n\\n当前：synthetic_A\\n\\nsynthetic_wide.csv · 第 1 强度列 · A（吸光度） · 已跳过细调\\n\\n展示名称\\n\\n从批量导出中排除此条目\\n\\n5. 普通光谱后处理\\n\\n最终母谱 B 已确认 · 版本 7e5fb34c974c\\n\\n平滑与归一化均为可选独立分支。确认 S 不改变归一化来源或导出选择；旧基线导出继续使用 B。\\n\\n平滑 Smoothing\\n\\n归一化 Normalization\\n\\n分支状态\\n\\n结果导出\\n\\n使用未平滑校正谱 B\\n\\n使用已确认平滑谱 S\\n\\n当前归一化来源：B · 最终基线校正谱\\n\\n启用当前来源归一化\\n\\n普通谱归一化方法\\n\\n当前草稿 / 来源尚不可预览：POSTPROCESS_DISABLED: enable the selected operation before previewing or confirming\\n\\nN_B · 基线后归一化：未创建 · 未启用\\n\\n计算当前归一化预览\\n\\n确认当前归一化\\n\\n确认归一化并下一条\\n\\n恢复已确认归一化参数\\n\\nkeyboard_arrow_right\\n\\n归一化参数复制与批量操作\"}\n### Ran Playwright code\n```js\nawait (async(page)=>{await page.getByText(/S · 平滑校正谱：已确认/).waitFor(); const before=await page.locator('.js-plotly-plot').first().evaluate(e=>({range:e.layout.xaxis.range,data:e.data.map(t=>({x:t.x,y:t.y}))}));const versionBefore=await page.getByText(/已确认结果 · S ·/).innerText(); await page.getByRole('button',{name:'Zoom in',exact:true}).first().click(); const after=await page.locator('.js-plotly-plot').first().evaluate(e=>({range:e.layout.xaxis.range,data:e.data.map(t=>({x:t.x,y:t.y}))}));const versionAfter=await page.getByText(/已确认结果 · S ·/).innerText(); await page.getByRole('tab',{name:'归一化 Normalization',exact:true}).click(); return{zoom:{rangeBefore:before.range,rangeAfter:after.range,arraysUnchanged:JSON.stringify(before.data)===JSON.stringify(after.data),versionBefore,versionAfter},body:(await page.locator('body').innerText()).slice(-7000)};})(page);\n```"
+          }
+        ]
+      }
+    },
+    {
+      "step": "A_confirm_NB_maximum_NS_vector",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "### Error\nTimeoutError: locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for getByRole('option', { name: 'L2 向量归一化', exact: true })\n    - locator resolved to <div data-rac=\"\" data-key=\"5\" role=\"option\" aria-setsize=\"7\" aria-posinset=\"6\" aria-selected=\"false\" data-selection-mode=\"single\" data-react-aria-pressable=\"true\" id=\"react-aria1915737716-:r17l:-option-5\" class=\"st-emotion-cache-1oefkbl e1fp86qc7\" data-collection=\"react-aria1915737716-:r1ca:\">…</div>\n  - attempting click action\n    - waiting for element to be visible, enabled and stable\n    - element is visible, enabled and stable\n    - scrolling into view if needed\n    - done scrolling\n    - element is not visible\n  - retrying click action\n    - waiting for element to be visible, enabled and stable\n  - element was detached from the DOM, retrying\n"
+          }
+        ],
+        "isError": true
+      }
+    },
+    {
+      "step": "A_confirm_NS_vector_wait_branch_specific_render",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "### Result\n{\"body\":\"7 options available.\\n不做归一化, selected\\nL2 向量归一化\\nL2 向量归一化, selected\\n\\n数据模式\\n\\n工作流\\n\\n1. 普通光谱导入与检查\\n\\n2. 单位与处理范围\\n\\n3. 逐谱粗调\\n\\n4. 逐谱细调\\n\\n5. 普通光谱后处理\\n\\n6. 批量检查与导出\\n\\n普通光谱 → 逐谱粗调 / 细调 → 可选平滑 / 归一化 → 导出\\n\\n搜索光谱\\n\\n状态筛选\\n\\n当前光谱\\n\\n批量勾选（独立于当前光谱）\\n\\n反转显示顺序\\n\\nDeploy\\nFTIR Spectral Workbench\\n\\n唯一基线路径 · 可独立结束 · prepared-only 2D-COS · SHA-256 lineage\\n\\n当前：synthetic_A\\n\\nsynthetic_wide.csv · 第 1 强度列 · A（吸光度） · 已跳过细调\\n\\n展示名称\\n\\n从批量导出中排除此条目\\n\\n5. 普通光谱后处理\\n\\n最终母谱 B 已确认 · 版本 7e5fb34c974c\\n\\n平滑与归一化均为可选独立分支。确认 S 不改变归一化来源或导出选择；旧基线导出继续使用 B。\\n\\n平滑 Smoothing\\n\\n归一化 Normalization\\n\\n分支状态\\n\\n结果导出\\n\\n使用未平滑校正谱 B\\n\\n使用已确认平滑谱 S\\n\\n当前归一化来源：S · 平滑校正谱\\n\\n启用当前来源归一化\\n\\n普通谱归一化方法\\n\\n归一化目标值\\n\\n最小有效参考值（0 使用数值保护）\\n\\nL2 按完整父谱的采样点平方和计算，不含波数积分权重；不同网格不代表相同物理尺度。\\n\\nN_S · 平滑后归一化：已确认\\n\\n计算当前归一化预览\\n\\n确认当前归一化\\n\\n确认归一化并下一条\\n\\n恢复已确认归一化参数\\n\\nkeyboard_arrow_right\\n\\n归一化参数复制与批量操作\\n\\n显示后处理结果\\n\\n已确认结果 · N_S · 平滑后归一化 · 版本 78f787578b02 · 父级 1f58247a8dd6\\n\\n1800\\n1600\\n1400\\n1200\\n1000\\n0.2\\n0.4\\n0.6\\n0.8\\n归一化来源\\nWavenumber (cm⁻¹)\\nAbsorbance\\n1800\\n1600\\n1400\\n1200\\n1000\\n0.1\\n0.2\\n归一化结果\\nWavenumber (cm⁻¹)\\nNormalized intensity\\n{\\n\\\"scale\\\":[\\n0:0.2774108458333084\\n]\\n\\\"offset\\\":[\\n0:0\\n]\\n\\\"reference\\\":{\\n\\\"minimum\\\":[\\n0:0.06873777867054415\\n]\\n\\\"maximum\\\":[\\n0:0.8814587760676367\\n]\\n\\\"point_count\\\":201\\n\\\"selection_rule\\\":\\\"all_parent_samples\\\"\\n\\\"norm\\\":\\\"sampled_point_l2_without_x_weights\\\"\\n\\\"enabled\\\":true\\n\\\"core_method\\\":\\\"vector\\\"\\n\\\"core_parameters\\\":{\\n\\\"method\\\":\\\"vector\\\"\\n\\\"target\\\":1\\n\\\"use_absolute\\\":false\\n\\\"interval\\\":NULL\\n}\\n\\\"core_warnings\\\":[\\n0:\\\"Vector normalization is a shape-focused optional branch and removes absolute scale.\\\"\\n]\\n\\\"reference_values\\\":[\\n0:3.6047617280287714\\n]\\n\\\"reference_scale\\\":[\\n0:3.6047617280287714\\n]\\n\\\"numerical_floor\\\":[\\n0:5.122674519993739e-14\\n]\\n\\\"numerical_guard_version\\\":\\\"ordinary-normalization-reference-floor-v1\\\"\\n\\\"numerical_floor_eps_multiplier\\\":64\\n\\\"user_minimum_reference\\\":0\\n\\\"affine_formula\\\":\\\"z = scale * y + offset\\\"\\n}\\n\\\"quantity\\\":\\\"normalized_intensity\\\"\\n\\\"purpose\\\":\\\"scientific\\\"\\n}\\nkeyboard_arrow_right\\n\\n当前版本诊断与配方\\n\\nVector normalization is a shape-focused optional branch and removes absolute scale.\\n\\nL2 uses sampled-point squares without wavenumber weights; its scale depends on sampling density and is not a common physical scale across grids.\\n\\nNormalization removes absolute intensity scale; the output is not absorbance or physical transmittance.\"}\n### Ran Playwright code\n```js\nawait (async(page)=>{await page.getByText('启用当前来源归一化',{exact:true}).click();await page.getByText('N_S · 平滑后归一化：未创建 · 未启用',{exact:true}).waitFor({state:'hidden'});await page.getByRole('combobox',{name:'普通谱归一化方法',exact:true}).click();await page.getByRole('option',{name:'L2 向量归一化',exact:true}).click();await page.getByRole('spinbutton',{name:'归一化目标值',exact:true}).waitFor();await page.getByRole('button',{name:'计算当前归一化预览',exact:true}).click();await page.getByText('N_S · 平滑后归一化：预览未确认',{exact:true}).waitFor();await page.getByRole('button',{name:'确认当前归一化',exact:true}).click();await page.getByText('N_S · 平滑后归一化：已确认',{exact:true}).waitFor();return{body:(await page.locator('body').innerText()).slice(-7000)};})(page);\n```"
+          }
+        ]
+      }
+    },
+    {
+      "step": "B_S_gaussian_1.2_NB_minmax",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "### Error\nTimeoutError: locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n  - waiting for getByText(/固定 0–1/).first() to be visible\n"
+          }
+        ],
+        "isError": true
+      }
+    },
+    {
+      "step": "B_confirm_NB_minmax_NS_absolute_full_area",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "### Result\n{\"B_NB_minmax_noTarget\":true,\"NS\":\"已确认结果 · N_S · 平滑后归一化 · 版本 277f4a4357b7 · 父级 2543230adbd2\",\"exceptions\":0}\n### Ran Playwright code\n```js\nawait (async(page)=>{await page.getByRole('button',{name:'计算当前归一化预览',exact:true}).click();await page.getByText('N_B · 基线后归一化：预览未确认',{exact:true}).waitFor();await page.getByRole('button',{name:'确认当前归一化',exact:true}).click();await page.getByText('N_B · 基线后归一化：已确认',{exact:true}).waitFor();const noTarget=await page.getByRole('spinbutton',{name:'归一化目标值',exact:true}).count()===0;await page.getByRole('button',{name:'使用已确认平滑谱 S',exact:true}).click();await page.getByText('当前归一化来源：S · 平滑校正谱',{exact:true}).waitFor();await page.getByText('启用当前来源归一化',{exact:true}).click();await page.getByText('N_S · 平滑后归一化：未创建 · 未启用',{exact:true}).waitFor({state:'hidden'});await page.getByRole('combobox',{name:'普通谱归一化方法',exact:true}).click();await page.getByRole('option',{name:'全范围 / 指定范围面积',exact:true}).click();await page.getByRole('combobox',{name:'积分面积定义',exact:true}).waitFor();await page.getByRole('button',{name:'计算当前归一化预览',exact:true}).click();await page.getByText('N_S · 平滑后归一化：预览未确认',{exact:true}).waitFor();await page.getByRole('button',{name:'确认当前归一化',exact:true}).click();await page.getByText('N_S · 平滑后归一化：已确认',{exact:true}).waitFor();return{B_NB_minmax_noTarget:noTarget,NS:(await page.getByText(/已确认结果 · N_S ·/).innerText()),exceptions:await page.locator('[data-testid=stException]').count()};})(page);\n```"
+          }
+        ]
+      }
+    },
+    {
+      "step": "C_S_median3_NB_area",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "### Result\n{\"C_S\":\"median3\",\"C_NB\":\"absolute full area\",\"exceptions\":0}\n### Ran Playwright code\n```js\nawait (async(page)=>{await page.getByRole('combobox',{name:'当前光谱',exact:true}).click();await page.getByRole('option',{name:/^synthetic_C ·/}).click();await page.getByText('当前：synthetic_C',{exact:true}).waitFor();await page.getByRole('tab',{name:'平滑 Smoothing',exact:true}).click();await page.getByText('启用普通谱平滑',{exact:true}).click();await page.getByText('S · 平滑校正谱：未创建 · 未启用',{exact:true}).waitFor({state:'hidden'});await page.getByRole('combobox',{name:'普通谱平滑方法',exact:true}).click();await page.getByRole('option',{name:'median',exact:true}).click();await page.getByRole('spinbutton',{name:'平滑窗口点数（奇数）',exact:true}).waitFor();await page.getByRole('button',{name:'计算当前平滑预览',exact:true}).click();await page.getByText('S · 平滑校正谱：预览未确认',{exact:true}).waitFor();await page.getByRole('button',{name:'确认当前平滑',exact:true}).click();await page.getByText('S · 平滑校正谱：已确认',{exact:true}).waitFor();await page.getByRole('tab',{name:'归一化 Normalization',exact:true}).click();await page.getByText('启用当前来源归一化',{exact:true}).click();await page.getByText('N_B · 基线后归一化：未创建 · 未启用',{exact:true}).waitFor({state:'hidden'});await page.getByRole('combobox',{name:'普通谱归一化方法',exact:true}).click();await page.getByRole('option',{name:'全范围 / 指定范围面积',exact:true}).click();await page.getByRole('combobox',{name:'积分面积定义',exact:true}).waitFor();await page.getByRole('button',{name:'计算当前归一化预览',exact:true}).click();await page.getByText('N_B · 基线后归一化：预览未确认',{exact:true}).waitFor();await page.getByRole('button',{name:'确认当前归一化',exact:true}).click();await page.getByText('N_B · 基线后归一化：已确认',{exact:true}).waitFor();return{C_S:'median3',C_NB:'absolute full area',exceptions:await page.locator('[data-testid=stException]').count()};})(page);\n```"
+          }
+        ]
+      }
+    },
+    {
+      "step": "C_confirm_NS_A_return_and_export_defaults",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "### Result\n{\"C_NS\":\"maximum\",\"A_restoredSource\":\"当前归一化来源：S · 平滑校正谱\",\"A_restoredMethod\":\"L2 向量归一化\",\"body\":\"7 options available.\\n不做归一化, selected\\n全范围最大正峰高\\n全范围最大正峰高, selected\\n3 options available.\\nsynthetic_C · synthetic_other_axis.csv · 列1 · 61cc3a, selected\\nsynthetic_A · synthetic_wide.csv · 列1 · 9c27ff\\nsynthetic_A · synthetic_wide.csv · 列1 · 9c27ff, selected\\nkeyboard_double_arrow_left\\n\\n数据模式\\n\\n工作流\\n\\n1. 普通光谱导入与检查\\n\\n2. 单位与处理范围\\n\\n3. 逐谱粗调\\n\\n4. 逐谱细调\\n\\n5. 普通光谱后处理\\n\\n6. 批量检查与导出\\n\\n普通光谱 → 逐谱粗调 / 细调 → 可选平滑 / 归一化 → 导出\\n\\n搜索光谱\\n\\n状态筛选\\n\\n当前光谱\\n\\n批量勾选（独立于当前光谱）\\n\\n反转显示顺序\\n\\nDeploy\\nFTIR Spectral Workbench\\n\\n唯一基线路径 · 可独立结束 · prepared-only 2D-COS · SHA-256 lineage\\n\\n当前：synthetic_A\\n\\nsynthetic_wide.csv · 第 1 强度列 · A（吸光度） · 已跳过细调\\n\\n展示名称\\n\\n从批量导出中排除此条目\\n\\n5. 普通光谱后处理\\n\\n最终母谱 B 已确认 · 版本 7e5fb34c974c\\n\\n平滑与归一化均为可选独立分支。确认 S 不改变归一化来源或导出选择；旧基线导出继续使用 B。\\n\\n平滑 Smoothing\\n\\n归一化 Normalization\\n\\n分支状态\\n\\n结果导出\\n\\n后处理导出分支\\n\\n后处理导出范围\\n\\n只导出有效项（明确排除下表不可用项）\\n\\n存在未确认草稿，导出只使用当前有效的已确认版本。\\n\\n提供后处理同轴宽表\\n\\nZIP 按谱保留原轴；N_B 包含 B，N_S 包含 B 与 S。归一化 / Min–Max 不导出为物理 T 或 %T。\\n\\n打包已确认后处理结果\"}\n### Ran Playwright code\n```js\nawait (async(page)=>{await page.getByRole('button',{name:'使用已确认平滑谱 S',exact:true}).click();await page.getByText('当前归一化来源：S · 平滑校正谱',{exact:true}).waitFor();await page.getByText('启用当前来源归一化',{exact:true}).click();await page.getByText('N_S · 平滑后归一化：未创建 · 未启用',{exact:true}).waitFor({state:'hidden'});await page.getByRole('combobox',{name:'普通谱归一化方法',exact:true}).click();await page.getByRole('option',{name:'全范围最大正峰高',exact:true}).click();await page.getByRole('spinbutton',{name:'归一化目标值',exact:true}).waitFor();await page.getByRole('button',{name:'计算当前归一化预览',exact:true}).click();await page.getByText('N_S · 平滑后归一化：预览未确认',{exact:true}).waitFor();await page.getByRole('button',{name:'确认当前归一化',exact:true}).click();await page.getByText('N_S · 平滑后归一化：已确认',{exact:true}).waitFor();await page.getByRole('combobox',{name:'当前光谱',exact:true}).click();await page.getByRole('option',{name:/^synthetic_A ·/}).click();await page.getByText('当前：synthetic_A',{exact:true}).waitFor();const restoredSource=await page.getByText('当前归一化来源：S · 平滑校正谱',{exact:true}).innerText();const restoredMethod=await page.getByRole('combobox',{name:'普通谱归一化方法',exact:true}).inputValue();await page.getByRole('tab',{name:'结果导出',exact:true}).click();return{C_NS:'maximum',A_restoredSource:restoredSource,A_restoredMethod:restoredMethod,body:(await page.locator('body').innerText()).slice(-7000)};})(page);\n```"
+          }
+        ]
+      }
+    },
+    {
+      "step": "real_download_all3_allbranches_heterogeneous_axes",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "### Error\nTimeoutError: locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for getByRole('option', { name: '全部条目', exact: true })\n    - locator resolved to <div data-rac=\"\" data-key=\"2\" role=\"option\" aria-setsize=\"3\" aria-posinset=\"3\" aria-selected=\"false\" data-selection-mode=\"single\" data-react-aria-pressable=\"true\" id=\"react-aria1915737716-:r2ab:-option-2\" class=\"st-emotion-cache-1oefkbl e1fp86qc7\" data-collection=\"react-aria1915737716-:r2bg:\">…</div>\n  - attempting click action\n    - waiting for element to be visible, enabled and stable\n  - element was detached from the DOM, retrying\n"
+          }
+        ],
+        "isError": true
+      }
+    },
+    {
+      "step": "real_download_allbranches_after_render_wait",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "### Result\n{\"wideDisabled\":true,\"download\":\"ordinary_postprocessing_28fa6d12a31a.zip\",\"body\":\"3 options available.\\n当前光谱, selected\\n全部条目\\n全部条目, selected\\n\\n数据模式\\n\\n工作流\\n\\n1. 普通光谱导入与检查\\n\\n2. 单位与处理范围\\n\\n3. 逐谱粗调\\n\\n4. 逐谱细调\\n\\n5. 普通光谱后处理\\n\\n6. 批量检查与导出\\n\\n普通光谱 → 逐谱粗调 / 细调 → 可选平滑 / 归一化 → 导出\\n\\n搜索光谱\\n\\n状态筛选\\n\\n当前光谱\\n\\n批量勾选（独立于当前光谱）\\n\\n反转显示顺序\\n\\nDeploy\\nFTIR Spectral Workbench\\n\\n唯一基线路径 · 可独立结束 · prepared-only 2D-COS · SHA-256 lineage\\n\\n当前：synthetic_A\\n\\nsynthetic_wide.csv · 第 1 强度列 · A（吸光度） · 已跳过细调\\n\\n展示名称\\n\\n从批量导出中排除此条目\\n\\n5. 普通光谱后处理\\n\\n最终母谱 B 已确认 · 版本 7e5fb34c974c\\n\\n平滑与归一化均为可选独立分支。确认 S 不改变归一化来源或导出选择；旧基线导出继续使用 B。\\n\\n平滑 Smoothing\\n\\n归一化 Normalization\\n\\n分支状态\\n\\n结果导出\\n\\n后处理导出分支\\n\\n后处理导出范围\\n\\n只导出有效项（明确排除下表不可用项）\\n\\n已选择全部分支：所有目标的 B / S / N_B / N_S 均须有效；存在不可用项时默认阻止打包。\\n\\n存在未确认草稿，导出只使用当前有效的已确认版本。\\n\\n提供后处理同轴宽表\\n\\n后处理宽表不可用：Actual output axes differ in length, direction, range or coordinates; no alignment or interpolation is performed.\\n\\nZIP 按谱保留原轴；N_B 包含 B，N_S 包含 B 与 S。归一化 / Min–Max 不导出为物理 T 或 %T。\\n\\n打包已确认后处理结果\\n\\n下载已确认后处理 ZIP\\n\\nHeterogeneous baseline recipes or output grids/ranges: spectra are preserved independently; this export does not establish quantitative comparability.\\n\\nHeterogeneous smoothed recipes or output grids/ranges: spectra are preserved independently; this export does not establish quantitative comparability.\\n\\nHeterogeneous normalized_baseline recipes or output grids/ranges: spectra are preserved independently; this export does not establish quantitative comparability.\\n\\nHeterogeneous normalized_smoothed recipes or output grids/ranges: spectra are preserved independently; this export does not establish quantitative comparability.\\n\\nThe bundle contains different ordinate quantities; compare branch labels and purposes before interpreting overlays or a wide table.\"}\n### Ran Playwright code\n```js\nawait (async(page)=>{await page.getByText('已选择全部分支：所有目标的 B / S / N_B / N_S 均须有效；存在不可用项时默认阻止打包。',{exact:true}).waitFor();await page.getByRole('combobox',{name:'后处理导出范围',exact:true}).click();await page.getByRole('option',{name:'全部条目',exact:true}).click();await page.getByText(/后处理宽表不可用/).first().waitFor();const wideDisabled=await page.getByRole('checkbox',{name:'提供后处理同轴宽表',exact:true}).isDisabled();await page.getByRole('button',{name:'打包已确认后处理结果',exact:true}).click();await page.getByRole('button',{name:'下载已确认后处理 ZIP',exact:true}).waitFor();const dl=page.waitForEvent('download');await page.getByRole('button',{name:'下载已确认后处理 ZIP',exact:true}).click();const d=await dl;await d.saveAs('<repository>/outputs/validation-private/v031/browser/all_branches.zip');return{wideDisabled,download:d.suggestedFilename(),body:(await page.locator('body').innerText()).slice(-6000)};})(page);\n```\n### Events\n- Downloading file ordinary_postprocessing_28fa6d12a31a.zip ...\n- Downloaded file ordinary_postprocessing_28fa6d12a31a.zip to \".playwright-mcp/ordinary-postprocessing-28fa6d12a31a.zip\""
+          }
+        ]
+      }
+    },
+    {
+      "step": "select_A_for_wide_subset",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "### Result\n{\"body\":\"4 options available.\\nsynthetic_A · synthetic_wide.csv · 列1 · 9c27ff\\nkeyboard_double_arrow_left\\n\\n数据模式\\n\\n工作流\\n\\n1. 普通光谱导入与检查\\n\\n2. 单位与处理范围\\n\\n3. 逐谱粗调\\n\\n4. 逐谱细调\\n\\n5. 普通光谱后处理\\n\\n6. 批量检查与导出\\n\\n普通光谱 → 逐谱粗调 / 细调 → 可选平滑 / 归一化 → 导出\\n\\n搜索光谱\\n\\n状态筛选\\n\\n当前光谱\\n\\n批量勾选（独立于当前光谱）\\n\\n反转显示顺序\\n\\nDeploy\\nFTIR Spectral Workbench\\n\\n唯一基线路径 · 可独立结束 · prepared-only 2D-COS · SHA-256 lineage\\n\\n当前：synthetic_A\\n\\nsynthetic_wide.csv · 第 1 强度列 · A（吸光度） · 已跳过细调\\n\\n展示名称\\n\\n从批量导出中排除此条目\\n\\n5. 普通光谱后处理\\n\\n最终母谱 B 已确认 · 版本 7e5fb34c974c\\n\\n平滑与归一化均为可选独立分支。确认 S 不改变归一化来源或导出选择；旧基线导出继续使用 B。\\n\\n平滑 Smoothing\\n\\n归一化 Normalization\\n\\n分支状态\\n\\n结果导出\\n\\n后处理导出分支\\n\\n后处理导出范围\\n\\n只导出有效项（明确排除下表不可用项）\\n\\n已选择全部分支：所有目标的 B / S / N_B / N_S 均须有效；存在不可用项时默认阻止打包。\\n\\n存在未确认草稿，导出只使用当前有效的已确认版本。\\n\\n提供后处理同轴宽表\\n\\n后处理宽表不可用：Actual output axes differ in length, direction, range or coordinates; no alignment or interpolation is performed.\\n\\nZIP 按谱保留原轴；N_B 包含 B，N_S 包含 B 与 S。归一化 / Min–Max 不导出为物理 T 或 %T。\\n\\n打包已确认后处理结果\\n\\n下载已确认后处理 ZIP\\n\\nHeterogeneous baseline recipes or output grids/ranges: spectra are preserved independently; this export does not establish quantitative comparability.\\n\\nHeterogeneous smoothed recipes or output grids/ranges: spectra are preserved independently; this export does not establish quantitative comparability.\\n\\nHeterogeneous normalized_baseline recipes or output grids/ranges: spectra are preserved independently; this export does not establish quantitative comparability.\\n\\nHeterogeneous normalized_smoothed recipes or output grids/ranges: spectra are preserved independently; this export does not establish quantitative comparability.\\n\\nThe bundle contains different ordinate quantities; compare branch labels and purposes before interpreting overlays or a wide table.\\n\\nSelect all\\nsynthetic_A · synthetic_wide.csv · 列1 · 9c27ff\\nsynthetic_B · synthetic_wide.csv · 列2 · 77d5fd\\nsynthetic_C · synthetic_other_axis.csv · 列1 · 61cc3a\",\"options\":[\"Select all\",\"synthetic_A · synthetic_wide.csv · 列1 · 9c27ff\",\"synthetic_B · synthetic_wide.csv · 列2 · 77d5fd\",\"synthetic_C · synthetic_other_axis.csv · 列1 · 61cc3a\"]}\n### Ran Playwright code\n```js\nawait (async(page)=>{await page.getByRole('combobox',{name:'批量勾选（独立于当前光谱）',exact:true}).click();await page.getByRole('option',{name:/^synthetic_A ·/}).click();return{body:(await page.locator('body').innerText()).slice(0,3000),options:await page.getByRole('option').allTextContents()};})(page);\n```"
+          }
+        ]
+      }
+    },
+    {
+      "step": "real_selected_A_B_wide_zip_and_csv_download",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "### Result\n{\"downloads\":[\"ordinary_postprocessing_28fa6d12a31a.zip\",\"ordinary_postprocessing_wide.csv\"],\"wideEnabled\":true,\"exceptions\":0}\n### Ran Playwright code\n```js\nawait (async(page)=>{await page.getByRole('option',{name:/^synthetic_B ·/}).click();await page.getByRole('combobox',{name:'批量勾选（独立于当前光谱）',exact:true}).press('Escape');await page.getByRole('combobox',{name:'后处理导出范围',exact:true}).click();await page.getByRole('option',{name:'勾选条目',exact:true}).click();await page.getByText(/后处理宽表不可用/).waitFor({state:'hidden'});await page.getByText('提供后处理同轴宽表',{exact:true}).click();await page.getByRole('button',{name:'打包已确认后处理结果',exact:true}).click();await page.getByRole('button',{name:'下载后处理同轴宽表 CSV',exact:true}).waitFor();const downloads=[];for(const [label,name] of [['下载已确认后处理 ZIP','selected_wide.zip'],['下载后处理同轴宽表 CSV','selected_wide.csv']]){const dp=page.waitForEvent('download');await page.getByRole('button',{name:label,exact:true}).click();const d=await dp;await d.saveAs('<repository>/outputs/validation-private/v031/browser/'+name);downloads.push(d.suggestedFilename());}return{downloads,wideEnabled:!(await page.getByRole('checkbox',{name:'提供后处理同轴宽表',exact:true}).isDisabled()),exceptions:await page.locator('[data-testid=stException]').count()};})(page);\n```\n### Events\n- Downloading file ordinary_postprocessing_28fa6d12a31a.zip ...\n- Downloaded file ordinary_postprocessing_28fa6d12a31a.zip to \".playwright-mcp/ordinary-postprocessing-28fa6d12a31a.zip\"\n- Downloading file ordinary_postprocessing_wide.csv ...\n- Downloaded file ordinary_postprocessing_wide.csv to \".playwright-mcp/ordinary-postprocessing-wide.csv\""
+          }
+        ]
+      }
+    },
+    {
+      "step": "expert_axis_control_open_existing_A",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "### Result\n{\"expertOptions\":[\"默认拒绝非均匀轴\"],\"currentWindow\":\"7\"}\n### Ran Playwright code\n```js\nawait (async(page)=>{await page.getByRole('tab',{name:'平滑 Smoothing',exact:true}).click();await page.getByText('采样轴专家选项',{exact:true}).click();await page.getByRole('combobox',{name:'非均匀轴处理',exact:true}).click();return{expertOptions:await page.getByRole('option').allTextContents(),currentWindow:await page.getByRole('spinbutton',{name:'SG 窗口点数（奇数）',exact:true}).inputValue()};})(page);\n```"
+          }
+        ]
+      }
+    },
+    {
+      "step": "expert_draft_window9_preserve_committed_save_workspace_before",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "### Error\nTimeoutError: locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for getByRole('option', { name: '明确允许按索引处理（有警告）', exact: true })\n"
+          }
+        ],
+        "isError": true
+      }
+    },
+    {
+      "step": "actual_expert_override_A_draft9_workspace_before_download",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "### Error\nTimeoutError: locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for getByRole('option', { name: '明确允许按索引处理（有警告）', exact: true })\n"
+          }
+        ],
+        "isError": true
+      }
+    },
+    {
+      "step": "expert_override_keyboard_open_A_draft9_and_select_B",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "### Result\n{\"expertPolicyDraft\":\"explicit index space\",\"AWindowDraft\":9,\"committedBefore\":\"已确认结果 · S · 平滑校正谱 · 版本 1f58247a8dd6 · 父级 7e5fb34c974c\",\"body\":\"明确允许按索引处理（有警告）, selected\\n3 options available.\\nSelect all\\nsynthetic_B · synthetic_wide.csv · 列2 · 77d5fd\\n\\n数据模式\\n\\n工作流\\n\\n1. 普通光谱导入与检查\\n\\n2. 单位与处理范围\\n\\n3. 逐谱粗调\\n\\n4. 逐谱细调\\n\\n5. 普通光谱后处理\\n\\n6. 批量检查与导出\\n\\n普通光谱 → 逐谱粗调 / 细调 → 可选平滑 / 归一化 → 导出\\n\\n搜索光谱\\n\\n状态筛选\\n\\n当前光谱\\n\\n批量勾选（独立于当前光谱）\\n\\nsynthetic_A · synthetic_wide.csv · 列1 · 9c27ff\\n\\n反转显示顺序\\n\\nDeploy\\nFTIR Spectral Workbench\\n\\n唯一基线路径 · 可独立结束 · prepared-only 2D-COS · SHA-256 lineage\\n\\n当前：synthetic_A\\n\\nsynthetic_wide.csv · 第 1 强度列 · A（吸光度） · 已跳过细调\\n\\n展示名称\\n\\n从批量导出中排除此条目\\n\\n5. 普通光谱后处理\\n\\n最终母谱 B 已确认 · 版本 7e5fb34c974c\\n\\n平滑与归一化均为可选独立分支。确认 S 不改变归一化来源或导出选择；旧基线导出继续使用 B。\\n\\n平滑 Smoothing\\n\\n归一化 Normalization\\n\\n分支状态\\n\\n结果导出\\n\\n启用普通谱平滑\\n\\n普通谱平滑方法\\n\\nSG 窗口点数（奇数）\\n\\nSG 多项式阶数\\n\\nSG 边界模式\\n\\nkeyboard_arrow_down\\n\\n采样轴专家选项\\n\\n采样间距相对容差\\n\\n非均匀轴处理\\n\\n专家覆盖按采样点索引滤波；不插值，也不代表恒定物理窗口。不支持跨不连续分段。\\n\\n仅沿当前 B 的完整波数轴处理。图形缩放不改变范围；窗口宽度不是仪器分辨率。\\n\\n当前谱中位采样间距 5 cm⁻¹；窗口跨度 ≈ 40 cm⁻¹（按中位间距估算）。\\n\\nS · 平滑校正谱：已确认 · 草稿与确认版不同\\n\\n存在未确认修改；父级仍有效时，导出继续采用已确认版本。\\n\\n计算当前平滑预览\\n\\n确认当前平滑\\n\\n确认平滑并下一条\\n\\n恢复已确认平滑参数\\n\\nkeyboard_arrow_right\\n\\n平滑参数复制与批量操作\\n\\n显示后处理结果\\n\\n已确认结果 · S · 平滑校正谱 · 版本 1f58247a8dd6 · 父级 7e5fb34c974c\\n\\nB / S 显示单位\\n\\n1800\\n1600\\n1400\\n1200\\n1000\\n0.2\\n0.4\\n0.6\\n0.8\\nB\\nS\\nB 与 S\\nWavenumber (cm⁻¹)\\nAbsorbance\\n1800\\n1600\\n1400\\n1200\\n1000\\n−0.01\\n0\\n0.01\\n平滑移除分量 / smoothing removed component\\nWavenumber (cm⁻¹)\\nAbsorbance difference\\n\\n移除分量可能包含真实谱峰；不等于真实噪声，不自动证明 SNR 或处理正确性提升。\\n\\nkeyboard_arrow_right\\n\\n当前版本诊断与配方\\n\\nFirst-derivative correlation is below the diagnostic threshold (0.95) for 1 spectrum/s; minimum=0.920545.\\n\\nSelect all\\nsynthetic_B · synthetic_wide.csv · 列2 · 77d5fd\\nsynthetic_C · synthetic_other_axis.csv · 列1 · 61cc3a\"}\n### Ran Playwright code\n```js\nawait (async(page)=>{await page.getByRole('option',{name:'明确允许按索引处理（有警告）',exact:true}).click();await page.getByText('专家覆盖按采样点索引滤波；不插值，也不代表恒定物理窗口。不支持跨不连续分段。',{exact:true}).waitFor();const committed=await page.getByText(/已确认结果 · S ·/).innerText();await page.getByRole('spinbutton',{name:'SG 窗口点数（奇数）',exact:true}).fill('9');await page.getByRole('spinbutton',{name:'SG 窗口点数（奇数）',exact:true}).press('Enter');await page.getByText(/窗口跨度 ≈ 40 cm/).first().waitFor();await page.getByRole('combobox',{name:'批量勾选（独立于当前光谱）',exact:true}).focus();await page.getByRole('combobox',{name:'批量勾选（独立于当前光谱）',exact:true}).press('ArrowDown');await page.getByRole('option',{name:/^synthetic_B ·/}).click();return{expertPolicyDraft:'explicit index space',AWindowDraft:9,committedBefore:committed,body:(await page.locator('body').innerText()).slice(0,2200)};})(page);\n```"
+          }
+        ]
+      }
+    },
+    {
+      "step": "verified_two_selected_downloads_and_workspace_before",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "### Result\n{\"selected\":\"批量勾选（独立于当前光谱）\\n\\nsynthetic_A · synthetic_wide.csv · 列1 · 9c27ff\\nsynthetic_B · synthetic_wide.csv · 列2 · 77d5fd\",\"download\":\"independent_workspace_28fa6d12.zip\",\"exceptions\":0}\n### Ran Playwright code\n```js\nawait (async(page)=>{await page.getByRole('combobox',{name:'批量勾选（独立于当前光谱）',exact:true}).press('Escape');const selected=await page.locator('[data-testid=stMultiSelect]').innerText();await page.getByRole('tab',{name:'结果导出',exact:true}).click();await page.getByRole('button',{name:'打包已确认后处理结果',exact:true}).click();await page.getByRole('button',{name:'下载后处理同轴宽表 CSV',exact:true}).waitFor();for(const [label,name] of [['下载已确认后处理 ZIP','selected_wide.zip'],['下载后处理同轴宽表 CSV','selected_wide.csv']]){const dp=page.waitForEvent('download');await page.getByRole('button',{name:label,exact:true}).click();const d=await dp;await d.saveAs('<repository>/outputs/validation-private/v031/browser/'+name);}await page.getByText('6. 批量检查与导出',{exact:true}).first().click();await page.getByRole('button',{name:'准备工作区下载',exact:true}).click();await page.getByRole('button',{name:'保存工作区 ZIP',exact:true}).waitFor();const dp=page.waitForEvent('download');await page.getByRole('button',{name:'保存工作区 ZIP',exact:true}).click();const d=await dp;await d.saveAs('<repository>/outputs/validation-private/v031/browser/workspace_before.zip');return{selected,download:d.suggestedFilename(),exceptions:await page.locator('[data-testid=stException]').count()};})(page);\n```\n### Events\n- Downloading file ordinary_postprocessing_28fa6d12a31a.zip ...\n- Downloaded file ordinary_postprocessing_28fa6d12a31a.zip to \".playwright-mcp/ordinary-postprocessing-28fa6d12a31a.zip\"\n- Downloading file ordinary_postprocessing_wide.csv ...\n- Downloaded file ordinary_postprocessing_wide.csv to \".playwright-mcp/ordinary-postprocessing-wide.csv\"\n- Downloading file independent_workspace_28fa6d12.zip ...\n- Downloaded file independent_workspace_28fa6d12.zip to \".playwright-mcp/independent-workspace-28fa6d12.zip\""
+          }
+        ]
+      }
+    },
+    {
+      "step": "new_A_S_stales_only_A_NS_NB_ready_strict_export_blocked",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "### Result\n{\"newS\":\"已确认结果 · S · 平滑校正谱 · 版本 2b2c0b5f63e8 · 父级 7e5fb34c974c\",\"staleText\":\"N_S · 平滑后归一化：父级过期\",\"nb\":\"N_B · 基线后归一化：已确认 · 草稿与确认版不同\",\"exportChoiceBefore\":\"全部分支（B / S / N_B / N_S）\",\"strictDisabled\":true}\n### Ran Playwright code\n```js\nawait (async(page)=>{await page.getByText('5. 普通光谱后处理',{exact:true}).first().click();await page.getByRole('tab',{name:'平滑 Smoothing',exact:true}).click();await page.getByRole('button',{name:'计算当前平滑预览',exact:true}).click();await page.getByText(/当前预览 · S ·/).waitFor();await page.getByRole('button',{name:'确认当前平滑',exact:true}).click();await page.getByText('S · 平滑校正谱：已确认',{exact:true}).waitFor();const newS=await page.getByText(/已确认结果 · S ·/).innerText();await page.getByRole('tab',{name:'归一化 Normalization',exact:true}).click();const staleText=await page.getByText(/^N_S · 平滑后归一化：/).innerText();await page.getByRole('button',{name:'使用未平滑校正谱 B',exact:true}).click();await page.getByText('当前归一化来源：B · 最终基线校正谱',{exact:true}).waitFor();const nb=await page.getByText(/^N_B · 基线后归一化：/).innerText();await page.getByRole('tab',{name:'结果导出',exact:true}).click();const exportChoiceBefore=await page.getByRole('combobox',{name:'后处理导出分支',exact:true}).inputValue();await page.getByRole('combobox',{name:'后处理导出分支',exact:true}).focus();await page.getByRole('combobox',{name:'后处理导出分支',exact:true}).press('ArrowDown');await page.getByRole('option',{name:'N_S · 平滑后归一化',exact:true}).click();await page.getByText(/已选择全部分支/).waitFor({state:'hidden'});await page.getByRole('combobox',{name:'后处理导出范围',exact:true}).focus();await page.getByRole('combobox',{name:'后处理导出范围',exact:true}).press('ArrowDown');await page.getByRole('option',{name:'全部条目',exact:true}).click();return{newS,staleText,nb,exportChoiceBefore,strictDisabled:await page.getByRole('button',{name:'打包已确认后处理结果',exact:true}).isDisabled()};})(page);\n```"
+          }
+        ]
+      }
+    },
+    {
+      "step": "stale_A_NS_explicit_valid_only_real_download_B_C",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "### Result\n{\"strictDisabled\":true,\"explicitValidOnly\":true,\"download\":\"ordinary_postprocessing_28fa6d12a31a.zip\",\"body\":\"数据模式\\n\\n工作流\\n\\n1. 普通光谱导入与检查\\n\\n2. 单位与处理范围\\n\\n3. 逐谱粗调\\n\\n4. 逐谱细调\\n\\n5. 普通光谱后处理\\n\\n6. 批量检查与导出\\n\\n普通光谱 → 逐谱粗调 / 细调 → 可选平滑 / 归一化 → 导出\\n\\n搜索光谱\\n\\n状态筛选\\n\\n当前光谱\\n\\n批量勾选（独立于当前光谱）\\n\\nsynthetic_A · synthetic_wide.csv · 列1 · 9c27ff\\nsynthetic_B · synthetic_wide.csv · 列2 · 77d5fd\\n\\n反转显示顺序\\n\\nDeploy\\nFTIR Spectral Workbench\\n\\n唯一基线路径 · 可独立结束 · prepared-only 2D-COS · SHA-256 lineage\\n\\n当前：synthetic_A\\n\\nsynthetic_wide.csv · 第 1 强度列 · A（吸光度） · 已跳过细调\\n\\n展示名称\\n\\n从批量导出中排除此条目\\n\\n5. 普通光谱后处理\\n\\n最终母谱 B 已确认 · 版本 7e5fb34c974c\\n\\n平滑与归一化均为可选独立分支。确认 S 不改变归一化来源或导出选择；旧基线导出继续使用 B。\\n\\n平滑 Smoothing\\n\\n归一化 Normalization\\n\\n分支状态\\n\\n结果导出\\n\\n后处理导出分支\\n\\n后处理导出范围\\n\\n只导出有效项（明确排除下表不可用项）\\n\\n上表包含不可用项。指定分支不会退回其他来源；需明确排除不可用项才能打包其余正式结果。\\n\\n提供后处理同轴宽表\\n\\n后处理宽表不可用：Actual output axes differ in length, direction, range or coordinates; no alignment or interpolation is performed.\\n\\nZIP 按谱保留原轴；N_B 包含 B，N_S 包含 B 与 S。归一化 / Min–Max 不导出为物理 T 或 %T。\\n\\n打包已确认后处理结果\\n\\n下载已确认后处理 ZIP\\n\\nHeterogeneous baseline recipes or output grids/ranges: spectra are preserved independently; this export does not establish quantitative comparability.\\n\\nHeterogeneous smoothed recipes or output grids/ranges: spectra are preserved independently; this export does not establish quantitative comparability.\\n\\nHeterogeneous normalized_smoothed recipes or output grids/ranges: spectra are preserved independently; this export does not establish quantitative comparability.\\n\\nThe bundle contains different ordinate quantities; compare branch labels and purposes before interpreting overlays or a wide table.\"}\n### Ran Playwright code\n```js\nawait (async(page)=>{const strictDisabled=await page.getByRole('button',{name:'打包已确认后处理结果',exact:true}).isDisabled();await page.getByText('只导出有效项（明确排除下表不可用项）',{exact:true}).click();await page.getByRole('button',{name:'打包已确认后处理结果',exact:true}).click();await page.getByRole('button',{name:'下载已确认后处理 ZIP',exact:true}).waitFor();const dp=page.waitForEvent('download');await page.getByRole('button',{name:'下载已确认后处理 ZIP',exact:true}).click();const d=await dp;await d.saveAs('<repository>/outputs/validation-private/v031/browser/stale_valid_only.zip');return{strictDisabled,explicitValidOnly:true,download:d.suggestedFilename(),body:(await page.locator('body').innerText()).slice(-3500)};})(page);\n```\n### Events\n- Downloading file ordinary_postprocessing_28fa6d12a31a.zip ...\n- Downloaded file ordinary_postprocessing_28fa6d12a31a.zip to \".playwright-mcp/ordinary-postprocessing-28fa6d12a31a.zip\""
+          }
+        ]
+      }
+    },
+    {
+      "step": "new_browser_session_for_restore",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "### Result\n- 0: [FTIR Spectral Workbench](http://127.0.0.1:8504/)\n- 1: (current) [Streamlit](http://127.0.0.1:8504/)\n### Ran Playwright code\n```js\nawait page.goto('http://127.0.0.1:8504/');\n```\n### Open tabs\n- 0: [FTIR Spectral Workbench](http://127.0.0.1:8504/)\n- 1: (current) [Streamlit](http://127.0.0.1:8504/)\n### Page\n- Page URL: http://127.0.0.1:8504/\n- Page Title: Streamlit\n### Snapshot\n- [Snapshot](.playwright-mcp/page-2026-09-11T06-28-27-762Z.yml)"
+          }
+        ]
+      }
+    },
+    {
+      "step": "restore_new_session_show_uploader",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "### Result\n{\"inputs\":[{\"label\":\"file upload\",\"id\":\"\"},{\"label\":\"file upload\",\"id\":\"\"}],\"body\":\"原位序列模式, selected\\n普通光谱模式\\n普通光谱模式, selected\\n2 options available.\\nkeyboard_double_arrow_left\\n\\n数据模式\\n\\n工作流\\n\\n1. 普通光谱导入与检查\\n\\n2. 单位与处理范围\\n\\n3. 逐谱粗调\\n\\n4. 逐谱细调\\n\\n5. 普通光谱后处理\\n\\n6. 批量检查与导出\\n\\n普通光谱 → 逐谱粗调 / 细调 → 可选平滑 / 归一化 → 导出\\n\\nDeploy\\nFTIR Spectral Workbench\\n\\n唯一基线路径 · 可独立结束 · prepared-only 2D-COS · SHA-256 lineage\\n\\n1. 普通光谱导入与检查\\n\\n每列独立导入，保留各自波数轴。导入确认的是强度单位，不需要时间、温度或扰动坐标。\\n\\n新文件默认强度单位\\n\\nkeyboard_arrow_right\\n\\n文本解析选项\\n\\n上传普通光谱文本文件\\n\\nupload\\n\\nUpload\\n\\n200MB per file • CSV, TSV, TAB, TXT, DPT, ASC, DAT, XY\\n\\n确认单位并导入\\n\\nkeyboard_arrow_down\\n\\n恢复普通光谱工作区\\n\\n恢复普通工作区 ZIP\\n\\nupload\\n\\nUpload\\n\\n200MB per file • ZIP\\n\\n此入口仅接收本模式的工作区包；恢复会替换当前普通工作区。原位结果独立保留。\\n\\n恢复工作区\"}\n### Ran Playwright code\n```js\nawait (async(page)=>{await page.getByRole('combobox',{name:'数据模式',exact:true}).click();await page.getByRole('option',{name:'普通光谱模式',exact:true}).click();await page.getByText('恢复普通光谱工作区',{exact:true}).click();await page.getByRole('button',{name:'恢复工作区',exact:true}).waitFor();return{inputs:await page.locator('input[type=file]').evaluateAll(es=>es.map(e=>({label:e.getAttribute('aria-label'),id:e.id}))),body:(await page.locator('body').innerText()).slice(-2500)};})(page);\n```\n### Open tabs\n- 0: [FTIR Spectral Workbench](http://127.0.0.1:8504/)\n- 1: (current) [FTIR Spectral Workbench](http://127.0.0.1:8504/)\n### Page\n- Page URL: http://127.0.0.1:8504/\n- Page Title: FTIR Spectral Workbench"
+          }
+        ]
+      }
+    },
+    {
+      "step": "real_workspace_upload_restore_new_session_and_save_unchanged",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "### Result\n{\"restoredSelection\":\"批量勾选（独立于当前光谱）\\n\\nsynthetic_A · synthetic_wide.csv · 列1 · 9c27ff\\nsynthetic_B · synthetic_wide.csv · 列2 · 77d5fd\",\"download\":\"independent_workspace_28fa6d12.zip\",\"exceptions\":0}\n### Ran Playwright code\n```js\nawait (async(page)=>{await page.locator('[data-testid=stFileUploader]').filter({hasText:'恢复普通工作区 ZIP'}).locator('input[type=file]').setInputFiles('<repository>/outputs/validation-private/v031/browser/workspace_before.zip');await page.getByRole('button',{name:'恢复工作区',exact:true}).click();await page.getByRole('combobox',{name:'当前光谱',exact:true}).waitFor();const restoredSelection=await page.locator('[data-testid=stMultiSelect]').innerText();await page.getByText('6. 批量检查与导出',{exact:true}).first().click();await page.getByRole('button',{name:'准备工作区下载',exact:true}).click();await page.getByRole('button',{name:'保存工作区 ZIP',exact:true}).waitFor();const dp=page.waitForEvent('download');await page.getByRole('button',{name:'保存工作区 ZIP',exact:true}).click();const d=await dp;await d.saveAs('<repository>/outputs/validation-private/v031/browser/workspace_restored.zip');return{restoredSelection,download:d.suggestedFilename(),exceptions:await page.locator('[data-testid=stException]').count()};})(page);\n```\n### Events\n- Downloading file independent_workspace_28fa6d12.zip ...\n- Downloaded file independent_workspace_28fa6d12.zip to \".playwright-mcp/independent-workspace-28fa6d12.zip\""
+          }
+        ]
+      }
+    },
+    {
+      "step": "restored_draft9_committed7_allbranches_redownload",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "### Result\n{\"restoredWindow\":\"9\",\"committed\":\"已确认结果 · S · 平滑校正谱 · 版本 1f58247a8dd6 · 父级 7e5fb34c974c\",\"status\":\"S · 平滑校正谱：已确认 · 草稿与确认版不同\",\"branch\":\"全部分支（B / S / N_B / N_S）\",\"download\":\"ordinary_postprocessing_28fa6d12a31a.zip\"}\n### Ran Playwright code\n```js\nawait (async(page)=>{await page.getByText('5. 普通光谱后处理',{exact:true}).first().click();await page.getByRole('tab',{name:'平滑 Smoothing',exact:true}).click();const window=await page.getByRole('spinbutton',{name:'SG 窗口点数（奇数）',exact:true}).inputValue();const committed=await page.getByText(/已确认结果 · S ·/).innerText();const status=await page.getByText(/^S · 平滑校正谱：/).innerText();await page.getByRole('tab',{name:'结果导出',exact:true}).click();const branch=await page.getByRole('combobox',{name:'后处理导出分支',exact:true}).inputValue();await page.getByRole('combobox',{name:'后处理导出范围',exact:true}).focus();await page.getByRole('combobox',{name:'后处理导出范围',exact:true}).press('ArrowDown');await page.getByRole('option',{name:'全部条目',exact:true}).click();await page.getByText(/后处理宽表不可用/).waitFor();await page.getByRole('button',{name:'打包已确认后处理结果',exact:true}).click();await page.getByRole('button',{name:'下载已确认后处理 ZIP',exact:true}).waitFor();const dp=page.waitForEvent('download');await page.getByRole('button',{name:'下载已确认后处理 ZIP',exact:true}).click();const d=await dp;await d.saveAs('<repository>/outputs/validation-private/v031/browser/all_branches_restored.zip');return{restoredWindow:window,committed,status,branch,download:d.suggestedFilename()};})(page);\n```\n### Events\n- Downloading file ordinary_postprocessing_28fa6d12a31a.zip ...\n- Downloaded file ordinary_postprocessing_28fa6d12a31a.zip to \".playwright-mcp/ordinary-postprocessing-28fa6d12a31a.zip\""
+          }
+        ]
+      }
+    }
+  ]
+}

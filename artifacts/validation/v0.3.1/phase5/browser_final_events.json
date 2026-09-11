@@ -1,0 +1,27 @@
+{
+  "evidence": "Actual Playwright actions after restarting v0.3.1, synthetic workspace only.",
+  "events": [
+    {
+      "step": "final_v031_restart_restore_confirm_new_S_download",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "### Result\n{\"restored\":\"S · 平滑校正谱：已确认 · 草稿与确认版不同\",\"download\":\"ordinary_postprocessing_28fa6d12a31a.zip\",\"exceptions\":0}\n### Ran Playwright code\n```js\nawait (async(page)=>{await page.getByRole('combobox',{name:'数据模式',exact:true}).click();await page.getByRole('option',{name:'普通光谱模式',exact:true}).click();await page.getByText('恢复普通光谱工作区',{exact:true}).click();await page.locator('[data-testid=stFileUploader]').filter({hasText:'恢复普通工作区 ZIP'}).locator('input[type=file]').setInputFiles('<repository>/outputs/validation-private/v031/browser/workspace_before.zip');await page.getByRole('button',{name:'恢复工作区',exact:true}).click();await page.getByRole('combobox',{name:'当前光谱',exact:true}).waitFor();await page.getByText('5. 普通光谱后处理',{exact:true}).first().click();await page.getByRole('tab',{name:'平滑 Smoothing',exact:true}).click();const restored=await page.getByText(/^S · 平滑校正谱：/).innerText();await page.getByRole('button',{name:'计算当前平滑预览',exact:true}).click();await page.getByText(/当前预览 · S ·/).waitFor();await page.getByRole('button',{name:'确认当前平滑',exact:true}).click();await page.getByText('S · 平滑校正谱：已确认',{exact:true}).waitFor();await page.getByRole('tab',{name:'结果导出',exact:true}).click();await page.getByRole('combobox',{name:'后处理导出分支',exact:true}).focus();await page.getByRole('combobox',{name:'后处理导出分支',exact:true}).press('ArrowDown');await page.getByRole('option',{name:'S · 平滑校正谱',exact:true}).click();await page.getByText(/已选择全部分支/).waitFor({state:'hidden'});await page.getByRole('button',{name:'打包已确认后处理结果',exact:true}).click();await page.getByRole('button',{name:'下载已确认后处理 ZIP',exact:true}).waitFor();const dp=page.waitForEvent('download');await page.getByRole('button',{name:'下载已确认后处理 ZIP',exact:true}).click();const d=await dp;await d.saveAs('<repository>/outputs/validation-private/v031/browser/v031_smoothed.zip');return{restored,download:d.suggestedFilename(),exceptions:await page.locator('[data-testid=stException]').count()};})(page);\n```\n### Open tabs\n- 0: [FTIR Spectral Workbench](http://127.0.0.1:8504/)\n- 1: [FTIR Spectral Workbench](http://127.0.0.1:8504/)\n- 2: (current) [FTIR Spectral Workbench](http://127.0.0.1:8504/)\n### Page\n- Page URL: http://127.0.0.1:8504/\n- Page Title: FTIR Spectral Workbench\n### Events\n- Downloading file ordinary_postprocessing_28fa6d12a31a.zip ...\n- Downloaded file ordinary_postprocessing_28fa6d12a31a.zip to \".playwright-mcp/ordinary-postprocessing-28fa6d12a31a.zip\""
+          }
+        ]
+      }
+    },
+    {
+      "step": "final_v031_confirm_NS_download_and_save",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "### Result\n{\"NSDownload\":\"ordinary_postprocessing_28fa6d12a31a.zip\",\"workspace\":\"independent_workspace_28fa6d12.zip\",\"exceptions\":0}\n### Ran Playwright code\n```js\nawait (async(page)=>{await page.getByRole('tab',{name:'归一化 Normalization',exact:true}).click();await page.getByText('当前归一化来源：S · 平滑校正谱',{exact:true}).waitFor();await page.getByRole('button',{name:'计算当前归一化预览',exact:true}).click();await page.getByText(/当前预览 · N_S ·/).waitFor();await page.getByRole('button',{name:'确认当前归一化',exact:true}).click();await page.getByText('N_S · 平滑后归一化：已确认',{exact:true}).waitFor();await page.getByRole('tab',{name:'结果导出',exact:true}).click();await page.getByRole('combobox',{name:'后处理导出分支',exact:true}).focus();await page.getByRole('combobox',{name:'后处理导出分支',exact:true}).press('ArrowDown');await page.getByRole('option',{name:'N_S · 平滑后归一化',exact:true}).click();await page.getByRole('button',{name:'打包已确认后处理结果',exact:true}).click();await page.getByRole('button',{name:'下载已确认后处理 ZIP',exact:true}).waitFor();const dp=page.waitForEvent('download');await page.getByRole('button',{name:'下载已确认后处理 ZIP',exact:true}).click();const d=await dp;await d.saveAs('<repository>/outputs/validation-private/v031/browser/v031_normalized_smoothed.zip');await page.getByText('6. 批量检查与导出',{exact:true}).first().click();await page.getByRole('button',{name:'准备工作区下载',exact:true}).click();await page.getByRole('button',{name:'保存工作区 ZIP',exact:true}).waitFor();const wp=page.waitForEvent('download');await page.getByRole('button',{name:'保存工作区 ZIP',exact:true}).click();const w=await wp;await w.saveAs('<repository>/outputs/validation-private/v031/browser/workspace_v031.zip');return{NSDownload:d.suggestedFilename(),workspace:w.suggestedFilename(),exceptions:await page.locator('[data-testid=stException]').count()};})(page);\n```\n### Events\n- Downloading file ordinary_postprocessing_28fa6d12a31a.zip ...\n- Downloaded file ordinary_postprocessing_28fa6d12a31a.zip to \".playwright-mcp/ordinary-postprocessing-28fa6d12a31a.zip\"\n- Downloading file independent_workspace_28fa6d12.zip ...\n- Downloaded file independent_workspace_28fa6d12.zip to \".playwright-mcp/independent-workspace-28fa6d12.zip\""
+          }
+        ]
+      }
+    }
+  ]
+}

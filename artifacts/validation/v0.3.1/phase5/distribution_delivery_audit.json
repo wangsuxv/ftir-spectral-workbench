@@ -1,0 +1,424 @@
+{
+  "started_utc": "2026-09-11T06:46:50.671009+00:00",
+  "checks": {
+    "wheel": {
+      "status": "pass",
+      "details": {
+        "filename": "ftir_spectral_workbench-0.3.1-py3-none-any.whl",
+        "sha256": "bc94452cee611fb574c207a5c1b877fe49d7732ab61631281d64ead21c618e5a",
+        "bytes": 310423,
+        "version": "0.3.1",
+        "python_module_count": 76,
+        "batch_modules": [
+          "ftir_workbench/batch/__init__.py",
+          "ftir_workbench/batch/export.py",
+          "ftir_workbench/batch/fingerprints.py",
+          "ftir_workbench/batch/importing.py",
+          "ftir_workbench/batch/models.py",
+          "ftir_workbench/batch/normalization_adapter.py",
+          "ftir_workbench/batch/postprocessing.py",
+          "ftir_workbench/batch/postprocessing_export.py",
+          "ftir_workbench/batch/recipes.py",
+          "ftir_workbench/batch/service.py",
+          "ftir_workbench/batch/state.py",
+          "ftir_workbench/batch/workspace.py"
+        ],
+        "package_module_counts": {
+          "ftir_baseline": 24,
+          "ftir2dcos": 20,
+          "ftir_workbench": 32
+        },
+        "console_scripts": {
+          "ftir-baseline": "ftir_baseline.cli:main",
+          "ftir-workbench": "ftir_workbench.cli:main",
+          "ftir2dcos": "ftir2dcos.cli:main"
+        },
+        "all_runtime_modules_match_source": true,
+        "all_installed_modules_match_wheel": true,
+        "frozen_scientific_files_verified": 34,
+        "legacy_baseline_2d_project_smoothing_present": true,
+        "legacy_runtime_anchors": [
+          "ftir_baseline/pipeline.py",
+          "ftir2dcos/twodcos/engine.py",
+          "ftir_workbench/export.py",
+          "ftir_workbench/post_baseline_smoothing.py",
+          "ftir_workbench/services/smoothing_service.py"
+        ]
+      }
+    },
+    "sdist": {
+      "status": "pass",
+      "details": {
+        "filename": "ftir_spectral_workbench-0.3.1.tar.gz",
+        "sha256": "c20e6e3a44cf8d6e957838d8d1e78661d3b3f432a3a60aa2a0547a915226547a",
+        "bytes": 1259153,
+        "member_count": 531,
+        "version": "0.3.1",
+        "runtime_sources_match_current": true,
+        "outputs_rawdata_venv_private_paths_absent": true,
+        "data_original_only_readme_placeholder": true,
+        "spectrum_like_members_only_under_examples_or_test_fixtures": true,
+        "ordinary_ui_present": true,
+        "documentation_finality": "Not asserted; rebuild and rerun after final documentation edits."
+      }
+    },
+    "installed": {
+      "status": "pass",
+      "details": {
+        "source_pythonpath_removed": true,
+        "cli_help": {
+          "ftir-workbench": {
+            "command": "ftir-workbench --help",
+            "exit_code": 0,
+            "stdout": "usage: ftir-workbench [-h] {inspect,baseline,twodcos,smooth,demo,verify} ...\n\nBaseline-first FTIR processing with optional prepared-only 2D-COS\n\npositional arguments:\n  {inspect,baseline,twodcos,smooth,demo,verify}\n    inspect             Validate and summarize raw FTIR input\n    baseline            Run and export a baseline-only workflow\n    twodcos             Run 2D-COS from a prepared CSV, sidecar, baseline ZIP,\n                        or smoothing bundle\n    smooth              Create an explicit post-baseline smoothed Prepared\n                        branch and bundle\n    demo                Run a local DPT series through baseline and optional\n                        2D demonstration\n    verify              Verify a workbench ZIP/.ftirw manifest\n\noptions:\n  -h, --help            show this help message and exit\n",
+            "stderr": ""
+          },
+          "ftir-baseline": {
+            "command": "ftir-baseline --help",
+            "exit_code": 0,
+            "stdout": "usage: ftir-baseline [-h] {inspect,init-recipe,run,scan,demo} ...\n\nInspectable baseline correction for in-situ FTIR series\n\npositional arguments:\n  {inspect,init-recipe,run,scan,demo}\n    inspect             validate and describe input\n    init-recipe         write a complete starter recipe\n    run                 run the pipeline and export a ZIP\n    scan                compare the prescribed parameter grid\n    demo                run a local raw DPT series\n\noptions:\n  -h, --help            show this help message and exit\n",
+            "stderr": ""
+          },
+          "ftir2dcos": {
+            "command": "ftir2dcos --help",
+            "exit_code": 0,
+            "stdout": "usage: ftir2dcos [-h] [--config CONFIG] [--input INPUT] [--output OUTPUT]\n                 [--dpt-pattern DPT_PATTERN]\n                 [--delimiter {auto,comma,tab,semicolon}]\n                 [--perturbation VALUE [VALUE ...]] [--range HIGH:LOW[:LABEL]\n                 [HIGH:LOW[:LABEL] ...]]\n                 [--intensity {absorbance,percent_transmittance,fraction_transmittance,unknown}]\n                 [--perturbation-order {preserve_file_order,sort_by_perturbation}]\n                 [--convention {canonical,2dpy_compatible}]\n                 [--contour-levels CONTOUR_LEVELS]\n                 [--display-percentile DISPLAY_PERCENTILE]\n                 [--peak WAVENUMBER[:LABEL][@RANGE]]\n                 [--peak-match-tolerance CM-1] [--sync-threshold VALUE]\n                 [--async-threshold VALUE]\n                 [--peak-relative-threshold FRACTION]\n                 [--analysis-order-note ANALYSIS_ORDER_NOTE]\n                 [--baseline {none,offset,constant,anchor_polynomial,anchor,asls,rubberband}]\n                 [--offset-mode {minimum,window_median}]\n                 [--offset-window HIGH LOW] [--anchor-range HIGH LOW]\n                 [--polynomial-order {0,1,2,3}] [--asls-lam ASLS_LAM]\n                 [--asls-p ASLS_P] [--asls-diff-order ASLS_DIFF_ORDER]\n                 [--asls-max-iter ASLS_MAX_ITER] [--asls-tol ASLS_TOL]\n                 [--rubberband-segments SEGMENT [SEGMENT ...]]\n                 [--rubberband-lam RUBBERBAND_LAM]\n                 [--rubberband-diff-order RUBBERBAND_DIFF_ORDER]\n                 [--rubberband-smooth-half-window RUBBERBAND_SMOOTH_HALF_WINDOW]\n                 [--smooth | --no-smooth]\n                 [--smoothing-window SMOOTHING_WINDOW]\n                 [--smoothing-polyorder SMOOTHING_POLYORDER]\n                 [--smoothing-mode {interp,mirror,constant,nearest,wrap}]\n                 [--normalization {none,vector,reference_peak}]\n                 [--reference-peak-range HIGH LOW]\n\nPreprocess FTIR spectra and calculate single-range or all-pairs cross-range\n2D-COS matrices.\n\noptions:\n  -h, --help            show this help message and exit\n  --config CONFIG       JSON wrapper or plain PipelineConfig file\n\ninput and output:\n  --input INPUT         wide CSV/TXT/TSV file, DPT file, or directory of DPT\n                        files\n  --output OUTPUT       output root (default: wrapper value, otherwise\n                        ./results)\n  --dpt-pattern DPT_PATTERN\n                        case-insensitive filename pattern for a DPT directory\n                        (default: *MIN.dpt)\n  --delimiter {auto,comma,tab,semicolon}\n                        wide-table delimiter (default: detect comma, tab, or\n                        semicolon)\n  --perturbation VALUE [VALUE ...]\n                        explicit perturbation values in input spectrum order\n\npipeline:\n  --range HIGH:LOW[:LABEL] [HIGH:LOW[:LABEL] ...]\n                        inclusive range; repeat for batch analysis. Colon or\n                        comma compact syntax is preferred; legacy '--range\n                        HIGH LOW' remains supported. For negative compact\n                        values use '--range=-1:-5[:LABEL]'.\n  --intensity {absorbance,percent_transmittance,fraction_transmittance,unknown}\n                        input intensity unit; conversion is only done for an\n                        explicit transmittance unit\n  --perturbation-order {preserve_file_order,sort_by_perturbation}\n                        preserve acquisition/file order by default, or\n                        explicitly sort by perturbation\n  --convention {canonical,2dpy_compatible}\n                        2D-COS matrix orientation/sign convention\n  --contour-levels CONTOUR_LEVELS\n                        number of contour levels used for exported figures\n  --display-percentile DISPLAY_PERCENTILE\n                        symmetric display-only color percentile in (0, 100]\n\npeak response-order analysis:\n  --peak WAVENUMBER[:LABEL][@RANGE]\n                        peak position to order; repeat at least twice. RANGE\n                        is an optional 1-based analysis-range index required\n                        when intervals overlap (examples: 1650:amide-I,\n                        1650:amide-I@1, 1200@2).\n  --peak-match-tolerance CM-1\n                        maximum distance to the nearest sampled grid point\n                        (default: 1 cm^-1)\n  --sync-threshold VALUE\n                        absolute synchronous signal cutoff for an\n                        indeterminate pair (default: 0)\n  --async-threshold VALUE\n                        absolute asynchronous signal cutoff for an\n                        indeterminate pair (default: 0)\n  --peak-relative-threshold FRACTION\n                        matrix-relative numerical signal cutoff; the effective\n                        cutoff is the larger of this fraction (0..1) times\n                        matrix max-abs and the absolute cutoff (default: 1e-6)\n  --analysis-order-note ANALYSIS_ORDER_NOTE\n                        optional context appended to the automatically derived\n                        perturbation-order facts; it cannot override the\n                        stored sequence\n\nbaseline correction:\n  --baseline {none,offset,constant,anchor_polynomial,anchor,asls,rubberband}\n                        baseline method\n  --offset-mode {minimum,window_median}\n                        constant/offset estimator\n  --offset-window HIGH LOW\n                        wavenumber interval used by offset window_median mode\n  --anchor-range HIGH LOW\n                        anchor interval; repeat this option to supply multiple\n                        intervals\n  --polynomial-order {0,1,2,3}\n                        anchor-polynomial order\n  --asls-lam ASLS_LAM   AsLS smoothness lambda\n  --asls-p ASLS_P       AsLS asymmetry in (0, 1)\n  --asls-diff-order ASLS_DIFF_ORDER\n                        AsLS finite-difference order\n  --asls-max-iter ASLS_MAX_ITER\n                        AsLS maximum iterations\n  --asls-tol ASLS_TOL   AsLS convergence tolerance\n  --rubberband-segments SEGMENT [SEGMENT ...]\n                        segment count (one value) or explicit segment boundary\n                        indices\n  --rubberband-lam RUBBERBAND_LAM\n                        optional rubberband smoothing lambda\n  --rubberband-diff-order RUBBERBAND_DIFF_ORDER\n                        rubberband smoothing finite-difference order\n  --rubberband-smooth-half-window RUBBERBAND_SMOOTH_HALF_WINDOW\n                        optional rubberband pre-smoothing half-window\n\noptional Savitzky-Golay smoothing:\n  --smooth              enable smoothing (disabled by default)\n  --no-smooth           explicitly disable smoothing\n  --smoothing-window SMOOTHING_WINDOW\n                        Savitzky-Golay window length\n  --smoothing-polyorder SMOOTHING_POLYORDER\n                        Savitzky-Golay polynomial order\n  --smoothing-mode {interp,mirror,constant,nearest,wrap}\n                        Savitzky-Golay edge mode\n\noptional normalization:\n  --normalization {none,vector,reference_peak}\n                        spectrum-wise normalization method (none by default)\n  --reference-peak-range HIGH LOW\n                        reference interval required by reference_peak\n                        normalization\n\nConfiguration precedence: explicit CLI options override JSON values. Ranges\nuse: repeated --range, then wrapper JSON ranges, then legacy pipeline low/high\nfields. A plain PipelineConfig JSON still requires --input. Wrapper-relative\npaths are resolved from the JSON file directory.\n",
+            "stderr": ""
+          }
+        },
+        "installed_api": {
+          "isolated_mode": true,
+          "origins": {
+            "ftir_baseline": "site-packages/ftir_baseline/__init__.py",
+            "ftir2dcos": "site-packages/ftir2dcos/__init__.py",
+            "ftir_workbench": "site-packages/ftir_workbench/__init__.py",
+            "ftir_workbench.batch.postprocessing": "site-packages/ftir_workbench/batch/postprocessing.py",
+            "ftir_workbench.batch.normalization_adapter": "site-packages/ftir_workbench/batch/normalization_adapter.py",
+            "ftir_workbench.batch.postprocessing_export": "site-packages/ftir_workbench/batch/postprocessing_export.py",
+            "ftir_workbench.batch.workspace": "site-packages/ftir_workbench/batch/workspace.py",
+            "ftir_workbench.post_baseline_smoothing": "site-packages/ftir_workbench/post_baseline_smoothing.py",
+            "ftir_workbench.export": "site-packages/ftir_workbench/export.py",
+            "ftir_workbench.services.smoothing_service": "site-packages/ftir_workbench/services/smoothing_service.py"
+          },
+          "distribution_version": "0.3.1",
+          "workbench_version": "0.3.1",
+          "baseline_version": "0.1.0",
+          "twodcos_version": "0.4.0",
+          "callable_public_apis": {
+            "ftir_workbench.batch.importing": [
+              "import_sources"
+            ],
+            "ftir_workbench.batch.service": [
+              "preview_coarse",
+              "preview_fine"
+            ],
+            "ftir_workbench.batch.state": [
+              "confirm_coarse",
+              "confirm_fine",
+              "skip_fine",
+              "get_ready_snapshot"
+            ],
+            "ftir_workbench.batch.postprocessing": [
+              "preview_branch",
+              "confirm_branch",
+              "get_branch",
+              "update_draft",
+              "copy_drafts",
+              "preview_selected",
+              "confirm_selected"
+            ],
+            "ftir_workbench.batch.postprocessing_export": [
+              "build_postprocessing_export",
+              "verify_postprocessing_export",
+              "can_export_postprocessing_wide"
+            ],
+            "ftir_workbench.batch.workspace": [
+              "save_batch_workspace",
+              "load_batch_workspace"
+            ],
+            "ftir_workbench.export": [
+              "build_baseline_bundle",
+              "build_project_bundle",
+              "build_twodcos_bundle",
+              "verify_project_bundle"
+            ],
+            "ftir_workbench.post_baseline_smoothing": [
+              "apply_post_baseline_smoothing",
+              "smooth_spectral_arrays",
+              "validate_smoothing_request"
+            ]
+          },
+          "normalization_core_analysis_unchanged": true,
+          "normalization_core_minmax_optional_normalized_is_none": true,
+          "normalization_core_minmax_uses_view_data": true,
+          "ordinary_maximum_uses_transformed_output": true,
+          "ordinary_minmax_quantity_purpose_scale_offset_correct": true,
+          "ordinary_smoothing_array_api_smoke": true,
+          "baseline_prepared_2d_calls": 0
+        },
+        "dependency_versions_rechecked": [
+          {
+            "package": "altair",
+            "version": "6.2.2"
+          },
+          {
+            "package": "annotated-types",
+            "version": "0.8.0"
+          },
+          {
+            "package": "anyio",
+            "version": "4.14.2"
+          },
+          {
+            "package": "ast_serialize",
+            "version": "0.8.0"
+          },
+          {
+            "package": "attrs",
+            "version": "26.1.0"
+          },
+          {
+            "package": "blinker",
+            "version": "1.9.0"
+          },
+          {
+            "package": "certifi",
+            "version": "2026.7.22"
+          },
+          {
+            "package": "charset-normalizer",
+            "version": "3.5.1"
+          },
+          {
+            "package": "click",
+            "version": "8.4.2"
+          },
+          {
+            "package": "contourpy",
+            "version": "1.3.3"
+          },
+          {
+            "package": "coverage",
+            "version": "7.15.4"
+          },
+          {
+            "package": "cycler",
+            "version": "0.12.1"
+          },
+          {
+            "package": "fonttools",
+            "version": "4.63.0"
+          },
+          {
+            "package": "h11",
+            "version": "0.16.0"
+          },
+          {
+            "package": "httptools",
+            "version": "0.8.0"
+          },
+          {
+            "package": "hypothesis",
+            "version": "6.165.10"
+          },
+          {
+            "package": "idna",
+            "version": "3.19"
+          },
+          {
+            "package": "iniconfig",
+            "version": "2.3.0"
+          },
+          {
+            "package": "itsdangerous",
+            "version": "2.2.0"
+          },
+          {
+            "package": "Jinja2",
+            "version": "3.1.6"
+          },
+          {
+            "package": "jsonschema",
+            "version": "4.26.0"
+          },
+          {
+            "package": "jsonschema-specifications",
+            "version": "2025.9.1"
+          },
+          {
+            "package": "kiwisolver",
+            "version": "1.5.0"
+          },
+          {
+            "package": "librt",
+            "version": "0.15.0"
+          },
+          {
+            "package": "MarkupSafe",
+            "version": "3.0.3"
+          },
+          {
+            "package": "matplotlib",
+            "version": "3.11.1"
+          },
+          {
+            "package": "mypy",
+            "version": "2.3.1"
+          },
+          {
+            "package": "mypy_extensions",
+            "version": "1.1.0"
+          },
+          {
+            "package": "narwhals",
+            "version": "2.25.0"
+          },
+          {
+            "package": "numpy",
+            "version": "2.5.2"
+          },
+          {
+            "package": "packaging",
+            "version": "26.3"
+          },
+          {
+            "package": "pandas",
+            "version": "3.0.5"
+          },
+          {
+            "package": "pandas-stubs",
+            "version": "3.0.5.260730"
+          },
+          {
+            "package": "pathspec",
+            "version": "1.1.1"
+          },
+          {
+            "package": "pillow",
+            "version": "12.3.0"
+          },
+          {
+            "package": "plotly",
+            "version": "6.9.0"
+          },
+          {
+            "package": "pluggy",
+            "version": "1.6.0"
+          },
+          {
+            "package": "protobuf",
+            "version": "7.36.0"
+          },
+          {
+            "package": "pyarrow",
+            "version": "25.0.1"
+          },
+          {
+            "package": "pybaselines",
+            "version": "1.2.1"
+          },
+          {
+            "package": "pydantic",
+            "version": "2.13.4"
+          },
+          {
+            "package": "pydantic_core",
+            "version": "2.46.4"
+          },
+          {
+            "package": "pydeck",
+            "version": "0.9.3"
+          },
+          {
+            "package": "Pygments",
+            "version": "2.21.0"
+          },
+          {
+            "package": "pyparsing",
+            "version": "3.3.2"
+          },
+          {
+            "package": "pytest",
+            "version": "9.1.1"
+          },
+          {
+            "package": "pytest-cov",
+            "version": "7.1.0"
+          },
+          {
+            "package": "python-dateutil",
+            "version": "2.9.0.post0"
+          },
+          {
+            "package": "python-multipart",
+            "version": "0.0.32"
+          },
+          {
+            "package": "referencing",
+            "version": "0.37.0"
+          },
+          {
+            "package": "requests",
+            "version": "2.34.2"
+          },
+          {
+            "package": "rpds-py",
+            "version": "2026.6.3"
+          },
+          {
+            "package": "ruff",
+            "version": "0.16.4"
+          },
+          {
+            "package": "scipy",
+            "version": "1.18.1"
+          },
+          {
+            "package": "six",
+            "version": "1.17.0"
+          },
+          {
+            "package": "sortedcontainers",
+            "version": "2.4.0"
+          },
+          {
+            "package": "starlette",
+            "version": "1.6.0"
+          },
+          {
+            "package": "streamlit",
+            "version": "1.62.0"
+          },
+          {
+            "package": "toml",
+            "version": "0.10.2"
+          },
+          {
+            "package": "typing_extensions",
+            "version": "4.16.0"
+          },
+          {
+            "package": "typing-inspection",
+            "version": "0.4.4"
+          },
+          {
+            "package": "urllib3",
+            "version": "2.7.0"
+          },
+          {
+            "package": "uvicorn",
+            "version": "0.52.4"
+          },
+          {
+            "package": "websockets",
+            "version": "16.1.1"
+          }
+        ],
+        "dependency_count": 64
+      }
+    }
+  },
+  "failures": [],
+  "status": "pass",
+  "completed_utc": "2026-09-11T06:46:55.157923+00:00"
+}

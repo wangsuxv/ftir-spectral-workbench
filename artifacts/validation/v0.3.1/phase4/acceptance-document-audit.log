@@ -1,0 +1,54 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -c 'import ast,json,re,subprocess
+from pathlib import Path
+root=Path.cwd()
+doc=root/"docs/ordinary_postprocessing_acceptance.md"
+text=doc.read_text()
+aliases={alias:path for alias,path in re.findall(r"\| ([A-Z]+) \| \[(tests/[^]]+)\]",text)}
+errors=[]
+selectors=set(re.findall(r"\b([A-Z]+)::(test_[A-Za-z0-9_]+)",text))
+for alias,name in sorted(selectors):
+    path=root/aliases[alias]
+    names={node.name for node in ast.parse(path.read_text()).body if isinstance(node,(ast.FunctionDef,ast.AsyncFunctionDef))}
+    if name not in names: errors.append(f"missing selector {alias}::{name}")
+links=re.findall(r"\]\(([^)]+)\)",text)
+for target in links:
+    if not (doc.parent/target.split("#")[0]).exists(): errors.append(f"missing link {target}")
+ids=re.findall(r"^\| PP-(\d{3}) \|",text,re.M)
+if ids != [f"{n:03d}" for n in range(1,67)]: errors.append("scenario mapping is not exactly PP-001 through PP-066")
+base="9fc13c10ae34bd53cb220d0807edb18c9e2e41dc"
+tracked=subprocess.check_output(["git","diff",base,"--name-only","-z"]).decode().split("\0")
+untracked=subprocess.check_output(["git","ls-files","--others","--exclude-standard","-z"]).decode().split("\0")
+paths=sorted({name for name in tracked+untracked if name})
+nontext=[]
+data=[]
+leaked_paths=[]
+for name in paths:
+    path=root/name
+    if not path.is_file(): continue
+    if name.startswith("outputs/") or path.suffix.lower() in {".zip",".npz",".npy",".csv",".tsv",".dpt",".ftirw",".xlsx",".png",".pdf"}: data.append(name)
+    raw=path.read_bytes()
+    if b"\0" in raw: nontext.append(name)
+    if name.startswith("artifacts/validation/v0.3.1/") and re.search(rb"/Users/[^/]+/|/private/var/folders/|/var/folders/",raw): leaked_paths.append(name)
+if nontext or data or leaked_paths: errors.append("reviewed public change set contains data/binary files or absolute private paths")
+result={"scope":"changed tracked paths since exact baseline and unignored additions; ignored data contents not read","base_commit":base,"scenario_rows":len(ids),"verified_ast_selectors":len(selectors),"verified_local_links":len(links),"reviewed_public_paths":len(paths),"binary_paths":nontext,"data_artifact_paths":data,"absolute_private_path_logs":leaked_paths,"errors":errors,"status":"pass" if not errors else "fail"}
+print(json.dumps(result,indent=2))
+raise SystemExit(bool(errors))'
+STARTED_UTC: 2026-09-11T05:58:20.658860+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v031 cache>
+{
+  "scope": "changed tracked paths since exact baseline and unignored additions; ignored data contents not read",
+  "base_commit": "9fc13c10ae34bd53cb220d0807edb18c9e2e41dc",
+  "scenario_rows": 66,
+  "verified_ast_selectors": 92,
+  "verified_local_links": 43,
+  "reviewed_public_paths": 113,
+  "binary_paths": [],
+  "data_artifact_paths": [],
+  "absolute_private_path_logs": [],
+  "errors": [],
+  "status": "pass"
+}
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 0.238

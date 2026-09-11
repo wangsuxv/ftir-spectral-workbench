@@ -1,0 +1,97 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python artifacts/validation/v0.3.1/phase5/verify_final_browser.py
+STARTED_UTC: 2026-09-11T06:40:26.402990+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v031 cache>
+{
+  "status": "pass",
+  "workspace": {
+    "filename": "workspace_v031.zip",
+    "sha256": "f9fbeb0fc0d01ab398811b5cd42fb374dd9b3a6f26dd12b78659d3a191f74fb0",
+    "size_bytes": 549080,
+    "workspace_id": "28fa6d12a31a4d668664fb770d85df66",
+    "spectrum_ids": [
+      "9c27ff2a492949fda2a7d85729c3d2aa",
+      "77d5fdae3c8b4cd29141766bb1f82164",
+      "61cc3a73667840f497009d43daac6685"
+    ],
+    "source_count": 2,
+    "selected_spectrum_id": "9c27ff2a492949fda2a7d85729c3d2aa",
+    "selected_spectrum_ids": [
+      "9c27ff2a492949fda2a7d85729c3d2aa",
+      "77d5fdae3c8b4cd29141766bb1f82164"
+    ],
+    "load_numerical_baseline_prepared_2d_calls": 0,
+    "source_bytes_match_actual_uploads": true,
+    "previews_absent": true
+  },
+  "unchanged_baseline_arrays": 204,
+  "exports": {
+    "v031_smoothed.zip": {
+      "integrity": {
+        "filename": "v031_smoothed.zip",
+        "sha256": "5571fc8e9cc372beda74f547fded460d4c9685b02778c143f16597f28df1a238",
+        "size_bytes": 33993,
+        "nodes": 4,
+        "requested_items": 2,
+        "excluded_items": [],
+        "integrity_verifier": true,
+        "explicit_replay_verifier": true,
+        "non_replay_forbidden_calls": 0,
+        "replay_baseline_prepared_2d_calls": 0,
+        "verification_only_replays": {
+          "smoothing": 2
+        },
+        "exporter_versions": {
+          "ftir-spectral-workbench": "0.3.1",
+          "numpy": "2.5.2",
+          "pybaselines": "1.2.1",
+          "pydantic": "2.13.4",
+          "python": "3.12.14",
+          "scipy": "1.18.1"
+        },
+        "wide_available": true
+      },
+      "confirmed_arrays": {
+        "csv_arrays_match_confirmed_workspace": 4,
+        "normalized_baseline_evidence": []
+      }
+    },
+    "v031_normalized_smoothed.zip": {
+      "integrity": {
+        "filename": "v031_normalized_smoothed.zip",
+        "sha256": "80ac7a94786553076f4542662fd81a63116064a0bc2781bc290143d6614ae676",
+        "size_bytes": 44280,
+        "nodes": 6,
+        "requested_items": 2,
+        "excluded_items": [],
+        "integrity_verifier": true,
+        "explicit_replay_verifier": true,
+        "non_replay_forbidden_calls": 0,
+        "replay_baseline_prepared_2d_calls": 0,
+        "verification_only_replays": {
+          "smoothing": 2,
+          "normalization": 2
+        },
+        "exporter_versions": {
+          "ftir-spectral-workbench": "0.3.1",
+          "numpy": "2.5.2",
+          "pybaselines": "1.2.1",
+          "pydantic": "2.13.4",
+          "python": "3.12.14",
+          "scipy": "1.18.1"
+        },
+        "wide_available": true
+      },
+      "confirmed_arrays": {
+        "csv_arrays_match_confirmed_workspace": 6,
+        "normalized_baseline_evidence": []
+      }
+    }
+  },
+  "A_NB_and_unrelated_B_C_unchanged": true,
+  "final_A_S_and_NS_computation_versions": "0.3.1",
+  "scope": "Actual final-version browser downloads; explicit verifier replays only S/N, never baseline."
+}
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 0.953

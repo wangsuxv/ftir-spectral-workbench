@@ -1,0 +1,24 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -
+STARTED_UTC: 2026-09-11T06:47:22.561678+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v031 cache>
+{
+  "status": "pass",
+  "documents": [
+    "README.md",
+    "PROJECT_STATUS.md",
+    "CHANGELOG.md",
+    "examples/ordinary_postprocessing/README.md",
+    "artifacts/validation/v0.3.1/REPORT.md",
+    "docs/ordinary_postprocessing.md",
+    "docs/ordinary_postprocessing_acceptance.md",
+    "docs/ordinary_postprocessing_browser_acceptance.md",
+    "docs/ordinary_postprocessing_code_map.md"
+  ],
+  "existing_local_link_occurrences": 211,
+  "acceptance_scenarios": 66,
+  "evidence_python_scripts_parse": true
+}
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 0.036

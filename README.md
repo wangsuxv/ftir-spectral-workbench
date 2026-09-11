@@ -1,8 +1,29 @@
 # FTIR Spectral Workbench
 
-FTIR Spectral Workbench 提供两种独立工作流：有明确扰动顺序的原位 FTIR 序列，以及彼此无关的普通光谱批次。原位模式保留 `FTIR → baseline → Prepared → 可选 smoothing → 2D-COS` 全流程；普通模式逐谱预览和确认粗调/细调，批量导出各自的正式结果，并支持工作区保存与恢复。
+FTIR Spectral Workbench 提供两种独立工作流：有明确扰动顺序的原位 FTIR 序列，以及彼此无关的普通光谱批次。原位模式保留 `FTIR → baseline → Prepared → 可选 smoothing → 2D-COS` 全流程；普通模式逐谱预览和确认粗调/细调，再按需创建独立的平滑与归一化分支，批量导出各自的正式结果，并支持工作区保存与恢复。
 
-本次 `v0.3.0` 升级在 workbench 层增加普通模式，不改变冻结科学核心或旧原位行为。项目采用 MIT 许可证，公开内容不包含实验原始数据。
+当前本地版本为 `v0.3.1`，增加普通光谱后处理，已完成全量测试、构建和真实浏览器导出/恢复闭环。升级不改变冻结科学核心或旧原位行为。项目采用 MIT 许可证，公开内容不包含实验原始数据；本次未推送、打 tag 或发布 Release。
+
+## v0.3.1 普通光谱后处理
+
+普通模式完成细调确认或明确跳过细调后，进入“普通光谱后处理”页。两个新增步骤均默认关闭：平滑复用现有 Savitzky–Golay、Gaussian、Moving Average、Median helpers；归一化复用冻结 core 的峰高、面积、L2 和 Min–Max 实现。每条光谱独立形成以下分支：
+
+```text
+B：已确认最终基线吸光度
+├─ S：Smooth(B)
+│  └─ N_S：Normalize(S)
+└─ N_B：Normalize(B)
+```
+
+每个分支分别保存草稿、预览和确认版。确认 S 不自动切换归一化或导出来源；修改 S 只使旧 N_S 过期，N_B 保持有效。修改某谱的 B 仅使该谱的后处理过期。切谱、缩放、复制参数、确认和导出都不会重新拟合基线；复制仅写独立草稿，预览才执行对应数值步骤。普通后处理不创建 Prepared，也不进入 2D。
+
+后处理作用于父谱完整域，不插值、对齐、重采样或裁负值。面积按真实波数坐标积分；参考区间必须完整位于谱域内并包含至少两个实际点，零值、近零或不稳定参考明确拒绝。Min–Max 固定为 0–1 显示缩放；归一化和 Min–Max 结果不能作为吸光度转换为物理 T/%T。不同配方不自动代表样品可定量比较。
+
+新导出默认选择 B，可明确选择 S、N_B、N_S 或全部四分支。即使选择全部，也只有明确勾选“只导出有效项”才排除缺失、失败、过期或手动排除项，并保留完整报告。ZIP 只序列化确认数组，包含必要 B/S 父数据、完整与有效配方、来源、QC、系数和版本；CSV 保留 17 位有效数字，只有实际 x 数组完全一致才提供宽表。旧基线导出格式不变。工作区 schema 2.0 保存后处理草稿、正式数组及历史父级，兼容读取旧 schema 1.0；预览不保存，恢复不自动计算。
+
+最终 v0.3.1 全量实测为 **1238 passed，5 个既有 warning，132.47 秒**；Ruff、配置范围内 Mypy（32 个源码文件）、sdist/wheel 构建和 wheel 安装通过；冻结文件 34/34 字节与路径集合不变，64 项依赖版本不变。结果见 [Phase 5 日志](artifacts/validation/v0.3.1/phase5/)，实际基准与完成提交 SHA 见 [交付报告](artifacts/validation/v0.3.1/REPORT.md)。真实浏览器以三条合成异轴谱完成全部 12 个分支导出、A/B 严格同轴宽表、过期 N_S 阻断/明确排除及新会话恢复；660 个数组、70,860 个元素与来源/草稿/父级精确核对。完整闭环的原下载如实保留版本统一前的 0.3.0；随后重启最终 v0.3.1，再次恢复、确认新 S/N_S 并下载，实际计算与导出版本均验证为 0.3.1，204 个基线数组不变。操作、失败定位尝试与证据边界见 [浏览器验收记录](docs/ordinary_postprocessing_browser_acceptance.md)。
+
+具体操作、科学边界和 verifier 示例见 [普通后处理说明](docs/ordinary_postprocessing.md)，可重建输入见 [纯合成示例](examples/ordinary_postprocessing/README.md)。以下 v0.3.0 及更早记录保留各自历史验收结果。
 
 ## v0.3.0 普通光谱独立批量基线
 
@@ -81,21 +102,21 @@ v0.2.1 接受 `.csv`、`.tsv`、`.tab`、`.txt`、`.dpt`、`.asc`、`.dat` 和 `
 
 - `ftir_baseline` 是单位转换、连续波数区间、estimate-only 平滑、粗/细/序列基线、归一化分支、QC 和基线导出的唯一实现。
 - `ftir2dcos.twodcos` 是 Hilbert–Noda、同步/异步、canonical/2dpy-compatible、homo 和 cross-range 计算的唯一实现。
-- `ftir_workbench` 只负责数据合同、状态、fingerprint、服务和跨阶段导出，不复制科学公式。
+- `ftir_workbench` 负责数据合同、状态、fingerprint、服务和导出；普通后处理的数组门面复用既有平滑 helpers 与冻结归一化 core，增加输入/参考保护及结果解释，不另造算法。
 - 默认 2D 输入始终是未归一化的 corrected absorbance，即 `PipelineResult.analysis_data`。
 - 2D 服务不调用旧 `ftir2dcos.pipeline`，因此不会重复单位转换、平滑、基线或归一化。
 - 不连续 2D 区间分别计算 self/cross 矩阵，不会伪装成连续波数轴。
 - 不同 Prepared blocks 的 cross 默认阻断；兼容性检查后仍需显式确认，并记录双方血缘。
-- v0.2.1 的输入、baseline 与 2D 科学路径在 v0.2.5 继续冻结；post-baseline smoothing 仅位于独立 workbench 分支层。对应逐文件 SHA-256 审计记录保存在 `artifacts/`。
+- v0.2.1 的输入、baseline 与 2D 科学路径继续冻结；post-baseline smoothing 和普通后处理仅位于独立 workbench 分支层。对应逐文件 SHA-256 审计记录保存在 `artifacts/`。
 - Preview、显示单位、热图色阶和 Cross orientation 都是状态隔离的查看操作，不改变 Prepared、2D fingerprint 或已存在矩阵。
 
-## Preview 与正式配置
+## 原位序列的 Preview 与正式配置
 
 Coarse 和 Fine 页面中的控件先形成临时 draft。`Preview` 使用临时 validated config 对完整光谱序列运行现有 `ftir_baseline.run_pipeline`，结果保存在独立 UI state 中；它不会覆盖正式 `baseline_config`、正式 baseline result、Prepared 或 2D。
 
 只有显式点击 `Adopt this recipe` 或 `Apply fine settings` 才会提交正式配置，并按 v0.1 依赖关系使 baseline result、Prepared 和 2D 失效。仅切换代表谱、候选查看项、显示单位或 Cross 1/Cross 2 不会触发科学失效。
 
-## 四种入口
+## 原位序列的四种入口
 
 1. 原始 FTIR → 基线、QC、导出后结束。
 2. 原始 FTIR → 基线 → 当前内存校正谱 → self/cross 2D-COS。
@@ -131,7 +152,7 @@ ruff check src tests ui scripts
 
 公开仓库不包含实验原始数据，也不包含由私有数据生成的指纹清单。`data/original/` 仅作为本机数据入口；其中除说明文件外的所有内容均被 Git 忽略。你也可以直接在 Streamlit 界面上传自己的 `.dpt`、`.csv`、`.tsv`、`.tab`、`.txt`、`.asc`、`.dat` 或 `.xy` 文本文件。
 
-导入目录时会：
+原位 CLI 导入目录时会：
 
 - 只读取支持的谱文件；
 - 默认排除 `BASELINE.dpt`；
@@ -165,7 +186,7 @@ python scripts/validate_real_data_demo.py outputs/real-data-demo
 
 演算默认先在 1800–900 cm⁻¹ 上完成唯一一次基线处理，再从 prepared data 截取 1736–1509 和 1250–1140 cm⁻¹，计算两个 self 结果和一个矩形 cross 结果。运行前请根据自己的数据范围审阅这些参数。
 
-## 导出
+## 原位序列导出
 
 Baseline bundle 包含原始输入、吸光度、基线分解、校正谱、QC、recipe、`corrected_absorbance_for_2dcos.csv`、`prepared_spectrum.meta.json` 和带 SHA-256 的 manifest。
 
@@ -207,11 +228,11 @@ tests/                   两套原回归 + 新集成/UI 测试
 data/original/           本机私有数据入口（谱文件不纳入 Git）
 ```
 
-## 结果失效
+## 原位序列结果失效
 
 原始数据、单位、扰动顺序或已提交的基线科学配置变化会失效 Prepared、smoothing 和全部 2D 结果。Smoothing draft/Preview 不修改正式分支；创建 smoothed branch 也不自动激活。显式切换 primary/smoothed Prepared 时只使旧 2D 后代失效。2D 区间、convention 或网格策略变化只失效 2D。代表谱、A/%T/T 显示、Cross 1/Cross 2、色阶、等高线、字体和线宽不会触发科学重算。
 
-本版本不增加多个 Baseline Blocks、局部 range correction、processing/analysis 双范围模型、baseline sensitivity A/B/C、新基线方法或 schema，也不实施自动参数优化、自动 SNR 推荐、resampling、连续多次 smoothing、smoothing + scientific normalization 组合、沿扰动轴平滑、PySide6/macOS `.app` 或大规模 UI 重写。
+本版本不增加多个 Baseline Blocks、局部 range correction、processing/analysis 双范围模型、baseline sensitivity A/B/C、新基线方法或 baseline schema，也不实施自动参数优化、自动 SNR 推荐、resampling、连续多次 smoothing、沿扰动轴平滑、PySide6/macOS `.app` 或大规模 UI 重写。原位 Prepared 分支仍不增加 smoothing + scientific normalization 组合；普通模式只允许上文固定的 B、S、N_B、N_S 数据链。
 
 最终实施状态与逐项合并审计见 `PROJECT_STATUS.md` 和 `MERGE_AUDIT.md`。
 私有数据处理约定见 `docs/original_data.md`。

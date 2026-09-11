@@ -1,0 +1,27 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -c 'from dataclasses import replace
+import numpy as np
+from tests.postprocessing.helpers import confirmed_workspace
+from tests.postprocessing.test_state_contracts import apply_branch
+from ftir_workbench.batch.postprocessing import get_postprocessing_state,get_branch,snapshot_fingerprint
+from ftir_workbench.batch.workspace import save_batch_workspace,load_batch_workspace
+from ftir_workbench.batch.postprocessing_export import build_postprocessing_export,verify_postprocessing_export
+ws,sid=confirmed_workspace(np.arange(3.0),np.array([0.0,1.0,2.0]))
+original=apply_branch(ws,sid,"normalized_baseline",{"enabled":True,"method":"minmax_display"})
+changed=replace(original,scale=original.scale*4,spectra=original.spectra*4)
+changed=replace(changed,fingerprint=snapshot_fingerprint(changed))
+get_postprocessing_state(ws,sid).normalized_baseline.committed=changed
+restored=load_batch_workspace(save_batch_workspace(ws))
+result=get_branch(restored,sid,"normalized_baseline")
+artifact=build_postprocessing_export(restored,[sid],branches=("normalized_baseline",))
+print({"claimed_method":result.effective_recipe["method"],"claimed_purpose":result.purpose,"restored_values":result.spectra.tolist(),"restored_scale":result.scale.tolist(),"export_verifies":verify_postprocessing_export(artifact.zip_bytes,recompute=False)})
+assert np.max(result.spectra)<=1.0,"rehashed Min-Max snapshot was restored/exported outside the fixed 0-1 range"'
+STARTED_UTC: 2026-09-11T06:09:27.090550+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v031 cache>
+{'claimed_method': 'minmax_display', 'claimed_purpose': 'display_only', 'restored_values': [[0.0, 2.0, 4.0]], 'restored_scale': [2.0], 'export_verifies': False}
+Traceback (most recent call last):
+  File "<string>", line 17, in <module>
+AssertionError: rehashed Min-Max snapshot was restored/exported outside the fixed 0-1 range
+
+EXIT_CODE: 1
+ELAPSED_SECONDS: 0.962

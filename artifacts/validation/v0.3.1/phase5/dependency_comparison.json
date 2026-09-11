@@ -1,0 +1,328 @@
+{
+  "workbench_source_version": "0.3.1",
+  "installed_workbench_metadata": "0.3.1",
+  "dependency_count": 64,
+  "all_versions_unchanged": true,
+  "packages": [
+    {
+      "package": "altair",
+      "baseline": "6.2.2",
+      "actual": "6.2.2"
+    },
+    {
+      "package": "annotated-types",
+      "baseline": "0.8.0",
+      "actual": "0.8.0"
+    },
+    {
+      "package": "anyio",
+      "baseline": "4.14.2",
+      "actual": "4.14.2"
+    },
+    {
+      "package": "ast_serialize",
+      "baseline": "0.8.0",
+      "actual": "0.8.0"
+    },
+    {
+      "package": "attrs",
+      "baseline": "26.1.0",
+      "actual": "26.1.0"
+    },
+    {
+      "package": "blinker",
+      "baseline": "1.9.0",
+      "actual": "1.9.0"
+    },
+    {
+      "package": "certifi",
+      "baseline": "2026.7.22",
+      "actual": "2026.7.22"
+    },
+    {
+      "package": "charset-normalizer",
+      "baseline": "3.5.1",
+      "actual": "3.5.1"
+    },
+    {
+      "package": "click",
+      "baseline": "8.4.2",
+      "actual": "8.4.2"
+    },
+    {
+      "package": "contourpy",
+      "baseline": "1.3.3",
+      "actual": "1.3.3"
+    },
+    {
+      "package": "coverage",
+      "baseline": "7.15.4",
+      "actual": "7.15.4"
+    },
+    {
+      "package": "cycler",
+      "baseline": "0.12.1",
+      "actual": "0.12.1"
+    },
+    {
+      "package": "fonttools",
+      "baseline": "4.63.0",
+      "actual": "4.63.0"
+    },
+    {
+      "package": "h11",
+      "baseline": "0.16.0",
+      "actual": "0.16.0"
+    },
+    {
+      "package": "httptools",
+      "baseline": "0.8.0",
+      "actual": "0.8.0"
+    },
+    {
+      "package": "hypothesis",
+      "baseline": "6.165.10",
+      "actual": "6.165.10"
+    },
+    {
+      "package": "idna",
+      "baseline": "3.19",
+      "actual": "3.19"
+    },
+    {
+      "package": "iniconfig",
+      "baseline": "2.3.0",
+      "actual": "2.3.0"
+    },
+    {
+      "package": "itsdangerous",
+      "baseline": "2.2.0",
+      "actual": "2.2.0"
+    },
+    {
+      "package": "Jinja2",
+      "baseline": "3.1.6",
+      "actual": "3.1.6"
+    },
+    {
+      "package": "jsonschema",
+      "baseline": "4.26.0",
+      "actual": "4.26.0"
+    },
+    {
+      "package": "jsonschema-specifications",
+      "baseline": "2025.9.1",
+      "actual": "2025.9.1"
+    },
+    {
+      "package": "kiwisolver",
+      "baseline": "1.5.0",
+      "actual": "1.5.0"
+    },
+    {
+      "package": "librt",
+      "baseline": "0.15.0",
+      "actual": "0.15.0"
+    },
+    {
+      "package": "MarkupSafe",
+      "baseline": "3.0.3",
+      "actual": "3.0.3"
+    },
+    {
+      "package": "matplotlib",
+      "baseline": "3.11.1",
+      "actual": "3.11.1"
+    },
+    {
+      "package": "mypy",
+      "baseline": "2.3.1",
+      "actual": "2.3.1"
+    },
+    {
+      "package": "mypy_extensions",
+      "baseline": "1.1.0",
+      "actual": "1.1.0"
+    },
+    {
+      "package": "narwhals",
+      "baseline": "2.25.0",
+      "actual": "2.25.0"
+    },
+    {
+      "package": "numpy",
+      "baseline": "2.5.2",
+      "actual": "2.5.2"
+    },
+    {
+      "package": "packaging",
+      "baseline": "26.3",
+      "actual": "26.3"
+    },
+    {
+      "package": "pandas",
+      "baseline": "3.0.5",
+      "actual": "3.0.5"
+    },
+    {
+      "package": "pandas-stubs",
+      "baseline": "3.0.5.260730",
+      "actual": "3.0.5.260730"
+    },
+    {
+      "package": "pathspec",
+      "baseline": "1.1.1",
+      "actual": "1.1.1"
+    },
+    {
+      "package": "pillow",
+      "baseline": "12.3.0",
+      "actual": "12.3.0"
+    },
+    {
+      "package": "plotly",
+      "baseline": "6.9.0",
+      "actual": "6.9.0"
+    },
+    {
+      "package": "pluggy",
+      "baseline": "1.6.0",
+      "actual": "1.6.0"
+    },
+    {
+      "package": "protobuf",
+      "baseline": "7.36.0",
+      "actual": "7.36.0"
+    },
+    {
+      "package": "pyarrow",
+      "baseline": "25.0.1",
+      "actual": "25.0.1"
+    },
+    {
+      "package": "pybaselines",
+      "baseline": "1.2.1",
+      "actual": "1.2.1"
+    },
+    {
+      "package": "pydantic",
+      "baseline": "2.13.4",
+      "actual": "2.13.4"
+    },
+    {
+      "package": "pydantic_core",
+      "baseline": "2.46.4",
+      "actual": "2.46.4"
+    },
+    {
+      "package": "pydeck",
+      "baseline": "0.9.3",
+      "actual": "0.9.3"
+    },
+    {
+      "package": "Pygments",
+      "baseline": "2.21.0",
+      "actual": "2.21.0"
+    },
+    {
+      "package": "pyparsing",
+      "baseline": "3.3.2",
+      "actual": "3.3.2"
+    },
+    {
+      "package": "pytest",
+      "baseline": "9.1.1",
+      "actual": "9.1.1"
+    },
+    {
+      "package": "pytest-cov",
+      "baseline": "7.1.0",
+      "actual": "7.1.0"
+    },
+    {
+      "package": "python-dateutil",
+      "baseline": "2.9.0.post0",
+      "actual": "2.9.0.post0"
+    },
+    {
+      "package": "python-multipart",
+      "baseline": "0.0.32",
+      "actual": "0.0.32"
+    },
+    {
+      "package": "referencing",
+      "baseline": "0.37.0",
+      "actual": "0.37.0"
+    },
+    {
+      "package": "requests",
+      "baseline": "2.34.2",
+      "actual": "2.34.2"
+    },
+    {
+      "package": "rpds-py",
+      "baseline": "2026.6.3",
+      "actual": "2026.6.3"
+    },
+    {
+      "package": "ruff",
+      "baseline": "0.16.4",
+      "actual": "0.16.4"
+    },
+    {
+      "package": "scipy",
+      "baseline": "1.18.1",
+      "actual": "1.18.1"
+    },
+    {
+      "package": "six",
+      "baseline": "1.17.0",
+      "actual": "1.17.0"
+    },
+    {
+      "package": "sortedcontainers",
+      "baseline": "2.4.0",
+      "actual": "2.4.0"
+    },
+    {
+      "package": "starlette",
+      "baseline": "1.6.0",
+      "actual": "1.6.0"
+    },
+    {
+      "package": "streamlit",
+      "baseline": "1.62.0",
+      "actual": "1.62.0"
+    },
+    {
+      "package": "toml",
+      "baseline": "0.10.2",
+      "actual": "0.10.2"
+    },
+    {
+      "package": "typing_extensions",
+      "baseline": "4.16.0",
+      "actual": "4.16.0"
+    },
+    {
+      "package": "typing-inspection",
+      "baseline": "0.4.4",
+      "actual": "0.4.4"
+    },
+    {
+      "package": "urllib3",
+      "baseline": "2.7.0",
+      "actual": "2.7.0"
+    },
+    {
+      "package": "uvicorn",
+      "baseline": "0.52.4",
+      "actual": "0.52.4"
+    },
+    {
+      "package": "websockets",
+      "baseline": "16.1.1",
+      "actual": "16.1.1"
+    }
+  ]
+}

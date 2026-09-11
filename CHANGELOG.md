@@ -1,6 +1,40 @@
 # Changelog
 
-本文件记录 FTIR Spectral Workbench 的用户可见变化。v0.3.0 增加普通光谱工作区；下方旧版本的发布状态和测试数字均保留为历史记录。
+本文件记录 FTIR Spectral Workbench 的用户可见变化。v0.3.1 为普通光谱增加独立平滑与归一化；下方旧版本的发布状态和测试数字均保留为历史记录。
+
+## [0.3.1] - 2026-09-11
+
+本地功能、真实浏览器导出/恢复验收和统一 workbench v0.3.1 版本更新完成，尚未对外发布。
+
+### Added
+
+- 普通模式新增默认关闭的逐谱后处理：B 为已确认最终基线，S=Smooth(B)，N_B=Normalize(B)，N_S=Normalize(S)，分支互不覆盖。
+- 公开数组平滑门面复用原 Savitzky–Golay、Gaussian、Moving Average、Median helpers；归一化适配器复用冻结 core 的最大正峰、窗口峰高/面积、全域/指定域面积、L2 和 Min–Max。
+- 普通后处理页提供独立草稿、预览、明确确认、来源选择、移除分量、QC、参数复制与逐项批量操作。切谱/切页保留状态，确认 S 不自动选择其他来源。
+- 独立 `ordinary_spectrum_postprocess_bundle` 导出与专用 verifier；逐谱 CSV 使用 17 位有效数字，包含完整/有效配方、source/parent/hash、必要父级数组、scale/offset、参考区间、QC、警告和真实版本信息。
+- 工作区内层 schema 2.0 保存新增草稿、确认版和历史父级，兼容读取 schema 1.0；批量勾选集和来源选择可恢复，预览不保存。
+- [普通后处理说明](docs/ordinary_postprocessing.md)、[可再生纯合成输入](examples/ordinary_postprocessing/README.md) 和对应数值、状态、UI、导出与迁移回归。
+
+### Scientific and state boundaries
+
+- 后处理只从有效 B 或 S 读取完整数组，不重新运行 baseline、不造 Prepared、不调用 2D；旧基线、原位 smoothing/Prepared/2D、CLI 和旧 bundle 合同保留。
+- 未激活或禁用参数保留在完整草稿中，但不改变有效科学 hash。每个目标独立验证实际轴、点数及参考区间；复制、确认、导出和恢复不执行滤波或归一化。
+- 草稿变化不覆盖正式快照。新 S 只使旧 N_S 过期；新 B 使同谱后处理过期，其他谱不受影响。禁止 S→S、N→S、N→N，缺失 S 时不退回 B。
+- 面积使用真实 x 与显式 absolute/signed 定义；区间完整包含且至少有两个实际点，零/近零或不稳定参考拒绝，不插值、不加 epsilon 继续运算。Min–Max 使用 core 的 `view_data` 与正确 offset，仅作 0–1 显示缩放。
+- 归一化量不转换为物理 T/%T。平滑移除分量不宣称真实噪声或自动 SNR 改善，不进行普通样品时间连续性或跨样品稳定性评分。
+- 导出只序列化已确认数组，默认缺失或过期即阻止；“全部分支”同样严格，只有显式“只导出有效项”才排除并报告。宽表要求实际输出 x 完全一致。
+- verifier 可重放 S/N 核对父子结果，B 仅做锚点完整性校验；SHA-256 不是数字签名，历史 B 未记录的依赖版本不以当前导出环境冒充。
+- 冻结 manifest 与根文件集合不改写，旧平滑模块只追加数组门面，不升级数值依赖或增加算法。
+
+### Validation status
+
+- 实际基准为 `9fc13c10ae34bd53cb220d0807edb18c9e2e41dc`；完成提交 SHA 与完整证据见 [交付报告](artifacts/validation/v0.3.1/REPORT.md)。
+- Phase 0 实际起点 906 passed；Phase 1 数值及旧回归 206 passed；Phase 2 数值 218、状态 66、旧 batch 181 passed；Phase 3 实际 AppTest 48 passed；Phase 4 导出 96、工作区 39、UI 54 passed。各命令覆盖重叠，不能相加为验收总数。
+- 版本更新前全量 1230 passed；最终 v0.3.1 实际全量 **1238 passed，5 个既有 warning，132.47 秒**。Ruff、配置范围内 Mypy（32 个源码文件）、sdist/wheel 构建和当前环境 wheel `--no-deps` 安装通过。最终冻结 34/34、旧 bundle/project/Prepared smoothing/self/cross 2D 及包版本审计通过。真实命令见 [Phase 5 日志](artifacts/validation/v0.3.1/phase5/)。
+- 真实浏览器完成三条合成异轴谱的 12 分支下载、201 行/8 结果列同轴宽表、stale 阻断与明确排除、新会话工作区恢复；660 个数组、70,860 个元素与来源/草稿/父级精确核对。原始下载发生在版本号统一前，metadata 的实际 0.3.0 保留；30 步原始响应包括失败定位尝试，详见 [浏览器验收记录](docs/ordinary_postprocessing_browser_acceptance.md)。
+- 最终 v0.3.1 服务重启后，再次通过真实浏览器恢复、确认新 S/N_S、下载与保存；新快照计算版本及两个包的导出版本均为 0.3.1。204 个基线数组、A 的 N_B 和无关 B/C 不变，4/6 个导出 CSV 节点精确匹配确认数组；64 项依赖版本与起点全部一致。
+- 首次无隔离 editable 安装因环境缺 `editables` 失败，日志保留；随后本地 wheel 安装成功，未升级依赖，不冒充全新隔离环境测试。
+- 初始失败与修复后日志保留在 `artifacts/validation/v0.3.1/`。本次不自动推送、创建 PR、打 tag 或发布 Release；新增示例与测试只使用合成数据。
 
 ## [0.3.0] - 2026-09-11
 

@@ -1,0 +1,363 @@
+{
+  "started_utc": "2026-09-11T06:30:15.378643+00:00",
+  "mode": "complete",
+  "missing_required_files": [],
+  "checks": {
+    "all_branches.zip": {
+      "status": "pass",
+      "details": {
+        "filename": "all_branches.zip",
+        "sha256": "ffb8a93ace16051144bf2055650a4d80ca04014c7593f459d77ae4f79d50bda9",
+        "size_bytes": 75249,
+        "nodes": 12,
+        "requested_items": 12,
+        "excluded_items": [],
+        "integrity_verifier": true,
+        "explicit_replay_verifier": true,
+        "non_replay_forbidden_calls": 0,
+        "replay_baseline_prepared_2d_calls": 0,
+        "verification_only_replays": {
+          "smoothing": 3,
+          "normalization": 6
+        },
+        "exporter_versions": {
+          "ftir-spectral-workbench": "0.3.0",
+          "numpy": "2.5.2",
+          "pybaselines": "1.2.1",
+          "pydantic": "2.13.4",
+          "python": "3.12.14",
+          "scipy": "1.18.1"
+        },
+        "wide_available": false
+      }
+    },
+    "workspace_before.zip": {
+      "status": "pass",
+      "details": {
+        "filename": "workspace_before.zip",
+        "sha256": "9b88c8e7b1f4e5cf9d39864b14463d60819968a771e418cf06ca9c52929cef49",
+        "size_bytes": 549705,
+        "workspace_id": "28fa6d12a31a4d668664fb770d85df66",
+        "spectrum_ids": [
+          "9c27ff2a492949fda2a7d85729c3d2aa",
+          "77d5fdae3c8b4cd29141766bb1f82164",
+          "61cc3a73667840f497009d43daac6685"
+        ],
+        "source_count": 2,
+        "selected_spectrum_id": "9c27ff2a492949fda2a7d85729c3d2aa",
+        "selected_spectrum_ids": [
+          "9c27ff2a492949fda2a7d85729c3d2aa",
+          "77d5fdae3c8b4cd29141766bb1f82164"
+        ],
+        "load_numerical_baseline_prepared_2d_calls": 0,
+        "source_bytes_match_actual_uploads": true,
+        "previews_absent": true
+      }
+    },
+    "workspace_restored.zip": {
+      "status": "pass",
+      "details": {
+        "filename": "workspace_restored.zip",
+        "sha256": "0f6abbdcfec3cfea4b6b5f84edc36d88dd2c48e0250cb8120407ddbf9f4ae463",
+        "size_bytes": 549617,
+        "workspace_id": "28fa6d12a31a4d668664fb770d85df66",
+        "spectrum_ids": [
+          "9c27ff2a492949fda2a7d85729c3d2aa",
+          "77d5fdae3c8b4cd29141766bb1f82164",
+          "61cc3a73667840f497009d43daac6685"
+        ],
+        "source_count": 2,
+        "selected_spectrum_id": "9c27ff2a492949fda2a7d85729c3d2aa",
+        "selected_spectrum_ids": [
+          "9c27ff2a492949fda2a7d85729c3d2aa",
+          "77d5fdae3c8b4cd29141766bb1f82164"
+        ],
+        "load_numerical_baseline_prepared_2d_calls": 0,
+        "source_bytes_match_actual_uploads": true,
+        "previews_absent": true
+      }
+    },
+    "all_branches_restored.zip": {
+      "status": "pass",
+      "details": {
+        "filename": "all_branches_restored.zip",
+        "sha256": "ffb8a93ace16051144bf2055650a4d80ca04014c7593f459d77ae4f79d50bda9",
+        "size_bytes": 75249,
+        "nodes": 12,
+        "requested_items": 12,
+        "excluded_items": [],
+        "integrity_verifier": true,
+        "explicit_replay_verifier": true,
+        "non_replay_forbidden_calls": 0,
+        "replay_baseline_prepared_2d_calls": 0,
+        "verification_only_replays": {
+          "smoothing": 3,
+          "normalization": 6
+        },
+        "exporter_versions": {
+          "ftir-spectral-workbench": "0.3.0",
+          "numpy": "2.5.2",
+          "pybaselines": "1.2.1",
+          "pydantic": "2.13.4",
+          "python": "3.12.14",
+          "scipy": "1.18.1"
+        },
+        "wide_available": false
+      }
+    },
+    "selected_wide.zip": {
+      "status": "pass",
+      "details": {
+        "filename": "selected_wide.zip",
+        "sha256": "28ef6f6a62c630caa755349cffa242693d94a14d67bc50b601fbca0a5805b8e6",
+        "size_bytes": 67350,
+        "nodes": 8,
+        "requested_items": 8,
+        "excluded_items": [],
+        "integrity_verifier": true,
+        "explicit_replay_verifier": true,
+        "non_replay_forbidden_calls": 0,
+        "replay_baseline_prepared_2d_calls": 0,
+        "verification_only_replays": {
+          "smoothing": 2,
+          "normalization": 4
+        },
+        "exporter_versions": {
+          "ftir-spectral-workbench": "0.3.0",
+          "numpy": "2.5.2",
+          "pybaselines": "1.2.1",
+          "pydantic": "2.13.4",
+          "python": "3.12.14",
+          "scipy": "1.18.1"
+        },
+        "wide_available": true
+      }
+    },
+    "stale_valid_only.zip": {
+      "status": "pass",
+      "details": {
+        "filename": "stale_valid_only.zip",
+        "sha256": "7560a36c000129cb58fa01b688e1db69ca442f312903d6c1e2c8b372df86d056",
+        "size_bytes": 40134,
+        "nodes": 6,
+        "requested_items": 2,
+        "excluded_items": [
+          {
+            "branch": "normalized_smoothed",
+            "display_name": "synthetic_A",
+            "draft_modified": true,
+            "import_options": {
+              "allow_preamble": true,
+              "comment_prefixes": [
+                "#",
+                "//",
+                "%"
+              ],
+              "decimal_mark": "auto",
+              "delimiter": "auto",
+              "encoding": "auto",
+              "header_mode": "auto",
+              "skip_rows": 0,
+              "trim_empty_edge_columns": true
+            },
+            "invalid_editor_not_used": {},
+            "original_axis_direction": "descending",
+            "original_filename": "synthetic_wide.csv",
+            "original_point_count": 201,
+            "reason": "POSTPROCESS_STALE: the confirmed smoothing parent has changed",
+            "reason_code": "POSTPROCESS_STALE",
+            "recorded_errors": [],
+            "source_column_index": 1,
+            "source_column_label": "synthetic_A",
+            "source_id": "27a52ac5f11544f9ab7b85ce89058e38",
+            "source_selection_sha256": "493fa89a4adc1e6ab224fb1237b77687910bd0f4d9a78138c7f22a5a3c1ca191",
+            "source_sha256": "8cb3c6c3ce73baf1f0ce600c6f40f743cc2faf978dc8fb61612a0c017e46285b",
+            "spectrum_id": "9c27ff2a492949fda2a7d85729c3d2aa",
+            "status": "stale"
+          }
+        ],
+        "integrity_verifier": true,
+        "explicit_replay_verifier": true,
+        "non_replay_forbidden_calls": 0,
+        "replay_baseline_prepared_2d_calls": 0,
+        "verification_only_replays": {
+          "smoothing": 2,
+          "normalization": 2
+        },
+        "exporter_versions": {
+          "ftir-spectral-workbench": "0.3.0",
+          "numpy": "2.5.2",
+          "pybaselines": "1.2.1",
+          "pydantic": "2.13.4",
+          "python": "3.12.14",
+          "scipy": "1.18.1"
+        },
+        "wide_available": false
+      }
+    },
+    "all_branches.zip:complete_graph": {
+      "status": "pass",
+      "details": {
+        "three_spectra_twelve_branches": true,
+        "heterogeneous_axes_disable_wide": true
+      }
+    },
+    "all_branches_restored.zip:complete_graph": {
+      "status": "pass",
+      "details": {
+        "three_spectra_twelve_branches": true,
+        "heterogeneous_axes_disable_wide": true
+      }
+    },
+    "workspace_restore_equivalence": {
+      "status": "pass",
+      "details": {
+        "stable_ids_sources_drafts_arrays_and_parents_equal": true,
+        "selection_source_export_and_display_preferences_equal": true,
+        "compared_arrays": 660,
+        "compared_array_elements": 70860,
+        "export_history_equal": true,
+        "note": "Download/export activity history is reported separately from restored scientific state."
+      }
+    },
+    "all_branches.zip:workspace_arrays": {
+      "status": "pass",
+      "details": {
+        "csv_arrays_match_confirmed_workspace": 12,
+        "normalized_baseline_evidence": [
+          {
+            "spectrum_id": "9c27ff2a492949fda2a7d85729c3d2aa",
+            "method": "maximum",
+            "differs_from_parent_analysis_data": true
+          },
+          {
+            "spectrum_id": "77d5fdae3c8b4cd29141766bb1f82164",
+            "method": "minmax_display",
+            "differs_from_parent_analysis_data": true
+          },
+          {
+            "spectrum_id": "61cc3a73667840f497009d43daac6685",
+            "method": "area",
+            "differs_from_parent_analysis_data": true
+          }
+        ]
+      }
+    },
+    "all_branches_restored.zip:workspace_arrays": {
+      "status": "pass",
+      "details": {
+        "csv_arrays_match_confirmed_workspace": 12,
+        "normalized_baseline_evidence": [
+          {
+            "spectrum_id": "9c27ff2a492949fda2a7d85729c3d2aa",
+            "method": "maximum",
+            "differs_from_parent_analysis_data": true
+          },
+          {
+            "spectrum_id": "77d5fdae3c8b4cd29141766bb1f82164",
+            "method": "minmax_display",
+            "differs_from_parent_analysis_data": true
+          },
+          {
+            "spectrum_id": "61cc3a73667840f497009d43daac6685",
+            "method": "area",
+            "differs_from_parent_analysis_data": true
+          }
+        ]
+      }
+    },
+    "selected_wide.zip:workspace_arrays": {
+      "status": "pass",
+      "details": {
+        "csv_arrays_match_confirmed_workspace": 8,
+        "normalized_baseline_evidence": [
+          {
+            "spectrum_id": "9c27ff2a492949fda2a7d85729c3d2aa",
+            "method": "maximum",
+            "differs_from_parent_analysis_data": true
+          },
+          {
+            "spectrum_id": "77d5fdae3c8b4cd29141766bb1f82164",
+            "method": "minmax_display",
+            "differs_from_parent_analysis_data": true
+          }
+        ]
+      }
+    },
+    "stale_valid_only.zip:workspace_arrays": {
+      "status": "pass",
+      "details": {
+        "csv_arrays_match_confirmed_workspace": 6,
+        "normalized_baseline_evidence": []
+      }
+    },
+    "restored_export_equivalence": {
+      "status": "pass",
+      "details": {
+        "branch_arrays_recipes_sources_and_fingerprints_equal": true,
+        "nodes": 12
+      }
+    },
+    "selected_wide_exact_columns": {
+      "status": "pass",
+      "details": {
+        "selected_spectrum_ids": [
+          "9c27ff2a492949fda2a7d85729c3d2aa",
+          "77d5fdae3c8b4cd29141766bb1f82164"
+        ],
+        "standalone_csv_equals_zip_member": true,
+        "rows": 201,
+        "independent_output_columns": 8,
+        "all_columns_exact_float64_matches": true
+      }
+    },
+    "stale_export_isolation": {
+      "status": "pass",
+      "details": {
+        "stale_exclusions": [
+          {
+            "branch": "normalized_smoothed",
+            "display_name": "synthetic_A",
+            "draft_modified": true,
+            "import_options": {
+              "allow_preamble": true,
+              "comment_prefixes": [
+                "#",
+                "//",
+                "%"
+              ],
+              "decimal_mark": "auto",
+              "delimiter": "auto",
+              "encoding": "auto",
+              "header_mode": "auto",
+              "skip_rows": 0,
+              "trim_empty_edge_columns": true
+            },
+            "invalid_editor_not_used": {},
+            "original_axis_direction": "descending",
+            "original_filename": "synthetic_wide.csv",
+            "original_point_count": 201,
+            "reason": "POSTPROCESS_STALE: the confirmed smoothing parent has changed",
+            "reason_code": "POSTPROCESS_STALE",
+            "recorded_errors": [],
+            "source_column_index": 1,
+            "source_column_label": "synthetic_A",
+            "source_id": "27a52ac5f11544f9ab7b85ce89058e38",
+            "source_selection_sha256": "493fa89a4adc1e6ab224fb1237b77687910bd0f4d9a78138c7f22a5a3c1ca191",
+            "source_sha256": "8cb3c6c3ce73baf1f0ce600c6f40f743cc2faf978dc8fb61612a0c017e46285b",
+            "spectrum_id": "9c27ff2a492949fda2a7d85729c3d2aa",
+            "status": "stale"
+          }
+        ],
+        "no_fallback_or_stale_arrays": true,
+        "unrelated_nodes_unchanged": true
+      }
+    }
+  },
+  "failures": [],
+  "scope": "Only actual browser download files were read; no spectra or replacement artifacts were generated.",
+  "spy_scope": "Spies observe this audit's loading/verification calls, not past browser-server executions.",
+  "integrity_notice": "Hashes establish internal integrity, not source authenticity or baseline refitting.",
+  "status": "pass",
+  "completed_utc": "2026-09-11T06:30:15.617253+00:00"
+}

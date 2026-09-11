@@ -1,0 +1,57 @@
+# Real command output; local repository/home paths redacted; blank-line trailing spaces removed. Raw log retained under ignored outputs/.
+COMMAND: .venv/bin/python -m pip install --no-deps --no-build-isolation -e .
+STARTED_UTC: 2026-09-11T06:30:39.719543+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v031 cache>
+Obtaining file://<repository>
+  Checking if build backend supports build_editable: started
+  Checking if build backend supports build_editable: finished with status 'done'
+  Preparing editable metadata (pyproject.toml): started
+  Preparing editable metadata (pyproject.toml): finished with status 'error'
+WARNING: The directory '<home>/Library/Caches/pip' or its parent directory is not owned or is not writable by the current user. The cache has been disabled. Check the permissions and owner of that directory. If executing pip with sudo, you should use sudo's -H flag.
+  error: subprocess-exited-with-error
+
+  × Preparing editable metadata (pyproject.toml) did not run successfully.
+  │ exit code: 1
+  ╰─> [29 lines of output]
+      Traceback (most recent call last):
+        File "<repository>/.venv/lib/python3.12/site-packages/pip/_vendor/pyproject_hooks/_in_process/_in_process.py", line 195, in prepare_metadata_for_build_editable
+          hook = backend.prepare_metadata_for_build_editable
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      AttributeError: module 'hatchling.build' has no attribute 'prepare_metadata_for_build_editable'
+
+      During handling of the above exception, another exception occurred:
+
+      Traceback (most recent call last):
+        File "<repository>/.venv/lib/python3.12/site-packages/pip/_vendor/pyproject_hooks/_in_process/_in_process.py", line 389, in <module>
+          main()
+        File "<repository>/.venv/lib/python3.12/site-packages/pip/_vendor/pyproject_hooks/_in_process/_in_process.py", line 373, in main
+          json_out["return_val"] = hook(**hook_input["kwargs"])
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File "<repository>/.venv/lib/python3.12/site-packages/pip/_vendor/pyproject_hooks/_in_process/_in_process.py", line 204, in prepare_metadata_for_build_editable
+          whl_basename = build_hook(metadata_directory, config_settings)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File "<repository>/.venv/lib/python3.12/site-packages/hatchling/build.py", line 83, in build_editable
+          return os.path.basename(next(builder.build(directory=wheel_directory, versions=["editable"])))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File "<repository>/.venv/lib/python3.12/site-packages/hatchling/builders/plugin/interface.py", line 157, in build
+          artifact = version_api[version](directory, **build_data)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File "<repository>/.venv/lib/python3.12/site-packages/hatchling/builders/wheel.py", line 547, in build_editable
+          return self.build_editable_detection(directory, **build_data)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File "<repository>/.venv/lib/python3.12/site-packages/hatchling/builders/wheel.py", line 550, in build_editable_detection
+          from editables import EditableProject
+      ModuleNotFoundError: No module named 'editables'
+      [end of output]
+
+  note: This error originates from a subprocess, and is likely not a problem with pip.
+error: metadata-generation-failed
+
+× Encountered error while generating package metadata.
+╰─> See above for output.
+
+note: This is an issue with the package mentioned above, not pip.
+hint: See above for details.
+
+EXIT_CODE: 1
+ELAPSED_SECONDS: 0.320

@@ -1,0 +1,13 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m build --no-isolation
+STARTED_UTC: 2026-09-11T06:30:56.060601+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v031 cache>
+Successfully built ftir_spectral_workbench-0.3.1.tar.gz and ftir_spectral_workbench-0.3.1-py3-none-any.whl
+* Getting build dependencies for sdist...
+* Building sdist...
+* Building wheel from sdist
+* Getting build dependencies for wheel...
+* Building wheel...
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 0.685

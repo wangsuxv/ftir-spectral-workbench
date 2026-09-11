@@ -1,0 +1,8 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m ruff check src/ftir_workbench/batch/postprocessing.py tests/postprocessing/test_workspace_migration.py
+STARTED_UTC: 2026-09-11T06:11:59.391861+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v031 cache>
+All checks passed!
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 0.086
