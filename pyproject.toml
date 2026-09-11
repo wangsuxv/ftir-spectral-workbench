@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ftir-spectral-workbench"
-version = "0.3.0"
+version = "0.3.1"
 description = "Independent batch and in-situ FTIR baseline workflows with optional prepared-data-only 2D-COS"
 readme = "README.md"
 license = { text = "MIT" }

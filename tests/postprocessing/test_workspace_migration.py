@@ -11,6 +11,7 @@ import subprocess
 import sys
 import zipfile
 from collections.abc import Callable
+from dataclasses import replace
 from pathlib import Path
 
 import numpy as np
@@ -392,3 +393,40 @@ def test_pp061_derived_archive_retains_path_and_resource_boundaries(
     monkeypatch.setattr("ftir_workbench.batch.workspace.MAX_MEMBERS", 2)
     with pytest.raises(BatchError, match="WORKSPACE_INTEGRITY_FAILED"):
         load_batch_workspace(payload)
+
+
+@pytest.mark.parametrize("branch", ["normalized_baseline", "normalized_smoothed"])
+@pytest.mark.parametrize("offset", [0.0, 1e8])
+@pytest.mark.parametrize("multiplier", [0.25, 4.0])
+def test_pp061_paired_minmax_scale_and_output_rehash_cannot_change_fixed_span(
+    branch: str, offset: float, multiplier: float, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    ws, sid = confirmed_workspace(np.arange(9.0), offset + np.arange(9.0))
+    if branch == "normalized_smoothed":
+        apply_branch(ws, sid, "smoothed", SMOOTH)
+    snapshot = apply_branch(ws, sid, branch, {"enabled": True, "method": "minmax_display"})
+    assert snapshot.scale is not None
+    altered_scale = snapshot.scale * multiplier
+    parent = snapshot.parent_smoothed or snapshot.baseline
+    parent_y = postprocess.branch_arrays(parent)[1]
+    # Preserve the stored stable affine identity, all parent hashes and recipe.
+    # Rehash both changed arrays: only the fixed Min-Max scale contract rejects it.
+    altered_y = (parent_y - np.min(parent_y, axis=1)[:, None]) * altered_scale[:, None]
+    altered = replace(snapshot, scale=altered_scale, spectra=altered_y)
+    altered = replace(altered, fingerprint=postprocess.snapshot_fingerprint(altered))
+    payload = save_batch_workspace(ws)
+
+    def corrupt(data: dict, members: dict[str, bytes]) -> None:
+        node = data["postprocessing"][sid][branch]["committed"]
+        for field in ("scale", "spectra"):
+            stream = io.BytesIO()
+            np.save(stream, getattr(altered, field), allow_pickle=False)
+            members[node[field]["__array__"]] = stream.getvalue()
+        node["fingerprint"] = altered.fingerprint
+
+    forbid_calculations(monkeypatch)
+    with pytest.raises(BatchError, match="Min-Max scale does not match its parent span"):
+        postprocess.validate_snapshot(ws, sid, altered)
+    with pytest.raises(BatchError, match="Min-Max scale does not match its parent span"):
+        load_batch_workspace(rewrite(payload, corrupt))
+    assert postprocess.get_branch(ws, sid, branch) is snapshot

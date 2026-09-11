@@ -282,15 +282,18 @@ def validate_snapshot(workspace: BatchWorkspace, spectrum_id: str, snapshot: Pos
         if (snapshot.scale.shape != (1,) or snapshot.offset.shape != (1,)
                 or np.any(snapshot.scale <= 0) or (not expected_minmax and np.any(snapshot.offset != 0))):
             fail("normalization requires a finite positive per-spectrum scale")
-        with np.errstate(over="ignore", invalid="ignore"):
+        with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
             if expected_minmax:
                 minimum = np.asarray(snapshot.reference_details.get("minimum"), dtype=float)
                 if minimum.shape != (1,) or not np.array_equal(minimum, np.min(y, axis=1)):
                     fail("Min-Max minimum does not match its parent")
+                span = np.max(y, axis=1) - minimum
+                if not np.array_equal(snapshot.scale, 1.0 / span):
+                    fail("Min-Max scale does not match its parent span")
                 # The core evaluates the stable translated expression, not
                 # scale*y+offset which can catastrophically cancel large offsets.
                 affine = (y - minimum[:, None]) * snapshot.scale[:, None]
-                if not np.array_equal(snapshot.offset, -minimum / (np.max(y, axis=1) - minimum)):
+                if not np.array_equal(snapshot.offset, -minimum / span):
                     fail("Min-Max offset does not match its scale and parent minimum")
             else:
                 affine = snapshot.scale[:, None] * y
