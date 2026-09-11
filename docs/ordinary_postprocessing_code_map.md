@@ -248,3 +248,31 @@ src/ftir_workbench/services/twodcos_service.py
 6. 扩展现有 workspace 读写为新 schema `2.0`，明确同时读取旧 `1.0`，旧缺失后处理字段初始化为空/disabled；保留旧B数组/配方/ID/fingerprint。协调manifest及workspace payload版本，避免旧reader把新包误认成旧schema。沿用同一ZIP/NPY安全校验，保存新draft/committed/stale/选择项并省略preview。
 
 这些是依据真实代码提出的最小接入点；后续实现与每阶段真实验证还需单独记录。本映射本身只新增此文档。
+
+## 10. 实施后的增量映射
+
+前九节保留阶段 0 的真实本地起点；以下描述在其基础上的增量实现，不替换旧普通工作区。
+
+| 责任 | 本轮实际入口 / 状态 |
+|---|---|
+| 数值平滑门面 | `post_baseline_smoothing.smooth_spectral_arrays`、`validate_smoothing_request`、`effective_smoothing_config`；原 Prepared 实现字节前缀保留，新门面调用相同 helpers |
+| 普通归一化 | `batch.normalization_adapter.normalize_spectral_arrays`、`validate_normalization_request`、`OrdinaryNormalizationConfig`；公共 `apply_normalization` 决定实际输出 |
+| 状态容器 | `BatchWorkspace.postprocessing[spectrum_id]` → `OrdinaryPostprocessingState`；每条 `smoothed/normalized_baseline/normalized_smoothed` 为 `BranchState` |
+| 每分支状态 | `draft` 为保留闲置参数的 JSON 字典；`preview/committed` 为独立不可变快照；`committed_draft/errors` 分开；新处理默认关闭 |
+| 唯一 B | 仍为原 `get_ready_snapshot(workspace,id,"fine")`，不改变其最终决策和来源校验合同 |
+| 服务 | `batch.postprocessing.preview_branch/confirm_branch/get_branch/branch_status/update_draft/copy_drafts/preview_selected/confirm_selected`；`preview_smoothing` 和 `preview_normalization` 在服务层拒绝非法运算链 |
+| 来源与科学身份 | `PostprocessSnapshot` 保存 workspace/spectrum/source/input、历史 B、N_S 的历史 S、有效配方、request/output fingerprint、readonly x/y、scale/offset/参考与 QC；显示名不参与派生科学 hash |
+| 动态失效 | 当前 B/S 的正式 fingerprint 与快照父级对比；不依赖旧 `SpectrumProcessingState` 增加联动回调。新 S 只使 N_S 过期，新 B 使本谱三分支过期；草稿修改不使确认版失效 |
+| 新界面 | `ui/batch_postprocessing.py:render_postprocessing`，普通第 5 页；复用现有侧栏当前 ID 和批量选择。普通旧导出改为第 6 页，实际导出实现不变 |
+| 显示 | `display_arrays` 对 N 先执行 quantity gate，只有 B/S 可调用现有 A/T/%T 数学转换；Plotly 显示操作不调用科学数值 API |
+| 新导出 | `batch.postprocessing_export.build_postprocessing_export`，默认 B，明确分支集合与 strict/valid-only；`can_export_postprocessing_wide` 用实际输出 x 作严格比较 |
+| 新 verifier | `verify_postprocessing_export(payload,recompute=True)` 单独重放 S/N；`recompute=False` 检查成员、图谱、配方/数组与记录的完整性。二者都不重新拟合 B |
+| 旧导出 | 原 `batch.export.build_batch_export` 保持原实现和 `independent_baseline_batch` 类型 |
+| 同一工作区 schema | `batch.workspace` 原安全 ZIP/JSON/float64 NPY 系统；workspace.json 新写 `2.0`，通用归档 manifest 仍 `1.0`，类型仍 `independent_baseline_workspace`。旧 `1.0` 读取默认后处理空；旧 reader 对新内层 schema 明确拒绝 |
+| 保存/恢复 | 保存完整草稿、确认版、旧 B/S 父级、来源/导出偏好；省略 preview，恢复后未提交配方需重预览；受限 NPY `allow_pickle=False` 与原 ZIP 资源限制不变 |
+| 选择集 | 新 `BatchWorkspace.selected_spectrum_ids` 镜像现有勾选集并随 schema 2.0 保存；`selected_spectrum_id` 继续表示当前单条 |
+| 测试 | 新 `tests/postprocessing/` 覆盖数值、服务、状态、迁移、导出、AppTest；原 `tests/batch`、`tests/smoothing`、`tests/ui`、原位/2D/冻结测试保留 |
+
+新快照缓存只保留当前 preview 和 committed，身份包含 workspace、stable spectrum_id、source、父级和有效配方；不按标签或纯 y hash 共享结果。历史父级随正式子级保留，便于解释已过期 N_S 或 B 变更后的历史分支。
+
+归一化的区间、scale/offset、数值保护版本、quantity/purpose 都在普通适配层处理，冻结 core 的字段语义和算法不变。导出端序列化确认数组；重放验证与下载生成是分开的操作。实际验收覆盖和未执行项见 [66 场景证据矩阵](ordinary_postprocessing_acceptance.md)，阶段命令与退出码见 `artifacts/validation/v0.3.1/`。

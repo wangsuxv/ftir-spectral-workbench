@@ -34,6 +34,17 @@ from .models import (
     SpectrumRecord,
     StageSnapshot,
 )
+from .postprocessing import (
+    DERIVED_BRANCHES,
+    BranchState,
+    OrdinaryPostprocessingState,
+    PostprocessSnapshot,
+    draft_copy,
+    plain,
+)
+from .postprocessing import (
+    validate_snapshot as validate_postprocess_snapshot,
+)
 from .recipes import coarse_config, preparation_from_config, validate_preparation
 from .state import _validate_snapshot, get_ready_snapshot
 
@@ -259,7 +270,76 @@ def _validate_business_structure(value: Any) -> dict[str, Any]:
         _string(state["fine_parent_coarse_fingerprint"], f"states.{key}.fine_parent_coarse_fingerprint", optional=True)
         preferences = _object(state["display_preferences"], f"states.{key}.display_preferences")
         _editor_structure(preferences, state, f"states.{key}.display_preferences")
+    schema = data["schema_version"]
+    if schema == "1.0":
+        if "postprocessing" in data or "selected_spectrum_ids" in data:
+            raise _failure("postprocessing fields require workspace schema 2.0")
+    elif schema == "2.0":
+        _postprocessing_structure(data)
+    else:
+        raise _failure("unsupported workspace schema")
     return data
+
+
+def _postprocessing_structure(data: dict[str, Any]) -> None:
+    """Reject malformed business values before traversing NPY codec nodes."""
+    collection = _object(data["postprocessing"], "postprocessing")
+    if not collection.keys() <= data["records"].keys():
+        raise _failure("postprocessing contains unknown spectrum IDs")
+    _sequence(data["selected_spectrum_ids"], "selected_spectrum_ids", str)
+    selected = data["selected_spectrum_ids"]
+    if len(selected) != len(set(selected)) or not set(selected) <= data["records"].keys():
+        raise _failure("batch selection contains duplicate or unknown IDs")
+    state_keys = {item.name for item in fields(OrdinaryPostprocessingState)}
+    branch_keys = {item.name for item in fields(BranchState)}
+    for sid, value in collection.items():
+        state = _object(value, f"postprocessing.{sid}")
+        if set(state) != state_keys:
+            raise _failure("postprocessing state fields mismatch")
+        if state["normalization_source"] not in ("baseline", "smoothed"):
+            raise _failure("invalid normalization source; no fallback is permitted")
+        if state["export_choice"] not in ("baseline", *DERIVED_BRANCHES, "all"):
+            raise _failure("invalid postprocessing export choice")
+        _business_value(_object(state["display_preferences"], "display_preferences"), "display_preferences")
+        for branch in DERIVED_BRANCHES:
+            part = _object(state[branch], f"postprocessing.{sid}.{branch}")
+            if set(part) != branch_keys or part["preview"] is not None:
+                raise _failure("branch fields mismatch or attempted preview restoration")
+            _business_value(_object(part["draft"], "draft"), "draft")
+            if part["committed_draft"] is not None:
+                _business_value(_object(part["committed_draft"], "committed_draft"), "committed_draft")
+            _sequence(part["errors"], "errors", str)
+            if part["committed"] is not None:
+                _post_snapshot_structure(part["committed"], expected_branch=branch)
+
+
+def _post_snapshot_structure(value: Any, *, expected_branch: str, depth: int = 0) -> None:
+    if depth > 1:
+        raise _failure("unsupported nested postprocessing chain")
+    snapshot = _object(value, "postprocessing snapshot")
+    if set(snapshot) != {item.name for item in fields(PostprocessSnapshot)}:
+        raise _failure("postprocessing snapshot fields mismatch")
+    if snapshot["branch"] != expected_branch:
+        raise _failure("snapshot placed in wrong branch")
+    for name in ("workspace_id", "spectrum_id", "source_id", "input_sha256", "branch", "parent_fingerprint",
+                 "implementation", "request_fingerprint", "fingerprint", "quantity", "purpose"):
+        _string(snapshot[name], name)
+    for name in ("recipe", "effective_recipe", "versions", "reference_details", "qc"):
+        _business_value(_object(snapshot[name], name), name)
+    _sequence(snapshot["warnings"], "warnings", str)
+    for name in ("wavenumber", "spectra", "removed_component", "scale", "offset"):
+        value = snapshot[name]
+        if value is None and name in ("removed_component", "scale", "offset"):
+            continue
+        if not isinstance(value, dict) or set(value) != {"__array__"}:
+            raise _failure(f"postprocessing {name} must reference a float64 NPY member")
+    baseline = _object(snapshot["baseline"], "baseline parent")
+    if baseline.get("stage") != "fine":
+        raise _failure("postprocessing requires a finalized baseline parent")
+    if expected_branch == "normalized_smoothed":
+        _post_snapshot_structure(snapshot["parent_smoothed"], expected_branch="smoothed", depth=depth+1)
+    elif snapshot["parent_smoothed"] is not None:
+        raise _failure("unsupported postprocessing parent chain")
 
 
 class _Arrays:
@@ -407,17 +487,87 @@ def save_batch_workspace(workspace: BatchWorkspace) -> bytes:
         data["display_preferences"] = _editor_value(data["display_preferences"])
         states[spectrum_id] = data
     payload = {
-        "artifact_type": "independent_baseline_workspace", "schema_version": "1.0",
+        "artifact_type": "independent_baseline_workspace", "schema_version": "2.0",
         "workflow_mode": workspace.workflow_mode, "workspace_id": workspace.workspace_id,
         "saved_implementation_fingerprint": implementation_fingerprint(),
         "sources": sources, "records": {key: _fields(value) for key, value in workspace.records.items()},
         "states": states, "display_order": workspace.display_order,
         "selected_spectrum_id": workspace.selected_spectrum_id,
+        "selected_spectrum_ids": list(workspace.selected_spectrum_ids),
+        "postprocessing": _postprocessing_payload(workspace),
         "import_issues": workspace.import_issues, "export_history": workspace.export_history,
         "last_export_summary": workspace.last_export_summary,
     }
-    members["workspace.json"] = json_bytes(arrays.encode(payload))
+    encoded = arrays.encode(payload)
+    _validate_business_structure(encoded)
+    members["workspace.json"] = json_bytes(encoded)
     return make_archive(members, "independent_baseline_workspace")
+
+
+def _post_snapshot_payload(snapshot: PostprocessSnapshot | None) -> dict[str, Any] | None:
+    if snapshot is None:
+        return None
+    value = _fields(snapshot)
+    value["baseline"] = _snapshot_payload(snapshot.baseline)
+    value["parent_smoothed"] = _post_snapshot_payload(snapshot.parent_smoothed)
+    return value
+
+
+def _postprocessing_payload(workspace: BatchWorkspace) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for sid, state in workspace.postprocessing.items():
+        if sid not in workspace.records:
+            raise _failure("postprocessing references a removed or unknown record")
+        data = _fields(state)
+        data["display_preferences"] = _editor_value(state.display_preferences)
+        for branch in DERIVED_BRANCHES:
+            part = getattr(state, branch)
+            if part.committed is not None:
+                validate_postprocess_snapshot(workspace, sid, part.committed)
+            if (part.committed is None) != (part.committed_draft is None):
+                raise _failure("postprocessing confirmed recipe/snapshot presence mismatch")
+            if part.committed is not None and plain(part.committed.recipe) != plain(part.committed_draft):
+                raise _failure("postprocessing confirmed recipe differs from its snapshot")
+            data[branch] = {
+                "draft": draft_copy(part.draft), "preview": None,
+                "committed": _post_snapshot_payload(part.committed),
+                "committed_draft": part.committed_draft, "errors": list(part.errors),
+            }
+        result[sid] = data
+    return result
+
+
+def _load_post_snapshot(data: dict[str, Any] | None) -> PostprocessSnapshot | None:
+    if data is None:
+        return None
+    value = dict(data)
+    value["baseline"] = _load_snapshot(value["baseline"])
+    value["parent_smoothed"] = _load_post_snapshot(value["parent_smoothed"])
+    return PostprocessSnapshot(**value)
+
+
+def _load_postprocessing(workspace: BatchWorkspace, data: dict[str, Any]) -> None:
+    for sid, values in data.items():
+        arguments = dict(values)
+        for branch in DERIVED_BRANCHES:
+            part = dict(values[branch])
+            part["committed"] = _load_post_snapshot(part["committed"])
+            if part["preview"] is not None:
+                raise _failure("postprocessing previews cannot be restored")
+            snapshot = part["committed"]
+            if (snapshot is None) != (part["committed_draft"] is None):
+                raise _failure("postprocessing confirmed recipe/snapshot presence mismatch")
+            if snapshot is not None:
+                # Historical B is independently validated, even when current B
+                # was replaced and this derived snapshot is intentionally stale.
+                _validate_result(workspace, sid, snapshot.baseline)
+                if snapshot.parent_smoothed is not None:
+                    _validate_result(workspace, sid, snapshot.parent_smoothed.baseline)
+                validate_postprocess_snapshot(workspace, sid, snapshot)
+                if plain(snapshot.recipe) != plain(part["committed_draft"]):
+                    raise _failure("postprocessing confirmed draft/snapshot mismatch")
+            arguments[branch] = BranchState(**part)
+        workspace.postprocessing[sid] = OrdinaryPostprocessingState(**arguments)
 
 
 def _validate_sources(workspace: BatchWorkspace) -> None:
@@ -518,11 +668,12 @@ def load_batch_workspace(bundle_bytes: bytes) -> BatchWorkspace:
         arrays = _Arrays(members)
         data = arrays.decode(_validate_business_structure(_read_json(members["workspace.json"])))
         if (data["artifact_type"] != "independent_baseline_workspace"
-                or data["schema_version"] != "1.0" or data["workflow_mode"] != "independent_batch"):
+                or data["schema_version"] not in {"1.0", "2.0"} or data["workflow_mode"] != "independent_batch"):
             raise _failure("unsupported workspace schema")
         if not isinstance(data["workspace_id"], str) or not data["workspace_id"].strip():
             raise _failure("workspace ID must be a nonempty string")
         workspace = BatchWorkspace(workspace_id=data["workspace_id"])
+        workspace.selected_spectrum_ids = list(data.get("selected_spectrum_ids", []))
         used = {"workspace.json"} | arrays.used
         for key, source in data["sources"].items():
             values = dict(source)
@@ -594,6 +745,7 @@ def load_batch_workspace(bundle_bytes: bytes) -> BatchWorkspace:
                 fine.config.fine_baseline.enabled or np.any(fine.result.baseline.fine_baseline)
             ):
                 raise _failure("explicit skip contains active fine correction")
+        _load_postprocessing(workspace, data.get("postprocessing", {}))
         return workspace
     except (AttributeError, KeyError, TypeError, ValueError, OSError, OverflowError, EOFError, RecursionError, zlib.error) as exc:
         if isinstance(exc, BatchError) and exc.code == "WORKSPACE_INTEGRITY_FAILED":

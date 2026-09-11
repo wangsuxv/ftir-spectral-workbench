@@ -1,0 +1,13 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m mypy src/ftir_workbench/batch/postprocessing_export.py
+STARTED_UTC: 2026-09-11T05:44:24.648706+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v031 cache>
+src/ftir_workbench/batch/postprocessing_export.py:470: error: Argument 1 to "_require" has incompatible type "Any | numpy.bool[builtins.bool]"; expected "builtins.bool"  [arg-type]
+src/ftir_workbench/batch/postprocessing_export.py:478: error: Argument 1 to "_require" has incompatible type "numpy.bool[builtins.bool]"; expected "builtins.bool"  [arg-type]
+src/ftir_workbench/batch/postprocessing_export.py:507: error: Argument 1 to "_require" has incompatible type "list[Any] | bool"; expected "bool"  [arg-type]
+src/ftir_workbench/batch/postprocessing_export.py:508: error: Argument 1 to "_require" has incompatible type "list[Any] | bool"; expected "bool"  [arg-type]
+pyproject.toml: note: unused section(s): module = ['plotly', 'plotly.*', 'pybaselines', 'streamlit', 'streamlit.*']
+Found 4 errors in 1 file (checked 1 source file)
+
+EXIT_CODE: 1
+ELAPSED_SECONDS: 0.387

@@ -1,0 +1,10 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -c 'from tests.postprocessing.helpers import confirmed_workspace; from tests.postprocessing.test_state_contracts import graph; from ftir_workbench.batch.postprocessing_export import build_postprocessing_export,verify_postprocessing_export; from ftir_workbench.batch.postprocessing import BRANCHES; w,s=confirmed_workspace(); graph(w,s); a=build_postprocessing_export(w,[s],branches=BRANCHES,include_wide=True); print(len(a.zip_bytes),a.metadata["exported_items"]); print("integrity",verify_postprocessing_export(a.zip_bytes,recompute=False)); print("replay",verify_postprocessing_export(a.zip_bytes))'
+STARTED_UTC: 2026-09-11T05:44:24.653135+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v031 cache>
+32271 [{'spectrum_id': '2b33767e8d50419b871987baa0457f61', 'branch': 'baseline', 'fingerprint': '8c1bd78c375a88d0f07430fece2b51ecae47a3224b76d925a4056b691421b660'}, {'spectrum_id': '2b33767e8d50419b871987baa0457f61', 'branch': 'smoothed', 'fingerprint': '400bbf94826f727d76e3e5c96ac6938e2c01f27fc01ba4f3173498fe13d9e3c7'}, {'spectrum_id': '2b33767e8d50419b871987baa0457f61', 'branch': 'normalized_baseline', 'fingerprint': 'adcf5f20e684cd9a0b44f4deed2f13dc27d297d7c7c9a920302a0eb4c7ee52b8'}, {'spectrum_id': '2b33767e8d50419b871987baa0457f61', 'branch': 'normalized_smoothed', 'fingerprint': 'cde3d8b6b4fddff49c2bb19fdf1ff5bd9ce24eff6d420ba37e9ce4cd22b9fb92'}]
+integrity True
+replay True
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 1.036

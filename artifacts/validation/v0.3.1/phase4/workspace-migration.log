@@ -1,0 +1,55 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m pytest -q tests/postprocessing/test_workspace_migration.py
+STARTED_UTC: 2026-09-11T05:38:37.137220+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v031 cache>
+.FF.................................                                     [100%]
+=================================== FAILURES ===================================
+____ test_pp001_exact_legacy_default_exports_remain_byte_identical[coarse] _____
+
+legacy_directory = PosixPath('<repository>/outputs/validation-private/v031/legacy')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d9198e0>
+stage = 'coarse'
+
+    @pytest.mark.parametrize("stage", ["coarse", "fine"])
+    def test_pp001_exact_legacy_default_exports_remain_byte_identical(
+        legacy_directory: Path, monkeypatch: pytest.MonkeyPatch, stage: str,
+    ) -> None:
+        forbid_calculations(monkeypatch)
+        ws = load_batch_workspace((legacy_directory / "legacy_workspace_v030.zip").read_bytes())
+        actual = build_batch_export(ws, ws.display_order, stage=stage, ready_only=stage == "fine")
+        expected = (legacy_directory / f"legacy_{stage}_export_v030.zip").read_bytes()
+>       assert actual.zip_bytes == expected
+E       AssertionError: assert b'PK\x03\x04\...0\x00\x00\x00' == b'PK\x03\x04\...0\x00\x00\x00'
+E         
+E         At index 15221 diff: b'\x8c' != b'\\'
+E         Use -v to get more diff
+
+tests/postprocessing/test_workspace_migration.py:229: AssertionError
+_____ test_pp001_exact_legacy_default_exports_remain_byte_identical[fine] ______
+
+legacy_directory = PosixPath('<repository>/outputs/validation-private/v031/legacy')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d8fe6c0>
+stage = 'fine'
+
+    @pytest.mark.parametrize("stage", ["coarse", "fine"])
+    def test_pp001_exact_legacy_default_exports_remain_byte_identical(
+        legacy_directory: Path, monkeypatch: pytest.MonkeyPatch, stage: str,
+    ) -> None:
+        forbid_calculations(monkeypatch)
+        ws = load_batch_workspace((legacy_directory / "legacy_workspace_v030.zip").read_bytes())
+        actual = build_batch_export(ws, ws.display_order, stage=stage, ready_only=stage == "fine")
+        expected = (legacy_directory / f"legacy_{stage}_export_v030.zip").read_bytes()
+>       assert actual.zip_bytes == expected
+E       AssertionError: assert b'PK\x03\x04\...0\x00\x00\x00' == b'PK\x03\x04\...0\x00\x00\x00'
+E         
+E         At index 12867 diff: b'\xe4' != b'~'
+E         Use -v to get more diff
+
+tests/postprocessing/test_workspace_migration.py:229: AssertionError
+=========================== short test summary info ============================
+FAILED tests/postprocessing/test_workspace_migration.py::test_pp001_exact_legacy_default_exports_remain_byte_identical[coarse]
+FAILED tests/postprocessing/test_workspace_migration.py::test_pp001_exact_legacy_default_exports_remain_byte_identical[fine]
+2 failed, 34 passed in 4.64s
+
+EXIT_CODE: 1
+ELAPSED_SECONDS: 4.896

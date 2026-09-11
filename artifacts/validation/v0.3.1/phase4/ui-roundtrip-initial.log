@@ -1,0 +1,73 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m pytest tests/postprocessing/test_ui_roundtrip.py -q
+STARTED_UTC: 2026-09-11T05:45:39.014980+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v031 cache>
+...F..                                                                   [100%]
+=================================== FAILURES ===================================
+_ test_explicit_exports_include_parents_report_missing_and_preserve_download_bytes _
+
+downloaded_files = {'/mock/media/56af5d69a8f40544435f4ad914cedce7.zip': DownloadedFile(filename='ordinary_postprocessing_5aecc2daeb96.zip...9__smoothed.csvPK\x05\x06\x00\x00\x00\x00\x0b\x00\x0b\x00j\x04\x00\x00+J\x00\x00\x00\x00', mimetype='application/zip')}
+science_calls = {'smoothing': 3, 'normalization': 2}
+
+    def test_explicit_exports_include_parents_report_missing_and_preserve_download_bytes(
+        downloaded_files: dict[str, DownloadedFile], science_calls: dict[str, int],
+    ) -> None:
+        app, ws, ids = _confirmed_app()
+        a, b, c = ids
+        before = dict(science_calls)
+        assert element(app.selectbox, "后处理导出分支").value == "baseline"
+        element(app.selectbox, "后处理导出分支").set_value("normalized_smoothed").run()
+        element(app.selectbox, "后处理导出范围").set_value("全部条目").run()
+        assert element(app.button, "打包已确认后处理结果").disabled
+        preflight = next(item.value for item in app.dataframe if "将被导出" in item.value.columns)
+        assert preflight["将被导出"].tolist() == [True, False, False]
+        element(app.checkbox, "只导出有效项（明确排除下表不可用项）").set_value(True).run()
+        element(app.button, "打包已确认后处理结果").click().run()
+        assert_ok(app)
+        first = click_download(app, "下载已确认后处理 ZIP", downloaded_files)
+        original_bytes = first.content
+        metadata = _assert_bundle(original_bytes, ws)
+        assert metadata["exported_items"][0]["spectrum_id"] == a
+        assert {row["spectrum_id"] for row in metadata["excluded_items"]} == {b, c}
+        with zipfile.ZipFile(io.BytesIO(original_bytes)) as archive:
+            nodes = json.loads(archive.read("branch_index.json"))["nodes"]
+            assert {node["branch"] for node in nodes} == {"baseline", "smoothed", "normalized_smoothed"}
+        # Changing a raw draft invalidates only the UI download identity, not arrays.
+        element(app.checkbox, "启用当前来源归一化").set_value(True).run()
+        element(app.selectbox, "普通谱归一化方法").set_value("area").run()
+        assert not any(item.label == "下载已确认后处理 ZIP" for item in app.get("download_button"))
+        assert first.content == original_bytes
+        element(app.button, "打包已确认后处理结果").click().run()
+        assert_ok(app)
+        second = click_download(app, "下载已确认后处理 ZIP", downloaded_files)
+        _assert_bundle(second.content, ws)
+        # A real rename changes file labels/provenance, and never triggers science.
+>       element(app.text_input, "当前光谱展示名称").set_value("renamed A").run()
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/postprocessing/test_ui_roundtrip.py:248: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+elements = WidgetList(_list=[TextInput(key='_batch_5aecc2daeb964f3aa64143ac83863d53_cdb692e9847d468b9d751f4f4b250a21_display_name...), label='展示名称'), TextInput(key='batch_search_5aecc2daeb964f3aa64143ac83863d53', _value=InitialValue(), label='搜索光谱')])
+label = '当前光谱展示名称'
+
+    def element(elements: Any, label: str) -> Any:
+>       return next(item for item in elements if item.label == label)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       StopIteration
+
+tests/batch/test_ui.py:31: StopIteration
+----------------------------- Captured stderr call -----------------------------
+2026-09-11 13:45:49.471 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-09-11 13:45:49.471 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-09-11 13:45:49.471 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+------------------------------ Captured log call -------------------------------
+WARNING  streamlit.runtime.scriptrunner_utils.script_run_context:script_run_context.py:476 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+WARNING  streamlit.runtime.scriptrunner_utils.script_run_context:script_run_context.py:476 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+WARNING  streamlit.runtime.scriptrunner_utils.script_run_context:script_run_context.py:476 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+=========================== short test summary info ============================
+FAILED tests/postprocessing/test_ui_roundtrip.py::test_explicit_exports_include_parents_report_missing_and_preserve_download_bytes
+1 failed, 5 passed in 14.90s
+
+EXIT_CODE: 1
+ELAPSED_SECONDS: 15.281

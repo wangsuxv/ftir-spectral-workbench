@@ -23,7 +23,7 @@ BATCH_PAGES = [
     "2. 单位与处理范围",
     "3. 逐谱粗调",
     "4. 逐谱细调",
-    "5. 批量检查与导出",
+    "6. 批量检查与导出",
 ]
 
 
@@ -113,7 +113,9 @@ def test_modes_are_selectable_before_upload_with_separate_navigation(
     assert len(old_pages) == 10
     mode.set_value("普通光谱模式").run()
     assert_ok(app)
-    assert list(element(app.sidebar.radio, "工作流").options) == BATCH_PAGES
+    assert list(element(app.sidebar.radio, "工作流").options) == [
+        *BATCH_PAGES[:4], "5. 普通光谱后处理", BATCH_PAGES[4]
+    ]
     assert not workspace(app).records
     assert workspace(app).workflow_mode == "independent_batch"
     assert app.session_state["prepared"] is None

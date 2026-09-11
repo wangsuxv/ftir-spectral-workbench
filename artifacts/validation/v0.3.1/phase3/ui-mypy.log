@@ -1,0 +1,13 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m mypy ui/batch_postprocessing.py ui/batch_workflow.py
+STARTED_UTC: 2026-09-11T05:32:11.455094+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v031 cache>
+ui/components/baseline_preview.py: error: Source file found twice under different module names: "ui.components.baseline_preview" and "components.baseline_preview"
+ui/components/baseline_preview.py: note: See https://mypy.readthedocs.io/en/stable/running_mypy.html#mapping-file-paths-to-modules for more info
+ui/components/baseline_preview.py: note: Common resolutions include:
+ui/components/baseline_preview.py: note:     a) adding `__init__.py` somewhere,
+ui/components/baseline_preview.py: note:     b) using `--explicit-package-bases` or adjusting `MYPYPATH`
+Found 1 error in 1 file (errors prevented further checking)
+
+EXIT_CODE: 2
+ELAPSED_SECONDS: 0.175

@@ -1,0 +1,9 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m mypy --follow-imports=skip ui/batch_postprocessing.py
+STARTED_UTC: 2026-09-11T05:33:13.741668+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v031 cache>
+pyproject.toml: note: unused section(s): module = ['pybaselines', 'streamlit.*']
+Success: no issues found in 1 source file
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 0.313

@@ -1,0 +1,322 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m pytest -q tests/postprocessing/test_export_adversarial.py
+STARTED_UTC: 2026-09-11T05:46:37.378292+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v031 cache>
+.......................FF.....F.F                                        [100%]
+=================================== FAILURES ===================================
+_ test_rehashed_identity_graph_quantity_and_report_conflicts_return_false[baseline_unit_record] _
+
+ordinary_payload = (b'PK\x03\x04\x14\x00\x00\x00\x08\x00\x00\x00!\x00v\x04\xf9\xb0A\x05\x00\x00\x93\x1a\x00\x00\x13\x00\x00\x00batch_meta...d.csvPK\x05\x06\x00\x00\x00\x00\x0e\x00\x0e\x00\xb6\x05\x00\x00Bx\x00\x00\x00\x00', 'a98fd05e624f471c83e615fdecf2ff78')
+attack = 'baseline_unit_record'
+
+    @pytest.mark.parametrize("attack", [
+        "source_id", "spectrum_id", "workspace_id", "source_column", "parent_branch", "parent_hash",
+        "quantity", "purpose", "coarse_parent", "fine_not_decided", "duplicated_node", "missing_parent",
+        "wrong_inclusion", "unsafe_recipe_path", "aliased_recipe", "unknown_branch", "extra_member",
+        "duplicate_requested_branch", "lost_report_row", "invented_report_row", "false_2d", "wide_axes_claim",
+        "baseline_unit_record", "invalid_original_direction",
+    ])
+    def test_rehashed_identity_graph_quantity_and_report_conflicts_return_false(
+        ordinary_payload: tuple[bytes, str], attack: str,
+    ) -> None:
+        payload, sid = ordinary_payload
+    
+        def corrupt(metadata: dict, index: dict, nodes: dict[str, dict], members: dict[str, bytes]) -> None:
+            baseline = node_for(nodes, "baseline")
+            normalized = node_for(nodes, "normalized_smoothed")
+            if attack == "source_id":
+                normalized["source_id"] = normalized["source"]["source_id"] = "other-source"
+            elif attack == "spectrum_id":
+                normalized["spectrum_id"] = normalized["source"]["spectrum_id"] = "other-spectrum"
+            elif attack == "workspace_id":
+                normalized["workspace_id"] = "other-workspace"
+            elif attack == "source_column":
+                source = normalized["source"]
+                source["source_column_index"] += 1
+                source["source_selection_sha256"] = json_fingerprint({
+                    "source_sha256": source["source_sha256"], "column_index": source["source_column_index"],
+                    "import_options": source["import_options"],
+                })
+            elif attack == "parent_branch":
+                normalized["parent_branch"] = "normalized_baseline"
+            elif attack == "parent_hash":
+                normalized["parent_fingerprint"] = baseline["fingerprint"]
+            elif attack == "quantity":
+                normalized["quantity"] = "absorbance"
+            elif attack == "purpose":
+                normalized["purpose"] = "display_only"
+            elif attack == "coarse_parent":
+                baseline["stage_request"]["parent_coarse_fingerprint"] = "0" * 64
+            elif attack == "fine_not_decided":
+                baseline["fine_decision"] = "not_decided"
+            elif attack == "duplicated_node":
+                index["nodes"].append(copy.deepcopy(index["nodes"][0]))
+            elif attack == "missing_parent":
+                index["nodes"] = [row for row in index["nodes"] if row["branch"] != "smoothed"]
+            elif attack == "wrong_inclusion":
+                index["nodes"][0]["included_as"] = "parent"
+            elif attack == "unsafe_recipe_path":
+                path = next(path for path, node in nodes.items() if node is normalized)
+                del nodes[path]
+                normalized["recipe_json"] = "../outside.json"
+                nodes["../outside.json"] = normalized
+                next(row for row in index["nodes"] if row["branch"] == "normalized_smoothed")["recipe_json"] = "../outside.json"
+            elif attack == "aliased_recipe":
+                index["nodes"][-1]["recipe_json"] = index["nodes"][0]["recipe_json"]
+            elif attack == "unknown_branch":
+                index["nodes"][-1]["branch"] = "normalized_twice"
+            elif attack == "extra_member":
+                members["unrequested.npy"] = b"no arrays or executable objects belong in this CSV bundle"
+            elif attack == "duplicate_requested_branch":
+                metadata["requested_branches"].append("smoothed")
+            elif attack == "lost_report_row":
+                metadata["report"].pop()
+            elif attack == "invented_report_row":
+                metadata["report"].append({"spectrum_id": sid, "branch": "normalized_twice", "status": "exported"})
+            elif attack == "false_2d":
+                normalized["is_2d_ready"] = True
+            elif attack == "wide_axes_claim":
+                metadata["wide_available"] = False
+            elif attack == "baseline_unit_record":
+                baseline["unit_conversion"]["input_unit"] = "percent_transmittance"
+            else:
+                for node in nodes.values():
+                    node["source"]["original_axis_direction"] = "not-an-axis-direction"
+                for row in metadata["report"]:
+                    row["original_axis_direction"] = "not-an-axis-direction"
+>       assert verify_postprocessing_export(rehash_bundle(payload, corrupt), recompute=False) is False
+E       AssertionError: assert True is False
+E        +  where True = verify_postprocessing_export(b'PK\x03\x04\x14\x00\x00\x00\x08\x00\x00\x00!\x00v\x04\xf9\xb0A\x05\x00\x00\x93\x1a\x00\x00\x13\x00\x00\x00batch_metad...e615fdecf2ff78__80c310325910__smoothed.csvPK\x05\x06\x00\x00\x00\x00\x0e\x00\x0e\x00\xb6\x05\x00\x00Lx\x00\x00\x00\x00', recompute=False)
+E        +    where b'PK\x03\x04\x14\x00\x00\x00\x08\x00\x00\x00!\x00v\x04\xf9\xb0A\x05\x00\x00\x93\x1a\x00\x00\x13\x00\x00\x00batch_metad...e615fdecf2ff78__80c310325910__smoothed.csvPK\x05\x06\x00\x00\x00\x00\x0e\x00\x0e\x00\xb6\x05\x00\x00Lx\x00\x00\x00\x00' = rehash_bundle(b'PK\x03\x04\x14\x00\x00\x00\x08\x00\x00\x00!\x00v\x04\xf9\xb0A\x05\x00\x00\x93\x1a\x00\x00\x13\x00\x00\x00batch_metad...e615fdecf2ff78__80c310325910__smoothed.csvPK\x05\x06\x00\x00\x00\x00\x0e\x00\x0e\x00\xb6\x05\x00\x00Bx\x00\x00\x00\x00', <function test_rehashed_identity_graph_quantity_and_report_conflicts_return_false.<locals>.corrupt at 0x111972020>)
+
+tests/postprocessing/test_export_adversarial.py:153: AssertionError
+_ test_rehashed_identity_graph_quantity_and_report_conflicts_return_false[invalid_original_direction] _
+
+ordinary_payload = (b'PK\x03\x04\x14\x00\x00\x00\x08\x00\x00\x00!\x00\x8e\xb8I\xa7@\x05\x00\x00\x93\x1a\x00\x00\x13\x00\x00\x00batch_meta...d.csvPK\x05\x06\x00\x00\x00\x00\x0e\x00\x0e\x00\xb6\x05\x00\x00Cx\x00\x00\x00\x00', 'ed68535f3d694e91bcf90dc9770c1020')
+attack = 'invalid_original_direction'
+
+    @pytest.mark.parametrize("attack", [
+        "source_id", "spectrum_id", "workspace_id", "source_column", "parent_branch", "parent_hash",
+        "quantity", "purpose", "coarse_parent", "fine_not_decided", "duplicated_node", "missing_parent",
+        "wrong_inclusion", "unsafe_recipe_path", "aliased_recipe", "unknown_branch", "extra_member",
+        "duplicate_requested_branch", "lost_report_row", "invented_report_row", "false_2d", "wide_axes_claim",
+        "baseline_unit_record", "invalid_original_direction",
+    ])
+    def test_rehashed_identity_graph_quantity_and_report_conflicts_return_false(
+        ordinary_payload: tuple[bytes, str], attack: str,
+    ) -> None:
+        payload, sid = ordinary_payload
+    
+        def corrupt(metadata: dict, index: dict, nodes: dict[str, dict], members: dict[str, bytes]) -> None:
+            baseline = node_for(nodes, "baseline")
+            normalized = node_for(nodes, "normalized_smoothed")
+            if attack == "source_id":
+                normalized["source_id"] = normalized["source"]["source_id"] = "other-source"
+            elif attack == "spectrum_id":
+                normalized["spectrum_id"] = normalized["source"]["spectrum_id"] = "other-spectrum"
+            elif attack == "workspace_id":
+                normalized["workspace_id"] = "other-workspace"
+            elif attack == "source_column":
+                source = normalized["source"]
+                source["source_column_index"] += 1
+                source["source_selection_sha256"] = json_fingerprint({
+                    "source_sha256": source["source_sha256"], "column_index": source["source_column_index"],
+                    "import_options": source["import_options"],
+                })
+            elif attack == "parent_branch":
+                normalized["parent_branch"] = "normalized_baseline"
+            elif attack == "parent_hash":
+                normalized["parent_fingerprint"] = baseline["fingerprint"]
+            elif attack == "quantity":
+                normalized["quantity"] = "absorbance"
+            elif attack == "purpose":
+                normalized["purpose"] = "display_only"
+            elif attack == "coarse_parent":
+                baseline["stage_request"]["parent_coarse_fingerprint"] = "0" * 64
+            elif attack == "fine_not_decided":
+                baseline["fine_decision"] = "not_decided"
+            elif attack == "duplicated_node":
+                index["nodes"].append(copy.deepcopy(index["nodes"][0]))
+            elif attack == "missing_parent":
+                index["nodes"] = [row for row in index["nodes"] if row["branch"] != "smoothed"]
+            elif attack == "wrong_inclusion":
+                index["nodes"][0]["included_as"] = "parent"
+            elif attack == "unsafe_recipe_path":
+                path = next(path for path, node in nodes.items() if node is normalized)
+                del nodes[path]
+                normalized["recipe_json"] = "../outside.json"
+                nodes["../outside.json"] = normalized
+                next(row for row in index["nodes"] if row["branch"] == "normalized_smoothed")["recipe_json"] = "../outside.json"
+            elif attack == "aliased_recipe":
+                index["nodes"][-1]["recipe_json"] = index["nodes"][0]["recipe_json"]
+            elif attack == "unknown_branch":
+                index["nodes"][-1]["branch"] = "normalized_twice"
+            elif attack == "extra_member":
+                members["unrequested.npy"] = b"no arrays or executable objects belong in this CSV bundle"
+            elif attack == "duplicate_requested_branch":
+                metadata["requested_branches"].append("smoothed")
+            elif attack == "lost_report_row":
+                metadata["report"].pop()
+            elif attack == "invented_report_row":
+                metadata["report"].append({"spectrum_id": sid, "branch": "normalized_twice", "status": "exported"})
+            elif attack == "false_2d":
+                normalized["is_2d_ready"] = True
+            elif attack == "wide_axes_claim":
+                metadata["wide_available"] = False
+            elif attack == "baseline_unit_record":
+                baseline["unit_conversion"]["input_unit"] = "percent_transmittance"
+            else:
+                for node in nodes.values():
+                    node["source"]["original_axis_direction"] = "not-an-axis-direction"
+                for row in metadata["report"]:
+                    row["original_axis_direction"] = "not-an-axis-direction"
+>       assert verify_postprocessing_export(rehash_bundle(payload, corrupt), recompute=False) is False
+E       AssertionError: assert True is False
+E        +  where True = verify_postprocessing_export(b'PK\x03\x04\x14\x00\x00\x00\x08\x00\x00\x00!\x00<o=JE\x05\x00\x00\xbf\x1a\x00\x00\x13\x00\x00\x00batch_metadata.json\...f90dc9770c1020__ecca13640374__smoothed.csvPK\x05\x06\x00\x00\x00\x00\x0e\x00\x0e\x00\xb6\x05\x00\x00{x\x00\x00\x00\x00', recompute=False)
+E        +    where b'PK\x03\x04\x14\x00\x00\x00\x08\x00\x00\x00!\x00<o=JE\x05\x00\x00\xbf\x1a\x00\x00\x13\x00\x00\x00batch_metadata.json\...f90dc9770c1020__ecca13640374__smoothed.csvPK\x05\x06\x00\x00\x00\x00\x0e\x00\x0e\x00\xb6\x05\x00\x00{x\x00\x00\x00\x00' = rehash_bundle(b'PK\x03\x04\x14\x00\x00\x00\x08\x00\x00\x00!\x00\x8e\xb8I\xa7@\x05\x00\x00\x93\x1a\x00\x00\x13\x00\x00\x00batch_metad...f90dc9770c1020__ecca13640374__smoothed.csvPK\x05\x06\x00\x00\x00\x00\x0e\x00\x0e\x00\xb6\x05\x00\x00Cx\x00\x00\x00\x00', <function test_rehashed_identity_graph_quantity_and_report_conflicts_return_false.<locals>.corrupt at 0x111a232e0>)
+
+tests/postprocessing/test_export_adversarial.py:153: AssertionError
+_ test_malicious_csv_payloads_return_false_without_uncaught_parser_errors[huge_header] _
+
+ordinary_payload = (b'PK\x03\x04\x14\x00\x00\x00\x08\x00\x00\x00!\x00\xfb\xb9\x11HB\x05\x00\x00\x93\x1a\x00\x00\x13\x00\x00\x00batch_meta...d.csvPK\x05\x06\x00\x00\x00\x00\x0e\x00\x0e\x00\xb6\x05\x00\x00Gx\x00\x00\x00\x00', 'afeddf1d7c2349abb909a4a69b0dc13b')
+attack = 'huge_header'
+
+    @pytest.mark.parametrize("attack", [
+        "nan", "infinity", "expression", "duplicate_axis", "wrong_column", "huge_header", "object_bytes",
+    ])
+    def test_malicious_csv_payloads_return_false_without_uncaught_parser_errors(
+        ordinary_payload: tuple[bytes, str], attack: str,
+    ) -> None:
+        def corrupt(metadata: dict, index: dict, nodes: dict[str, dict], members: dict[str, bytes]) -> None:
+            node = node_for(nodes, "normalized_baseline")
+            path = node["spectra_csv"]
+            rows = list(csv.reader(io.StringIO(members[path].decode())))
+            if attack == "huge_header":
+                members[path] = ("x" * (csv.field_size_limit() + 1) + ",normalized_intensity\n0,0\n1,1\n").encode()
+                return
+            if attack == "object_bytes":
+                output = io.BytesIO()
+                np.save(output, np.array([{"must_not_execute": True}], dtype=object), allow_pickle=True)
+                members[path] = output.getvalue()
+                return
+            if attack in {"nan", "infinity", "expression"}:
+                rows[1][1] = {"nan": "nan", "infinity": "inf", "expression": "=1+1"}[attack]
+            elif attack == "duplicate_axis":
+                rows[2][0] = rows[1][0]
+            else:
+                rows[0][1] = "corrected_absorbance"
+            output = io.StringIO(newline="")
+            csv.writer(output, lineterminator="\n").writerows(rows)
+            members[path] = output.getvalue().encode()
+>       assert verify_postprocessing_export(rehash_bundle(ordinary_payload[0], corrupt), recompute=False) is False
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/postprocessing/test_export_adversarial.py:183: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/ftir_workbench/batch/postprocessing_export.py:544: in verify_postprocessing_export
+    x, y = _csv_arrays(members[node["spectra_csv"]], ["wavenumber_cm-1", node["column_label"]])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+payload = b'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx...xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx,normalized_intensity\n0,0\n1,1\n'
+headers = ['wavenumber_cm-1', 'normalized_intensity']
+
+    def _csv_arrays(payload: bytes, headers: Sequence[str]) -> tuple[FloatArray, FloatArray]:
+        stream = io.StringIO(payload.decode("utf-8"))
+>       header = next(csv.reader([stream.readline()]))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       _csv.Error: field larger than field limit (131072)
+
+src/ftir_workbench/batch/postprocessing_export.py:361: Error
+_ test_rehashed_extreme_minmax_parent_returns_false_instead_of_floating_point_exception _
+
+    def test_rehashed_extreme_minmax_parent_returns_false_instead_of_floating_point_exception() -> None:
+        ws, sid = confirmed_workspace(np.arange(3.0), np.array([-1.0, 1.0, 3.0]))
+        apply_branch(ws, sid, "normalized_baseline", {"enabled": True, "method": "minmax_display"})
+        payload = build_postprocessing_export(ws, [sid], branches=("normalized_baseline",)).zip_bytes
+    
+        def corrupt(metadata: dict, index: dict, nodes: dict[str, dict], members: dict[str, bytes]) -> None:
+            parent = node_for(nodes, "baseline")
+            child = node_for(nodes, "normalized_baseline")
+            values = np.array([[-1e308, 0.0, 1e308]])
+            members[parent["spectra_csv"]] = _table(
+                ["wavenumber_cm-1", "corrected_absorbance"],
+                list(zip(np.arange(3.0), values[0], strict=True)),
+            )
+            parent["y_sha256"] = array_hash(values)
+            child["request_payload"]["parent_y_sha256"] = parent["y_sha256"]
+            child["request_fingerprint"] = json_fingerprint(child["request_payload"])
+>       assert verify_postprocessing_export(rehash_bundle(payload, corrupt), recompute=False) is False
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/postprocessing/test_export_adversarial.py:202: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/ftir_workbench/batch/postprocessing_export.py:581: in verify_postprocessing_export
+    _verify_derived(node, parent, nodes[(key[0], "baseline")], x, y, parent_y, removed, recompute=recompute)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = {'baseline_fingerprint': '1d1c6e6715a3ce5c56fbeb0e1b4b04dd8fad73ae6549c347f1d15d58556acaab', 'branch': 'normalized_bas...inmax_display', 'minimum_reference': 0.0, 'numerical_guard_version': 'ordinary-normalization-reference-floor-v1'}, ...}
+parent = {'baseline_fingerprint': '1d1c6e6715a3ce5c56fbeb0e1b4b04dd8fad73ae6549c347f1d15d58556acaab', 'branch': 'baseline', 'co... [], 'enabled': False, 'endpoint_window_width_cm1': 8.0, 'method': 'none', ...}, 'input_unit': 'absorbance', ...}, ...}
+baseline = {'baseline_fingerprint': '1d1c6e6715a3ce5c56fbeb0e1b4b04dd8fad73ae6549c347f1d15d58556acaab', 'branch': 'baseline', 'co... [], 'enabled': False, 'endpoint_window_width_cm1': 8.0, 'method': 'none', ...}, 'input_unit': 'absorbance', ...}, ...}
+x = array([0., 1., 2.]), y = array([[0. , 0.5, 1. ]])
+parent_y = array([[-1.e+308,  0.e+000,  1.e+308]]), removed = None
+recompute = False
+
+    def _verify_derived(
+        node: dict[str, Any], parent: dict[str, Any], baseline: dict[str, Any],
+        x: FloatArray, y: FloatArray, parent_y: FloatArray, removed: FloatArray | None,
+        *, recompute: bool,
+    ) -> None:
+        config = effective_config(node["branch"], node["recipe"])
+        _require(plain(config.scientific_dict()) == node["effective_recipe"], "effective recipe mismatch")
+        _require(node["parent_branch"] == PARENTS[node["branch"]] and node["parent_fingerprint"] == parent["fingerprint"], "derived parent identity mismatch")
+        _require(node["source"] == parent["source"] == baseline["source"], "parent/source provenance mismatch")
+        _require(node["baseline_fingerprint"] == baseline["fingerprint"] == parent["baseline_fingerprint"], "baseline anchor mismatch")
+        _require(node["input_sha256"] == baseline["input_sha256"], "raw scientific input hash mismatch")
+        payload = {
+            "contract": "ordinary-postprocess-v1", "workspace_id": node["workspace_id"],
+            "spectrum_id": node["spectrum_id"], "source_id": node["source_id"],
+            "input_sha256": node["input_sha256"], "branch": node["branch"],
+            "baseline_fingerprint": baseline["fingerprint"], "parent_fingerprint": parent["fingerprint"],
+            "parent_branch": PARENTS[node["branch"]], "x_sha256": array_hash(x),
+            "parent_y_sha256": array_hash(parent_y), "effective_recipe": node["effective_recipe"],
+            "implementation": node["implementation"],
+        }
+        _require(payload == node["request_payload"] and json_fingerprint(payload) == node["request_fingerprint"], "derived request fingerprint mismatch")
+        _require(isinstance(node["versions"], dict) and bool(node["versions"]), "missing numerical versions")
+        if node["branch"] == "smoothed":
+            _require(node["quantity"] == "absorbance" and node["purpose"] == "scientific", "invalid smoothed quantity")
+            _require(removed is not None and np.array_equal(removed, parent_y - y), "smoothing residual identity mismatch")
+            _require(node["scale"] is None and node["offset"] is None, "smoothing carries normalization factors")
+            if recompute:
+                # Bound untrusted replay work; these limits do not change the filter.
+                full = config.to_dict()
+                if config.method == "gaussian":
+                    _require(full["gaussian_sigma_points"] * full["gaussian_truncate"] <= 1_000_000, "Gaussian replay kernel exceeds verifier resource limit")
+                result = smooth_spectral_arrays(x, parent_y, full)
+                _require(np.array_equal(result.smoothed_spectra, y), "smoothing replay differs from exported output")
+                _require(plain(result.per_spectrum_metrics) == node["qc"]["per_spectrum"] and plain(result.summary_metrics) == node["qc"]["summary"], "smoothing QC differs from replay")
+                _require(list(result.warnings) == node["warnings"], "smoothing warnings differ from replay")
+        else:
+            minmax = config.method == "minmax_display"
+            _require(node["quantity"] == ("minmax_scaled_intensity" if minmax else "normalized_intensity"), "normalization quantity mismatch")
+            _require(node["purpose"] == ("display_only" if minmax else "scientific") and removed is None, "normalization purpose/components mismatch")
+            scale, offset = np.asarray(node["scale"], dtype=float), np.asarray(node["offset"], dtype=float)
+            _require(scale.shape == offset.shape == (1,) and np.isfinite(scale).all() and np.isfinite(offset).all() and np.all(scale > 0), "invalid finite affine coefficients")
+            with np.errstate(over="raise", invalid="raise", divide="raise"):
+                if minmax:
+                    minimum = np.min(parent_y, axis=1)
+>                   span = np.max(parent_y, axis=1) - minimum
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E                   FloatingPointError: overflow encountered in subtract
+
+src/ftir_workbench/batch/postprocessing_export.py:474: FloatingPointError
+=========================== short test summary info ============================
+FAILED tests/postprocessing/test_export_adversarial.py::test_rehashed_identity_graph_quantity_and_report_conflicts_return_false[baseline_unit_record]
+FAILED tests/postprocessing/test_export_adversarial.py::test_rehashed_identity_graph_quantity_and_report_conflicts_return_false[invalid_original_direction]
+FAILED tests/postprocessing/test_export_adversarial.py::test_malicious_csv_payloads_return_false_without_uncaught_parser_errors[huge_header]
+FAILED tests/postprocessing/test_export_adversarial.py::test_rehashed_extreme_minmax_parent_returns_false_instead_of_floating_point_exception
+4 failed, 29 passed in 2.20s
+
+EXIT_CODE: 1
+ELAPSED_SECONDS: 2.459

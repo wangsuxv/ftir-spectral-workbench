@@ -1,0 +1,49 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m ruff check tests/postprocessing/test_export_adversarial.py
+STARTED_UTC: 2026-09-11T05:46:37.380682+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v031 cache>
+I001 [*] Import block is un-sorted or un-formatted
+  --> tests/postprocessing/test_export_adversarial.py:3:1
+   |
+ 1 |   """Rehashed untrusted postprocessing bundles must fail closed without replay."""
+ 2 |
+ 3 | / from __future__ import annotations
+ 4 | |
+ 5 | | import copy
+ 6 | | import csv
+ 7 | | import io
+ 8 | | from collections.abc import Callable
+ 9 | |
+10 | | import numpy as np
+11 | | import pytest
+12 | |
+13 | | from ftir_workbench.batch.export import _table
+14 | | from ftir_workbench.batch.fingerprints import json_fingerprint
+15 | | from ftir_workbench.batch.postprocessing import array_hash
+16 | | from ftir_workbench.batch.postprocessing_export import (
+17 | |     ARTIFACT_TYPE,
+18 | |     build_postprocessing_export,
+19 | |     verify_postprocessing_export,
+20 | | )
+21 | | from ftir_workbench.batch.workspace import _read_json, json_bytes, make_archive, read_verified_archive
+22 | | from tests.postprocessing.helpers import confirmed_workspace
+23 | | from tests.postprocessing.test_state_contracts import apply_branch, graph
+   | |_________________________________________________________________________^
+help: Organize imports
+   |
+20 | )
+   - from ftir_workbench.batch.workspace import _read_json, json_bytes, make_archive, read_verified_archive
+21 + from ftir_workbench.batch.workspace import (
+22 +     _read_json,
+23 +     json_bytes,
+24 +     make_archive,
+25 +     read_verified_archive,
+26 + )
+27 | from tests.postprocessing.helpers import confirmed_workspace
+   |
+
+Found 1 error.
+[*] 1 fixable with the `--fix` option.
+
+EXIT_CODE: 1
+ELAPSED_SECONDS: 0.026

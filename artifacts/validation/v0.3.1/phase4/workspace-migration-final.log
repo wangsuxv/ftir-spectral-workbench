@@ -1,0 +1,9 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m pytest -q tests/postprocessing/test_workspace_migration.py tests/postprocessing/test_service_edge_lineage.py
+STARTED_UTC: 2026-09-11T05:40:47.696967+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v031 cache>
+.......................................                                  [100%]
+39 passed in 4.70s
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 4.955

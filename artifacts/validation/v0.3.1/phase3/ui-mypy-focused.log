@@ -1,0 +1,11 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m mypy --follow-imports=skip ui/batch_postprocessing.py
+STARTED_UTC: 2026-09-11T05:32:36.940256+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v031 cache>
+ui/batch_postprocessing.py:370: error: Unused "type: ignore" comment  [unused-ignore]
+ui/batch_postprocessing.py:371: error: Unused "type: ignore" comment  [unused-ignore]
+pyproject.toml: note: unused section(s): module = ['pybaselines', 'streamlit.*']
+Found 2 errors in 1 file (checked 1 source file)
+
+EXIT_CODE: 1
+ELAPSED_SECONDS: 2.121

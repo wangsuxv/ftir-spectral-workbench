@@ -153,7 +153,7 @@ class SpectrumProcessingState:
 
 @dataclass(slots=True)
 class BatchWorkspace:
-    schema_version: str = "1.0"
+    schema_version: str = "2.0"
     workspace_id: str = field(default_factory=lambda: uuid4().hex)
     workflow_mode: Literal["independent_batch"] = "independent_batch"
     sources: dict[str, ImportedSource] = field(default_factory=dict)
@@ -161,6 +161,7 @@ class BatchWorkspace:
     states: dict[str, SpectrumProcessingState] = field(default_factory=dict)
     display_order: list[str] = field(default_factory=list)
     selected_spectrum_id: str | None = None
+    selected_spectrum_ids: list[str] = field(default_factory=list)
     import_issues: list[dict[str, Any]] = field(default_factory=list)
     export_history: list[dict[str, Any]] = field(default_factory=list)
     last_export_summary: dict[str, Any] | None = None

@@ -1,0 +1,8 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python scripts/generate_v031_examples.py --output outputs/validation-private/v031/browser/inputs
+STARTED_UTC: 2026-09-11T05:27:34.620743+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v031 cache>
+Generated 3 synthetic CSV files in <repository>/outputs/validation-private/v031/browser/inputs
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 0.115

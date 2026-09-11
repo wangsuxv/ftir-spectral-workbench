@@ -1,0 +1,9 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m pytest -q tests/postprocessing/test_ui_adversarial.py
+STARTED_UTC: 2026-09-11T05:32:47.823464+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v031 cache>
+......                                                                   [100%]
+6 passed in 11.68s
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 12.123

@@ -1,0 +1,35 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m ruff check tests/postprocessing/test_workspace_migration.py
+STARTED_UTC: 2026-09-11T05:38:37.137302+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v031 cache>
+RUF002 Docstring contains ambiguous `–` (EN DASH). Did you mean `-` (HYPHEN-MINUS)?
+ --> tests/postprocessing/test_workspace_migration.py:1:21
+  |
+1 | """PP-001 and PP-061–063: exact legacy fixtures, lineage and verified persistence."""
+  |                     ^
+2 |
+3 | from __future__ import annotations
+  |
+
+F401 [*] `typing.Any` imported but unused
+  --> tests/postprocessing/test_workspace_migration.py:14:20
+   |
+12 | from collections.abc import Callable
+13 | from pathlib import Path
+14 | from typing import Any
+   |                    ^^^
+15 |
+16 | import numpy as np
+   |
+help: Remove unused import: `typing.Any`
+   |
+13 | from pathlib import Path
+   - from typing import Any
+14 |
+   |
+
+Found 2 errors.
+[*] 1 fixable with the `--fix` option.
+
+EXIT_CODE: 1
+ELAPSED_SECONDS: 0.029

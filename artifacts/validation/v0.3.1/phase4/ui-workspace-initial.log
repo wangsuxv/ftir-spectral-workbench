@@ -1,0 +1,45 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m pytest tests/postprocessing/test_ui_roundtrip.py -q
+STARTED_UTC: 2026-09-11T05:41:49.959868+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v031 cache>
+F..                                                                      [100%]
+=================================== FAILURES ===================================
+_ test_real_uploaded_workspace_restores_selection_sources_drafts_parents_and_no_previews _
+
+downloaded_files = {}, science_calls = {'smoothing': 0, 'normalization': 0}
+
+    def test_real_uploaded_workspace_restores_selection_sources_drafts_parents_and_no_previews(
+        downloaded_files: dict[str, DownloadedFile], science_calls: dict[str, int],
+    ) -> None:
+        app = uploaded_app()
+        ws = workspace(app)
+        a, b, c = ws.display_order
+        for sid in (a, b, c):
+>           select_spectrum(app, sid)
+
+tests/postprocessing/test_ui_roundtrip.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/batch/test_ui.py:90: in select_spectrum
+    element(app.sidebar.selectbox, "当前光谱").set_value(sid).run()
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+elements = WidgetList(_list=[Selectbox(key='workflow_mode', _value=InitialValue(), label='数据模式', options=['原位序列模式', '普通光谱模式'])])
+label = '当前光谱'
+
+    def element(elements: Any, label: str) -> Any:
+>       return next(item for item in elements if item.label == label)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       StopIteration
+
+tests/batch/test_ui.py:31: StopIteration
+----------------------------- Captured stderr call -----------------------------
+2026-09-11 13:41:51.466 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+------------------------------ Captured log call -------------------------------
+WARNING  streamlit.runtime.scriptrunner_utils.script_run_context:script_run_context.py:476 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+=========================== short test summary info ============================
+FAILED tests/postprocessing/test_ui_roundtrip.py::test_real_uploaded_workspace_restores_selection_sources_drafts_parents_and_no_previews
+1 failed, 2 passed in 3.49s
+
+EXIT_CODE: 1
+ELAPSED_SECONDS: 3.861

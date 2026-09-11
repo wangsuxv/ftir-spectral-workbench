@@ -31,6 +31,7 @@ from ftir_workbench.batch.state import (
 from ftir_workbench.display_units import convert_absorbance_for_display
 
 try:
+    from ui.batch_postprocessing import postprocessing_save_context, render_postprocessing
     from ui.components.baseline_preview import (
         anchor_diagnostics_table,
         coarse_preview_figure,
@@ -38,6 +39,10 @@ try:
         fine_residual_figure,
     )
 except ModuleNotFoundError:
+    from batch_postprocessing import (  # type: ignore[no-redef]
+        postprocessing_save_context,
+        render_postprocessing,
+    )
     from components.baseline_preview import (  # type: ignore[no-redef]
         anchor_diagnostics_table,
         coarse_preview_figure,
@@ -50,7 +55,8 @@ PAGES = (
     "2. 单位与处理范围",
     "3. 逐谱粗调",
     "4. 逐谱细调",
-    "5. 批量检查与导出",
+    "5. 普通光谱后处理",
+    "6. 批量检查与导出",
 )
 UNITS = ("absorbance", "percent_transmittance", "fraction_transmittance")
 UNIT_LABELS = {
@@ -258,13 +264,14 @@ def _sidebar_selection(ws: BatchWorkspace) -> str | None:
     )
     ws.selected_spectrum_id = chosen
     targets_key = f"batch_targets_{ws.workspace_id}"
-    saved = st.session_state.get("batch_target_ids", [])
+    saved = ws.selected_spectrum_ids or st.session_state.get("batch_target_ids", [])
     if targets_key not in st.session_state:
         st.session_state[targets_key] = [sid for sid in saved if sid in ws.records]
     selected = st.sidebar.multiselect(
         "批量勾选（独立于当前光谱）", ws.display_order, format_func=label, key=targets_key
     )
     st.session_state["batch_target_ids"] = list(selected)
+    ws.selected_spectrum_ids = list(selected)
     if st.sidebar.button("反转显示顺序"):
         ws.display_order.reverse()
         ws.last_export_summary = None
@@ -734,10 +741,12 @@ def _workspace_context(
     if for_save:
         payload.update(
             selected=ws.selected_spectrum_id,
+            selected_spectrum_ids=ws.selected_spectrum_ids,
             display={sid: state.display_preferences for sid, state in ws.states.items()},
             exports=ws.export_history,
             summary=ws.last_export_summary,
             import_issues=ws.import_issues,
+            postprocessing=postprocessing_save_context(ws),
         )
     return json_fingerprint(payload)
 
@@ -754,7 +763,7 @@ def _workspace_restore(ws: BatchWorkspace) -> None:
             try:
                 restored = load_batch_workspace(uploaded.getvalue())
                 st.session_state.batch_workspace = restored
-                st.session_state["batch_target_ids"] = []
+                st.session_state["batch_target_ids"] = list(restored.selected_spectrum_ids)
                 for key in (
                     "batch_save_download",
                     "batch_download_coarse",
@@ -886,12 +895,12 @@ def render_batch_workflow() -> None:
     if st.session_state.get("batch_restore_message"):
         st.success(st.session_state["batch_restore_message"])
     page = st.sidebar.radio("工作流", PAGES, key="batch_page")
-    st.sidebar.caption("普通光谱 → 逐谱粗调 / 细调 → CSV / ZIP / 工作区")
+    st.sidebar.caption("普通光谱 → 逐谱粗调 / 细调 → 可选平滑 / 归一化 → 导出")
     sid = _sidebar_selection(ws)
     if page == PAGES[0]:
         _import_page(ws)
-    elif page == PAGES[4]:
-        st.subheader(PAGES[4])
+    elif page == PAGES[5]:
+        st.subheader(PAGES[5])
         st.dataframe(spectrum_table(ws), hide_index=True, width="stretch")
         _export_controls(ws, sid, "coarse")
         _export_controls(ws, sid, "fine")
@@ -903,5 +912,7 @@ def render_batch_workflow() -> None:
         _record_header(ws, sid)
         if page == PAGES[1]:
             _preparation_page(ws, sid)
+        elif page == PAGES[4]:
+            render_postprocessing(ws, sid)
         else:
             _processing_page(ws, sid, "coarse" if page == PAGES[2] else "fine")
