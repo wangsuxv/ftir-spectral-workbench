@@ -1,0 +1,20 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -c 'import numpy as np; from tests.postprocessing.helpers import confirmed_workspace; from ftir_workbench.batch.postprocessing import update_draft,preview_normalization; from ftir_workbench.batch.normalization_adapter import normalize_spectral_arrays; x=np.arange(9,dtype=float); y=1e8+np.linspace(0,0.1234567,9); w,s=confirmed_workspace(x,y); direct=normalize_spectral_arrays(x,y[None,:],{"enabled":True,"method":"minmax_display"}); print("direct Min-Max accepted",direct.metrics["affine_reconstruction_max_abs_error"]); update_draft(w,s,"normalized_baseline",{"enabled":True,"method":"minmax_display"}); preview_normalization(w,s)'
+STARTED_UTC: 2026-09-11T05:18:22.813598+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v031 cache>
+direct Min-Max accepted [7.39469799e-08]
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "<repository>/src/ftir_workbench/batch/postprocessing.py", line 452, in preview_normalization
+    return preview_branch(workspace, spectrum_id, "normalized_" + source_kind)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<repository>/src/ftir_workbench/batch/postprocessing.py", line 359, in preview_branch
+    validate_snapshot(workspace, spectrum_id, snapshot)
+  File "<repository>/src/ftir_workbench/batch/postprocessing.py", line 280, in validate_snapshot
+    fail("normalization arrays disagree with stored scale/offset")
+  File "<repository>/src/ftir_workbench/batch/postprocessing.py", line 229, in fail
+    raise BatchError("POSTPROCESS_INTEGRITY_FAILED", message)
+ftir_workbench.batch.models.BatchError: POSTPROCESS_INTEGRITY_FAILED: normalization arrays disagree with stored scale/offset
+
+EXIT_CODE: 1
+ELAPSED_SECONDS: 1.058

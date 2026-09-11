@@ -1,0 +1,10 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m mypy src/ftir_workbench/batch/postprocessing.py src/ftir_workbench/batch/models.py
+STARTED_UTC: 2026-09-11T05:17:46.842815+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v031 cache>
+src/ftir_workbench/batch/postprocessing.py:464: error: Argument 2 to "convert_absorbance_for_display" has incompatible type "str"; expected "Literal['absorbance', 'fraction_transmittance', 'percent_transmittance']"  [arg-type]
+pyproject.toml: note: unused section(s): module = ['plotly', 'plotly.*', 'pybaselines', 'streamlit', 'streamlit.*']
+Found 1 error in 1 file (checked 2 source files)
+
+EXIT_CODE: 1
+ELAPSED_SECONDS: 0.451

@@ -1,0 +1,9 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m mypy src/ftir_workbench/post_baseline_smoothing.py src/ftir_workbench/batch/normalization_adapter.py
+STARTED_UTC: 2026-09-11T05:13:08.634681+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v031 cache>
+pyproject.toml: note: unused section(s): module = ['plotly', 'plotly.*', 'pybaselines', 'streamlit', 'streamlit.*']
+Success: no issues found in 2 source files
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 0.505

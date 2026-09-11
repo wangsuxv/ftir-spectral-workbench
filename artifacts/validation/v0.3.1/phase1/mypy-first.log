@@ -1,0 +1,16 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m mypy src/ftir_workbench/post_baseline_smoothing.py src/ftir_workbench/batch/normalization_adapter.py
+STARTED_UTC: 2026-09-11T05:11:39.955638+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v031 cache>
+src/ftir_workbench/post_baseline_smoothing.py:944: error: Argument 1 to "PostBaselineSmoothingConfig" has incompatible type "**dict[str, object]"; expected "bool"  [arg-type]
+src/ftir_workbench/post_baseline_smoothing.py:944: error: Argument 1 to "PostBaselineSmoothingConfig" has incompatible type "**dict[str, object]"; expected "Literal['savgol', 'gaussian', 'moving_average', 'median']"  [arg-type]
+src/ftir_workbench/post_baseline_smoothing.py:944: error: Argument 1 to "PostBaselineSmoothingConfig" has incompatible type "**dict[str, object]"; expected "int"  [arg-type]
+src/ftir_workbench/post_baseline_smoothing.py:944: error: Argument 1 to "PostBaselineSmoothingConfig" has incompatible type "**dict[str, object]"; expected "Literal['interp', 'mirror', 'nearest']"  [arg-type]
+src/ftir_workbench/post_baseline_smoothing.py:944: error: Argument 1 to "PostBaselineSmoothingConfig" has incompatible type "**dict[str, object]"; expected "float"  [arg-type]
+src/ftir_workbench/post_baseline_smoothing.py:944: error: Argument 1 to "PostBaselineSmoothingConfig" has incompatible type "**dict[str, object]"; expected "Literal['reflect', 'mirror', 'nearest']"  [arg-type]
+src/ftir_workbench/post_baseline_smoothing.py:944: error: Argument 1 to "PostBaselineSmoothingConfig" has incompatible type "**dict[str, object]"; expected "Literal['error', 'allow_index_space_with_warning']"  [arg-type]
+pyproject.toml: note: unused section(s): module = ['plotly', 'plotly.*', 'pybaselines', 'streamlit', 'streamlit.*']
+Found 7 errors in 1 file (checked 2 source files)
+
+EXIT_CODE: 1
+ELAPSED_SECONDS: 0.577

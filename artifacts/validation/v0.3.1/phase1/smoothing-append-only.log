@@ -1,0 +1,8 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -c 'from pathlib import Path; import subprocess; path="src/ftir_workbench/post_baseline_smoothing.py"; old=subprocess.check_output(["git","show","HEAD:"+path]); current=Path(path).read_bytes(); assert current.startswith(old), "Existing smoothing source changed"; print("PASS: all",len(old),"existing smoothing source bytes unchanged; public array facade appended only")'
+STARTED_UTC: 2026-09-11T05:13:57.898363+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v031 cache>
+PASS: all 35105 existing smoothing source bytes unchanged; public array facade appended only
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 0.040

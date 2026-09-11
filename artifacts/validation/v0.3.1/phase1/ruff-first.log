@@ -1,0 +1,41 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m ruff check src/ftir_workbench/post_baseline_smoothing.py src/ftir_workbench/batch/normalization_adapter.py tests/postprocessing/test_numerical_adapters.py
+STARTED_UTC: 2026-09-11T05:11:39.955625+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v031 cache>
+RUF022 [*] `__all__` is not sorted
+   --> src/ftir_workbench/batch/normalization_adapter.py:410:11
+    |
+410 |   __all__ = [
+    |  ___________^
+411 | |     "ArrayNormalizationResult", "NUMERICAL_FLOOR_EPS_MULTIPLIER", "NUMERICAL_GUARD_VERSION",
+412 | |     "OrdinaryNormalizationConfig", "normalize_config", "normalize_spectral_arrays",
+413 | | ]
+    | |_^
+help: Apply an isort-style sorting to `__all__`
+    |
+410 | __all__ = [
+    -     "ArrayNormalizationResult", "NUMERICAL_FLOOR_EPS_MULTIPLIER", "NUMERICAL_GUARD_VERSION",
+    -     "OrdinaryNormalizationConfig", "normalize_config", "normalize_spectral_arrays",
+411 +     "NUMERICAL_FLOOR_EPS_MULTIPLIER",
+412 +     "NUMERICAL_GUARD_VERSION",
+413 +     "ArrayNormalizationResult",
+414 +     "OrdinaryNormalizationConfig",
+415 +     "normalize_config",
+416 +     "normalize_spectral_arrays",
+417 | ]
+    |
+
+RUF002 Docstring contains ambiguous `–` (EN DASH). Did you mean `-` (HYPHEN-MINUS)?
+ --> tests/postprocessing/test_numerical_adapters.py:1:10
+  |
+1 | """PP-009–041 numerical acceptance: exact core reuse and ordinary semantics."""
+  |          ^
+2 |
+3 | from __future__ import annotations
+  |
+
+Found 2 errors.
+[*] 1 fixable with the `--fix` option.
+
+EXIT_CODE: 1
+ELAPSED_SECONDS: 0.082

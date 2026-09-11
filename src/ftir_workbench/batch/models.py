@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 from uuid import uuid4
 
 import numpy as np
@@ -21,6 +21,9 @@ from ftir_baseline.config import (
 )
 from ftir_baseline.models import FloatArray, SpectrumSet, freeze_value, immutable_float64
 from ftir_baseline.pipeline import PipelineResult
+
+if TYPE_CHECKING:
+    from .postprocessing import OrdinaryPostprocessingState
 
 Stage = Literal["coarse", "fine"]
 FineDecision = Literal["not_decided", "applied", "explicitly_skipped"]
@@ -161,4 +164,5 @@ class BatchWorkspace:
     import_issues: list[dict[str, Any]] = field(default_factory=list)
     export_history: list[dict[str, Any]] = field(default_factory=list)
     last_export_summary: dict[str, Any] | None = None
+    postprocessing: dict[str, OrdinaryPostprocessingState] = field(default_factory=dict)
 

@@ -1,0 +1,32 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m pytest tests/postprocessing/test_state_contracts.py -q
+STARTED_UTC: 2026-09-11T05:20:02.798760+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v031 cache>
+.........................F.........                                      [100%]
+=================================== FAILURES ===================================
+_ test_pp052_copy_resolves_each_targets_smoothed_parent_without_fallback_or_coefficient_copy _
+
+    def test_pp052_copy_resolves_each_targets_smoothed_parent_without_fallback_or_coefficient_copy() -> None:
+        ws, a = confirmed_workspace()
+        _, b = confirmed_workspace(workspace=ws, name="no-S.csv")
+        _, c = confirmed_workspace(np.linspace(1500.0, 1400.0, 21), np.ones(21),
+                                   workspace=ws, name="missing-range.csv")
+        _, d = confirmed_workspace(ws.records[a].wavenumber, ws.records[a].raw_intensity * 2.0,
+                                   workspace=ws, name="own-amplitude.csv")
+        for sid in (a, c, d):
+            apply_branch(ws, sid, "smoothed", SMOOTH)
+        source = apply_branch(ws, a, "normalized_smoothed", {
+            "enabled": True, "method": "internal_peak_height", "reference_interval": [1700.0, 1600.0],
+        })
+        parents = {sid: get_branch(ws, sid, "smoothed") for sid in (a, c, d)}
+        outcomes = copy_drafts(ws, a, [b, c, d], branch="normalized_smoothed")
+>       assert outcomes[b] and outcomes[c]
+E       AssertionError: assert ('POSTPROCESS_REQUIRED: confirm smoothed before using it' and None)
+
+tests/postprocessing/test_state_contracts.py:291: AssertionError
+=========================== short test summary info ============================
+FAILED tests/postprocessing/test_state_contracts.py::test_pp052_copy_resolves_each_targets_smoothed_parent_without_fallback_or_coefficient_copy
+1 failed, 34 passed in 2.29s
+
+EXIT_CODE: 1
+ELAPSED_SECONDS: 2.611

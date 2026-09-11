@@ -900,3 +900,214 @@ __all__ = [
     "apply_post_baseline_smoothing",
     "post_baseline_smoothing_fingerprint",
 ]
+
+
+def effective_smoothing_config(
+    config: PostBaselineSmoothingConfig | Mapping[str, Any],
+) -> PostBaselineSmoothingConfig:
+    """Validate only enabled controls of the selected array smoothing method.
+
+    Callers retain their complete raw editor draft separately. Inactive values
+    are replaced with defaults here, including invalid unfinished editor values;
+    the existing strict configuration constructor remains unchanged.
+    """
+
+    if isinstance(config, PostBaselineSmoothingConfig):
+        raw = config.to_dict()
+    elif isinstance(config, Mapping):
+        raw = dict(config)
+    else:
+        raise TypeError("config must be a PostBaselineSmoothingConfig or mapping")
+    defaults = PostBaselineSmoothingConfig().to_dict()
+    unknown = raw.keys() - defaults.keys()
+    if unknown:
+        raise ValueError(f"Unknown smoothing settings: {sorted(unknown, key=str)}")
+    enabled = raw.get("enabled", False)
+    if not isinstance(enabled, bool):
+        raise TypeError("enabled must be a bool")
+    if not enabled:
+        return PostBaselineSmoothingConfig()
+    method = _choice(
+        raw.get("method", defaults["method"]),
+        name="method",
+        allowed=frozenset({"savgol", "gaussian", "moving_average", "median"}),
+    )
+    active = {
+        "savgol": ("savgol_window_length", "savgol_polyorder", "savgol_mode"),
+        "gaussian": ("gaussian_sigma_points", "gaussian_truncate", "convolution_mode"),
+        "moving_average": ("moving_average_window_length", "convolution_mode"),
+        "median": ("median_window_length", "convolution_mode"),
+    }[method]
+    values: dict[str, Any] = {"enabled": True, "method": method}
+    for key in (*active, "uniformity_rtol", "nonuniform_axis_policy"):
+        values[key] = raw.get(key, defaults[key])
+    return PostBaselineSmoothingConfig(**values)
+
+
+def validate_spectral_arrays(
+    wavenumber: ArrayLike,
+    spectra: ArrayLike,
+) -> tuple[FloatArray, FloatArray]:
+    """Return immutable, finite, monotonic x and real spectra shaped (rows, n).
+
+    This array contract carries no Prepared dataset or experimental series. It
+    does not infer missing samples or joins between separately acquired segments.
+    A service with explicit segment metadata must reject unsupported joins before
+    requesting a filter; the expert nonuniform policy is not a segment adapter.
+    """
+
+    axis = _immutable_float64(wavenumber, name="wavenumber")
+    values = _immutable_float64(spectra, name="spectra")
+    if axis.ndim != 1 or axis.size < 2:
+        raise ValueError("wavenumber must be one-dimensional with at least two points")
+    if not (np.all(axis[1:] > axis[:-1]) or np.all(axis[1:] < axis[:-1])):
+        raise ValueError("wavenumber must be strictly monotonic without duplicate points")
+    if values.ndim != 2 or values.shape[0] < 1 or values.shape[1] != axis.size:
+        raise ValueError("spectra must have shape (one or more rows, n_wavenumbers)")
+    return axis, values
+
+
+def _array_smoothing_request(
+    wavenumber: ArrayLike,
+    spectra: ArrayLike,
+    config: PostBaselineSmoothingConfig | Mapping[str, Any],
+) -> tuple[PostBaselineSmoothingConfig, FloatArray, FloatArray, float, float, list[str]]:
+    effective = effective_smoothing_config(config)
+    axis, source = validate_spectral_arrays(wavenumber, spectra)
+    warnings: list[str] = []
+    try:
+        with np.errstate(over="raise", invalid="raise", divide="raise", under="ignore"):
+            spacing, deviation, uniform = _axis_diagnostics(
+                axis, uniformity_rtol=effective.uniformity_rtol,
+            )
+            if effective.enabled and not uniform:
+                if effective.nonuniform_axis_policy == "error":
+                    raise ValueError(
+                        "NONUNIFORM_AXIS: The axis is not approximately uniformly spaced. "
+                        "No resampling is performed; explicitly choose "
+                        "allow_index_space_with_warning to allow index-space smoothing."
+                    )
+                warnings.append(
+                    "Wavenumber spacing exceeds the configured uniformity tolerance. "
+                    "Index-space smoothing was applied under the explicit expert override; "
+                    "the axis was not resampled."
+                )
+            if effective.enabled:
+                _validate_active_window(effective, n_points=axis.size)
+    except (FloatingPointError, OverflowError) as exc:
+        raise ValueError("SMOOTHING_NUMERICAL_ERROR: finite axis diagnostics cannot be computed") from exc
+    return effective, axis, source, spacing, deviation, warnings
+
+
+def validate_smoothing_request(
+    wavenumber: ArrayLike,
+    spectra: ArrayLike,
+    config: PostBaselineSmoothingConfig | Mapping[str, Any],
+) -> None:
+    """Check a target's array/axis/window contract without filtering or computing QC."""
+
+    _array_smoothing_request(wavenumber, spectra, config)
+
+
+@dataclass(frozen=True, slots=True)
+class ArraySmoothingResult:
+    """Immutable smoothing arrays and the existing diagnostics, without Prepared."""
+
+    wavenumber: FloatArray
+    input_spectra: FloatArray
+    smoothed_spectra: FloatArray
+    removed_component: FloatArray
+    config: PostBaselineSmoothingConfig
+    per_spectrum_metrics: Mapping[str, FloatArray]
+    summary_metrics: Mapping[str, float]
+    median_wavenumber_spacing: float
+    spacing_relative_max_deviation: float
+    approximate_physical_width: Mapping[str, float]
+    warnings: tuple[str, ...] = ()
+
+    def __post_init__(self) -> None:
+        axis, source = validate_spectral_arrays(self.wavenumber, self.input_spectra)
+        config = effective_smoothing_config(self.config)
+        smoothed = _immutable_float64(self.smoothed_spectra, name="smoothed_spectra")
+        removed = _immutable_float64(self.removed_component, name="removed_component")
+        if smoothed.shape != source.shape or removed.shape != source.shape:
+            raise ValueError("smoothing output and removed component must match input shape")
+        if not np.array_equal(removed, source - smoothed):
+            raise ValueError("removed_component must equal input_spectra - smoothed_spectra")
+        if not config.enabled and not np.array_equal(smoothed, source):
+            raise ValueError("disabled smoothing must preserve input exactly")
+        spacing = _finite_float(self.median_wavenumber_spacing, name="median spacing")
+        deviation = _finite_float(self.spacing_relative_max_deviation, name="spacing deviation")
+        widths = _immutable_float_mapping(
+            self.approximate_physical_width, name="approximate_physical_width"
+        )
+        if spacing <= 0 or deviation < 0 or any(width < 0 for width in widths.values()):
+            raise ValueError("spacing must be positive; deviations and widths must be nonnegative")
+        object.__setattr__(self, "wavenumber", axis)
+        object.__setattr__(self, "input_spectra", source)
+        object.__setattr__(self, "smoothed_spectra", smoothed)
+        object.__setattr__(self, "removed_component", removed)
+        object.__setattr__(self, "config", config)
+        object.__setattr__(self, "median_wavenumber_spacing", spacing)
+        object.__setattr__(self, "spacing_relative_max_deviation", deviation)
+        object.__setattr__(self, "approximate_physical_width", widths)
+        object.__setattr__(self, "warnings", tuple(map(str, self.warnings)))
+        object.__setattr__(
+            self, "per_spectrum_metrics",
+            _immutable_metric_mapping(self.per_spectrum_metrics, n_spectra=source.shape[0]),
+        )
+        object.__setattr__(
+            self, "summary_metrics",
+            _immutable_float_mapping(
+                self.summary_metrics, name="summary_metrics", required=_REQUIRED_SUMMARY_METRICS,
+            ),
+        )
+
+
+def smooth_spectral_arrays(
+    wavenumber: ArrayLike,
+    spectra: ArrayLike,
+    config: PostBaselineSmoothingConfig | Mapping[str, Any],
+) -> ArraySmoothingResult:
+    """Apply the existing filter and QC once to arrays along their x dimension.
+
+    Parent selection and rejection of chained/normalized inputs belong to the
+    ordinary workspace service. This function never creates a Prepared object,
+    changes the x coordinates, or calls a baseline algorithm.
+    """
+
+    effective, axis, source, spacing, deviation, warnings = _array_smoothing_request(
+        wavenumber, spectra, config,
+    )
+    try:
+        with np.errstate(over="raise", invalid="raise", divide="raise", under="ignore"):
+            try:
+                smoothed = _apply_filter(source, effective)
+                removed = source - smoothed
+                per_spectrum, summary, qc_warnings = _compute_qc(source, smoothed, axis, effective)
+            except ValueError as exc:
+                raise ValueError(f"SMOOTHING_NUMERICAL_ERROR: {exc}") from exc
+            widths = _approximate_physical_width(effective, median_spacing=spacing)
+    except (FloatingPointError, OverflowError) as exc:
+        raise ValueError("SMOOTHING_NUMERICAL_ERROR: finite filter/QC output cannot be computed") from exc
+    if effective.enabled and effective.method == "median":
+        warnings.append(
+            "Median / despike smoothing is nonlinear and may flatten genuine narrow peaks."
+        )
+    warnings.extend(qc_warnings)
+    return ArraySmoothingResult(
+        wavenumber=axis, input_spectra=source, smoothed_spectra=smoothed,
+        removed_component=removed, config=effective, per_spectrum_metrics=per_spectrum,
+        summary_metrics=summary, median_wavenumber_spacing=spacing,
+        spacing_relative_max_deviation=deviation, approximate_physical_width=widths,
+        warnings=tuple(warnings),
+    )
+
+
+__all__ += [
+    "ArraySmoothingResult",
+    "effective_smoothing_config",
+    "smooth_spectral_arrays",
+    "validate_smoothing_request",
+    "validate_spectral_arrays",
+]

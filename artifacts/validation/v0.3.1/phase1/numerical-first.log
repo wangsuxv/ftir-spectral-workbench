@@ -1,0 +1,60 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m pytest tests/postprocessing/test_numerical_adapters.py -q
+STARTED_UTC: 2026-09-11T05:11:39.955626+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v031 cache>
+F....................................................................... [ 68%]
+................................F                                        [100%]
+=================================== FAILURES ===================================
+____ test_pp009_four_methods_match_existing_prepared_result_and_qc[savgol] _____
+
+method = 'savgol'
+
+    @pytest.mark.parametrize("method", ["savgol", "gaussian", "moving_average", "median"])
+    def test_pp009_four_methods_match_existing_prepared_result_and_qc(method: str) -> None:
+        prepared = make_prepared()
+        config = PostBaselineSmoothingConfig(enabled=True, method=method)
+        expected = apply_post_baseline_smoothing(prepared, config)
+        result = smooth_spectral_arrays(prepared.wavenumber, prepared.spectra, config)
+        np.testing.assert_array_equal(result.wavenumber, prepared.wavenumber)
+        np.testing.assert_array_equal(result.smoothed_spectra, expected.smoothed_spectra)
+        np.testing.assert_array_equal(result.removed_component, expected.removed_component)
+        assert result.summary_metrics == expected.summary_metrics
+        assert result.approximate_physical_width == expected.approximate_physical_width
+        assert result.warnings == expected.warnings
+        for key, metric in expected.per_spectrum_metrics.items():
+            np.testing.assert_array_equal(result.per_spectrum_metrics[key], metric)
+        alone = smooth_spectral_arrays(prepared.wavenumber, prepared.spectra[1:2], config)
+>       np.testing.assert_array_equal(alone.smoothed_spectra[0], result.smoothed_spectra[1])
+E       AssertionError: 
+E       Arrays are not equal
+E       
+E       Mismatched elements: 1 / 41 (2.44%)
+E       Mismatch at index:
+E        [40]: 0.14353795353619148 (ACTUAL), 0.1435379535361915 (DESIRED)
+E       Max absolute difference among violations: 2.77555756e-17
+E       Max relative difference among violations: 1.93367503e-16
+E        ACTUAL: array([0.148095, 0.148675, 0.149339, 0.150087, 0.152691, 0.147745,
+E              0.151139, 0.1551  , 0.153166, 0.162427, 0.176561, 0.191268,
+E              0.225285, 0.272566, 0.327325, 0.403503, 0.486963, 0.562386,...
+E        DESIRED: array([0.148095, 0.148675, 0.149339, 0.150087, 0.152691, 0.147745,
+E              0.151139, 0.1551  , 0.153166, 0.162427, 0.176561, 0.191268,
+E              0.225285, 0.272566, 0.327325, 0.403503, 0.486963, 0.562386,...
+
+tests/postprocessing/test_numerical_adapters.py:55: AssertionError
+_________ test_smoothing_extreme_values_fail_without_nonfinite_result __________
+
+    def test_smoothing_extreme_values_fail_without_nonfinite_result() -> None:
+>       with pytest.raises(ValueError, match="SMOOTHING_NUMERICAL_ERROR"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'SMOOTHING_NUMERICAL_ERROR'
+E         Actual message: 'post-baseline smoothing produced NaN or infinite values'
+
+tests/postprocessing/test_numerical_adapters.py:441: AssertionError
+=========================== short test summary info ============================
+FAILED tests/postprocessing/test_numerical_adapters.py::test_pp009_four_methods_match_existing_prepared_result_and_qc[savgol]
+FAILED tests/postprocessing/test_numerical_adapters.py::test_smoothing_extreme_values_fail_without_nonfinite_result
+2 failed, 103 passed in 1.07s
+
+EXIT_CODE: 1
+ELAPSED_SECONDS: 1.418

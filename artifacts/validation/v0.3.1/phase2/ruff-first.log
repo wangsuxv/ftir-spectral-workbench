@@ -1,0 +1,41 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m ruff check src/ftir_workbench/batch/postprocessing.py src/ftir_workbench/batch/models.py tests/postprocessing/helpers.py
+STARTED_UTC: 2026-09-11T05:17:46.842809+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v031 cache>
+F401 [*] `ftir_baseline.models.thaw_mapping` imported but unused
+  --> src/ftir_workbench/batch/postprocessing.py:21:79
+   |
+19 | import numpy as np
+20 |
+21 | from ftir_baseline.models import FloatArray, freeze_value, immutable_float64, thaw_mapping
+   |                                                                               ^^^^^^^^^^^^
+22 | from ftir_workbench.post_baseline_smoothing import (
+23 |     PostBaselineSmoothingConfig,
+   |
+help: Remove unused import: `ftir_baseline.models.thaw_mapping`
+   |
+20 |
+   - from ftir_baseline.models import FloatArray, freeze_value, immutable_float64, thaw_mapping
+21 + from ftir_baseline.models import FloatArray, freeze_value, immutable_float64
+22 | from ftir_workbench.post_baseline_smoothing import (
+   |
+
+SIM108 Use ternary operator `state = None if branch == "baseline" else branch_state(workspace, spectrum_id, branch)` instead of `if`-`else`-block
+   --> src/ftir_workbench/batch/postprocessing.py:384:5
+    |
+383 |   def branch_status(workspace: BatchWorkspace, spectrum_id: str, branch: str) -> dict[str, Any]:
+384 | /     if branch == "baseline":
+385 | |         state = None
+386 | |     else:
+387 | |         state = branch_state(workspace, spectrum_id, branch)
+    | |____________________________________________________________^
+388 |       result: dict[str, Any] = {"status": "missing", "reason": "", "draft_modified": False, "preview_current": False}
+389 |       try:
+    |
+help: Replace `if`-`else`-block with `state = None if branch == "baseline" else branch_state(workspace, spectrum_id, branch)`
+
+Found 2 errors.
+[*] 1 fixable with the `--fix` option (1 hidden fix can be enabled with the `--unsafe-fixes` option).
+
+EXIT_CODE: 1
+ELAPSED_SECONDS: 0.090

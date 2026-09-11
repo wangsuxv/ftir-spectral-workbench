@@ -1,0 +1,996 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m pytest tests/postprocessing/test_state_contracts.py -q
+STARTED_UTC: 2026-09-11T05:19:33.601817+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v031 cache>
+F..FFFFFFFFF..FFFFFFFFFFFFFFFFFFFFF                                      [100%]
+=================================== FAILURES ===================================
+____ test_pp002_pp003_postprocessing_never_calls_baseline_prepared_or_twod _____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10f522570>
+
+    def test_pp002_pp003_postprocessing_never_calls_baseline_prepared_or_twod(
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        ws, sid = confirmed_workspace()
+    
+        def forbidden(*args: object, **kwargs: object) -> None:
+            raise AssertionError("ordinary derived operations must not fit baseline or create Prepared/2D")
+    
+        for target in (
+            "ftir_baseline.pipeline.run_pipeline",
+            "ftir_workbench.batch.service.run_pipeline",
+            "ftir_workbench.services.baseline_service.BaselineWorkflowService.run",
+            "ftir_workbench.models.PreparedSpectralDataset.__init__",
+            "ftir_workbench.services.twodcos_service.TwoDCOSWorkflowService.compute",
+        ):
+            monkeypatch.setattr(target, forbidden)
+>       results = graph(ws, sid)
+                  ^^^^^^^^^^^^^^
+
+tests/postprocessing/test_state_contracts.py:67: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/postprocessing/test_state_contracts.py:45: in graph
+    "smoothed": apply_branch(ws, sid, "smoothed", SMOOTH),
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ws = BatchWorkspace(schema_version='1.0', workspace_id='4c269fa860844e0e9b10cac44d0346c3', workflow_mode='independent_batch... committed_draft=None, errors=[]), normalization_source='baseline', export_choice='baseline', display_preferences={})})
+sid = '1d4a76d9a8ed42fba535d69e3229cfdc', branch = 'smoothed'
+values = {'enabled': True, 'method': 'gaussian', 'gaussian_sigma_points': 1.0}
+
+    def apply_branch(ws: BatchWorkspace, sid: str, branch: str, values: dict):
+        """Commit only the preview requested for this explicit branch and record."""
+        update_draft(ws, sid, branch, values)
+        preview = preview_branch(ws, sid, branch)
+        confirm_branch(ws, sid, branch)
+        actual = get_branch(ws, sid, branch)
+>       assert actual is preview
+E       AssertionError: assert PostprocessSnapshot(workspace_id='4c269fa860844e0e9b10cac44d0346c3', spectrum_id='1d4a76d9a8ed42fba535d69e3229cfdc', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=()) is PostprocessSnapshot(workspace_id='4c269fa860844e0e9b10cac44d0346c3', spectrum_id='1d4a76d9a8ed42fba535d69e3229cfdc', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=())
+
+tests/postprocessing/test_state_contracts.py:39: AssertionError
+_ test_pp004_coarse_only_requires_explicit_final_baseline_decision[normalized_smoothed] _
+
+branch = 'normalized_smoothed'
+
+    @pytest.mark.parametrize("branch", DERIVED)
+    def test_pp004_coarse_only_requires_explicit_final_baseline_decision(branch: str) -> None:
+        ws, sid = confirmed_workspace(skip=False)
+        update_draft(ws, sid, branch, SMOOTH if branch == "smoothed" else NORMALIZE)
+        with pytest.raises(ValueError):
+            preview_branch(ws, sid, branch)
+        assert ws.states[sid].fine_decision == "not_decided"
+        assert getattr(get_postprocessing_state(ws, sid), branch).committed is None
+        skip_fine(ws, sid)
+        if branch == "normalized_smoothed":
+>           apply_branch(ws, sid, "smoothed", SMOOTH)
+
+tests/postprocessing/test_state_contracts.py:83: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ws = BatchWorkspace(schema_version='1.0', workspace_id='cb44983973b64097bcfbdd093bd8ba73', workflow_mode='independent_batch...justment or explicitly skip it']), normalization_source='baseline', export_choice='baseline', display_preferences={})})
+sid = '590aa247fbac4b348b5b5c66091aee68', branch = 'smoothed'
+values = {'enabled': True, 'method': 'gaussian', 'gaussian_sigma_points': 1.0}
+
+    def apply_branch(ws: BatchWorkspace, sid: str, branch: str, values: dict):
+        """Commit only the preview requested for this explicit branch and record."""
+        update_draft(ws, sid, branch, values)
+        preview = preview_branch(ws, sid, branch)
+        confirm_branch(ws, sid, branch)
+        actual = get_branch(ws, sid, branch)
+>       assert actual is preview
+E       AssertionError: assert PostprocessSnapshot(workspace_id='cb44983973b64097bcfbdd093bd8ba73', spectrum_id='590aa247fbac4b348b5b5c66091aee68', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=()) is PostprocessSnapshot(workspace_id='cb44983973b64097bcfbdd093bd8ba73', spectrum_id='590aa247fbac4b348b5b5c66091aee68', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=())
+
+tests/postprocessing/test_state_contracts.py:39: AssertionError
+____ test_pp005_parent_arrays_and_recipe_stay_immutable_across_all_branches ____
+
+    def test_pp005_parent_arrays_and_recipe_stay_immutable_across_all_branches() -> None:
+        ws, sid = confirmed_workspace()
+        parent = get_branch(ws, sid, "baseline")
+        recipe = parent.result.recipe_dict()
+        arrays = {name: getattr(parent.result.baseline, name).copy() for name in (
+            "coarse_baseline", "fine_baseline", "total_baseline", "corrected",
+        )}
+        x = parent.result.absorbance_selected.wavenumber.copy()
+>       snapshots = graph(ws, sid)
+                    ^^^^^^^^^^^^^^
+
+tests/postprocessing/test_state_contracts.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/postprocessing/test_state_contracts.py:45: in graph
+    "smoothed": apply_branch(ws, sid, "smoothed", SMOOTH),
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ws = BatchWorkspace(schema_version='1.0', workspace_id='f025ca2b86d1407589fec90530f2ff10', workflow_mode='independent_batch... committed_draft=None, errors=[]), normalization_source='baseline', export_choice='baseline', display_preferences={})})
+sid = 'ca46eb35fc96449bb9ace87ff6cb7874', branch = 'smoothed'
+values = {'enabled': True, 'method': 'gaussian', 'gaussian_sigma_points': 1.0}
+
+    def apply_branch(ws: BatchWorkspace, sid: str, branch: str, values: dict):
+        """Commit only the preview requested for this explicit branch and record."""
+        update_draft(ws, sid, branch, values)
+        preview = preview_branch(ws, sid, branch)
+        confirm_branch(ws, sid, branch)
+        actual = get_branch(ws, sid, branch)
+>       assert actual is preview
+E       AssertionError: assert PostprocessSnapshot(workspace_id='f025ca2b86d1407589fec90530f2ff10', spectrum_id='ca46eb35fc96449bb9ace87ff6cb7874', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=()) is PostprocessSnapshot(workspace_id='f025ca2b86d1407589fec90530f2ff10', spectrum_id='ca46eb35fc96449bb9ace87ff6cb7874', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=())
+
+tests/postprocessing/test_state_contracts.py:39: AssertionError
+_______ test_pp006_smoothing_rejects_every_nonbaseline_source[smoothed] ________
+
+source = 'smoothed'
+
+    @pytest.mark.parametrize("source", ["smoothed", "normalized_baseline", "normalized_smoothed"])
+    def test_pp006_smoothing_rejects_every_nonbaseline_source(source: str) -> None:
+        ws, sid = confirmed_workspace()
+>       graph(ws, sid)
+
+tests/postprocessing/test_state_contracts.py:118: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/postprocessing/test_state_contracts.py:45: in graph
+    "smoothed": apply_branch(ws, sid, "smoothed", SMOOTH),
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ws = BatchWorkspace(schema_version='1.0', workspace_id='2dd431a1ad1f4024b6fb706111b464d7', workflow_mode='independent_batch... committed_draft=None, errors=[]), normalization_source='baseline', export_choice='baseline', display_preferences={})})
+sid = 'e7bbd0936f5143a4a80372a30f2c7194', branch = 'smoothed'
+values = {'enabled': True, 'method': 'gaussian', 'gaussian_sigma_points': 1.0}
+
+    def apply_branch(ws: BatchWorkspace, sid: str, branch: str, values: dict):
+        """Commit only the preview requested for this explicit branch and record."""
+        update_draft(ws, sid, branch, values)
+        preview = preview_branch(ws, sid, branch)
+        confirm_branch(ws, sid, branch)
+        actual = get_branch(ws, sid, branch)
+>       assert actual is preview
+E       AssertionError: assert PostprocessSnapshot(workspace_id='2dd431a1ad1f4024b6fb706111b464d7', spectrum_id='e7bbd0936f5143a4a80372a30f2c7194', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=()) is PostprocessSnapshot(workspace_id='2dd431a1ad1f4024b6fb706111b464d7', spectrum_id='e7bbd0936f5143a4a80372a30f2c7194', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=())
+
+tests/postprocessing/test_state_contracts.py:39: AssertionError
+__ test_pp006_smoothing_rejects_every_nonbaseline_source[normalized_baseline] __
+
+source = 'normalized_baseline'
+
+    @pytest.mark.parametrize("source", ["smoothed", "normalized_baseline", "normalized_smoothed"])
+    def test_pp006_smoothing_rejects_every_nonbaseline_source(source: str) -> None:
+        ws, sid = confirmed_workspace()
+>       graph(ws, sid)
+
+tests/postprocessing/test_state_contracts.py:118: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/postprocessing/test_state_contracts.py:45: in graph
+    "smoothed": apply_branch(ws, sid, "smoothed", SMOOTH),
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ws = BatchWorkspace(schema_version='1.0', workspace_id='342bd66aa0484f629d509ecb31ad821b', workflow_mode='independent_batch... committed_draft=None, errors=[]), normalization_source='baseline', export_choice='baseline', display_preferences={})})
+sid = '9d4515d995ec4f45b55c78448737bcf1', branch = 'smoothed'
+values = {'enabled': True, 'method': 'gaussian', 'gaussian_sigma_points': 1.0}
+
+    def apply_branch(ws: BatchWorkspace, sid: str, branch: str, values: dict):
+        """Commit only the preview requested for this explicit branch and record."""
+        update_draft(ws, sid, branch, values)
+        preview = preview_branch(ws, sid, branch)
+        confirm_branch(ws, sid, branch)
+        actual = get_branch(ws, sid, branch)
+>       assert actual is preview
+E       AssertionError: assert PostprocessSnapshot(workspace_id='342bd66aa0484f629d509ecb31ad821b', spectrum_id='9d4515d995ec4f45b55c78448737bcf1', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=()) is PostprocessSnapshot(workspace_id='342bd66aa0484f629d509ecb31ad821b', spectrum_id='9d4515d995ec4f45b55c78448737bcf1', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=())
+
+tests/postprocessing/test_state_contracts.py:39: AssertionError
+__ test_pp006_smoothing_rejects_every_nonbaseline_source[normalized_smoothed] __
+
+source = 'normalized_smoothed'
+
+    @pytest.mark.parametrize("source", ["smoothed", "normalized_baseline", "normalized_smoothed"])
+    def test_pp006_smoothing_rejects_every_nonbaseline_source(source: str) -> None:
+        ws, sid = confirmed_workspace()
+>       graph(ws, sid)
+
+tests/postprocessing/test_state_contracts.py:118: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/postprocessing/test_state_contracts.py:45: in graph
+    "smoothed": apply_branch(ws, sid, "smoothed", SMOOTH),
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ws = BatchWorkspace(schema_version='1.0', workspace_id='2809a1511e7a453d85001f8e5c1ec25b', workflow_mode='independent_batch... committed_draft=None, errors=[]), normalization_source='baseline', export_choice='baseline', display_preferences={})})
+sid = 'bcd348f286404c338e8c73a5ef64316b', branch = 'smoothed'
+values = {'enabled': True, 'method': 'gaussian', 'gaussian_sigma_points': 1.0}
+
+    def apply_branch(ws: BatchWorkspace, sid: str, branch: str, values: dict):
+        """Commit only the preview requested for this explicit branch and record."""
+        update_draft(ws, sid, branch, values)
+        preview = preview_branch(ws, sid, branch)
+        confirm_branch(ws, sid, branch)
+        actual = get_branch(ws, sid, branch)
+>       assert actual is preview
+E       AssertionError: assert PostprocessSnapshot(workspace_id='2809a1511e7a453d85001f8e5c1ec25b', spectrum_id='bcd348f286404c338e8c73a5ef64316b', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=()) is PostprocessSnapshot(workspace_id='2809a1511e7a453d85001f8e5c1ec25b', spectrum_id='bcd348f286404c338e8c73a5ef64316b', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=())
+
+tests/postprocessing/test_state_contracts.py:39: AssertionError
+_ test_pp006_normalization_rejects_every_noncontract_source[normalized_baseline] _
+
+source = 'normalized_baseline'
+
+    @pytest.mark.parametrize("source", ["normalized_baseline", "normalized_smoothed", "raw"])
+    def test_pp006_normalization_rejects_every_noncontract_source(source: str) -> None:
+        ws, sid = confirmed_workspace()
+>       graph(ws, sid)
+
+tests/postprocessing/test_state_contracts.py:126: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/postprocessing/test_state_contracts.py:45: in graph
+    "smoothed": apply_branch(ws, sid, "smoothed", SMOOTH),
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ws = BatchWorkspace(schema_version='1.0', workspace_id='74ff19d456b042de8f54d5fbe934b9be', workflow_mode='independent_batch... committed_draft=None, errors=[]), normalization_source='baseline', export_choice='baseline', display_preferences={})})
+sid = 'fea962547eda414abd86265999900fa2', branch = 'smoothed'
+values = {'enabled': True, 'method': 'gaussian', 'gaussian_sigma_points': 1.0}
+
+    def apply_branch(ws: BatchWorkspace, sid: str, branch: str, values: dict):
+        """Commit only the preview requested for this explicit branch and record."""
+        update_draft(ws, sid, branch, values)
+        preview = preview_branch(ws, sid, branch)
+        confirm_branch(ws, sid, branch)
+        actual = get_branch(ws, sid, branch)
+>       assert actual is preview
+E       AssertionError: assert PostprocessSnapshot(workspace_id='74ff19d456b042de8f54d5fbe934b9be', spectrum_id='fea962547eda414abd86265999900fa2', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=()) is PostprocessSnapshot(workspace_id='74ff19d456b042de8f54d5fbe934b9be', spectrum_id='fea962547eda414abd86265999900fa2', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=())
+
+tests/postprocessing/test_state_contracts.py:39: AssertionError
+_ test_pp006_normalization_rejects_every_noncontract_source[normalized_smoothed] _
+
+source = 'normalized_smoothed'
+
+    @pytest.mark.parametrize("source", ["normalized_baseline", "normalized_smoothed", "raw"])
+    def test_pp006_normalization_rejects_every_noncontract_source(source: str) -> None:
+        ws, sid = confirmed_workspace()
+>       graph(ws, sid)
+
+tests/postprocessing/test_state_contracts.py:126: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/postprocessing/test_state_contracts.py:45: in graph
+    "smoothed": apply_branch(ws, sid, "smoothed", SMOOTH),
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ws = BatchWorkspace(schema_version='1.0', workspace_id='8be2651fb9784f54821cdc33356f4448', workflow_mode='independent_batch... committed_draft=None, errors=[]), normalization_source='baseline', export_choice='baseline', display_preferences={})})
+sid = '2eb2e03f32af415dbb38b9449698a698', branch = 'smoothed'
+values = {'enabled': True, 'method': 'gaussian', 'gaussian_sigma_points': 1.0}
+
+    def apply_branch(ws: BatchWorkspace, sid: str, branch: str, values: dict):
+        """Commit only the preview requested for this explicit branch and record."""
+        update_draft(ws, sid, branch, values)
+        preview = preview_branch(ws, sid, branch)
+        confirm_branch(ws, sid, branch)
+        actual = get_branch(ws, sid, branch)
+>       assert actual is preview
+E       AssertionError: assert PostprocessSnapshot(workspace_id='8be2651fb9784f54821cdc33356f4448', spectrum_id='2eb2e03f32af415dbb38b9449698a698', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=()) is PostprocessSnapshot(workspace_id='8be2651fb9784f54821cdc33356f4448', spectrum_id='2eb2e03f32af415dbb38b9449698a698', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=())
+
+tests/postprocessing/test_state_contracts.py:39: AssertionError
+________ test_pp006_normalization_rejects_every_noncontract_source[raw] ________
+
+source = 'raw'
+
+    @pytest.mark.parametrize("source", ["normalized_baseline", "normalized_smoothed", "raw"])
+    def test_pp006_normalization_rejects_every_noncontract_source(source: str) -> None:
+        ws, sid = confirmed_workspace()
+>       graph(ws, sid)
+
+tests/postprocessing/test_state_contracts.py:126: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/postprocessing/test_state_contracts.py:45: in graph
+    "smoothed": apply_branch(ws, sid, "smoothed", SMOOTH),
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ws = BatchWorkspace(schema_version='1.0', workspace_id='89166bea799e454ebf32a639d4c0662f', workflow_mode='independent_batch... committed_draft=None, errors=[]), normalization_source='baseline', export_choice='baseline', display_preferences={})})
+sid = '8fa7878f44e74beb9730384dab5fb3eb', branch = 'smoothed'
+values = {'enabled': True, 'method': 'gaussian', 'gaussian_sigma_points': 1.0}
+
+    def apply_branch(ws: BatchWorkspace, sid: str, branch: str, values: dict):
+        """Commit only the preview requested for this explicit branch and record."""
+        update_draft(ws, sid, branch, values)
+        preview = preview_branch(ws, sid, branch)
+        confirm_branch(ws, sid, branch)
+        actual = get_branch(ws, sid, branch)
+>       assert actual is preview
+E       AssertionError: assert PostprocessSnapshot(workspace_id='89166bea799e454ebf32a639d4c0662f', spectrum_id='8fa7878f44e74beb9730384dab5fb3eb', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=()) is PostprocessSnapshot(workspace_id='89166bea799e454ebf32a639d4c0662f', spectrum_id='8fa7878f44e74beb9730384dab5fb3eb', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=())
+
+tests/postprocessing/test_state_contracts.py:39: AssertionError
+_____ test_pp007_single_and_unrelated_batch_have_identical_derived_arrays ______
+
+    def test_pp007_single_and_unrelated_batch_have_identical_derived_arrays() -> None:
+        standalone, a = confirmed_workspace()
+>       isolated = graph(standalone, a)
+                   ^^^^^^^^^^^^^^^^^^^^
+
+tests/postprocessing/test_state_contracts.py:133: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/postprocessing/test_state_contracts.py:45: in graph
+    "smoothed": apply_branch(ws, sid, "smoothed", SMOOTH),
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ws = BatchWorkspace(schema_version='1.0', workspace_id='c1e0c90839464879a7faa1a1a5e5fabd', workflow_mode='independent_batch... committed_draft=None, errors=[]), normalization_source='baseline', export_choice='baseline', display_preferences={})})
+sid = '033982f84ea94c138cf5edb7b47b8e9a', branch = 'smoothed'
+values = {'enabled': True, 'method': 'gaussian', 'gaussian_sigma_points': 1.0}
+
+    def apply_branch(ws: BatchWorkspace, sid: str, branch: str, values: dict):
+        """Commit only the preview requested for this explicit branch and record."""
+        update_draft(ws, sid, branch, values)
+        preview = preview_branch(ws, sid, branch)
+        confirm_branch(ws, sid, branch)
+        actual = get_branch(ws, sid, branch)
+>       assert actual is preview
+E       AssertionError: assert PostprocessSnapshot(workspace_id='c1e0c90839464879a7faa1a1a5e5fabd', spectrum_id='033982f84ea94c138cf5edb7b47b8e9a', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=()) is PostprocessSnapshot(workspace_id='c1e0c90839464879a7faa1a1a5e5fabd', spectrum_id='033982f84ea94c138cf5edb7b47b8e9a', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=())
+
+tests/postprocessing/test_state_contracts.py:39: AssertionError
+__ test_pp043_preview_alone_is_never_a_confirmed_branch[normalized_smoothed] ___
+
+branch = 'normalized_smoothed'
+
+    @pytest.mark.parametrize("branch", DERIVED)
+    def test_pp043_preview_alone_is_never_a_confirmed_branch(branch: str) -> None:
+        ws, sid = confirmed_workspace()
+        if branch == "normalized_smoothed":
+>           apply_branch(ws, sid, "smoothed", SMOOTH)
+
+tests/postprocessing/test_state_contracts.py:149: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ws = BatchWorkspace(schema_version='1.0', workspace_id='31f3abb1b72d4e729da25e5397a4a8d6', workflow_mode='independent_batch... committed_draft=None, errors=[]), normalization_source='baseline', export_choice='baseline', display_preferences={})})
+sid = '5d32162ecd724dfbb020115d59809277', branch = 'smoothed'
+values = {'enabled': True, 'method': 'gaussian', 'gaussian_sigma_points': 1.0}
+
+    def apply_branch(ws: BatchWorkspace, sid: str, branch: str, values: dict):
+        """Commit only the preview requested for this explicit branch and record."""
+        update_draft(ws, sid, branch, values)
+        preview = preview_branch(ws, sid, branch)
+        confirm_branch(ws, sid, branch)
+        actual = get_branch(ws, sid, branch)
+>       assert actual is preview
+E       AssertionError: assert PostprocessSnapshot(workspace_id='31f3abb1b72d4e729da25e5397a4a8d6', spectrum_id='5d32162ecd724dfbb020115d59809277', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=()) is PostprocessSnapshot(workspace_id='31f3abb1b72d4e729da25e5397a4a8d6', spectrum_id='5d32162ecd724dfbb020115d59809277', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=())
+
+tests/postprocessing/test_state_contracts.py:39: AssertionError
+_ test_pp044_pp045_edit_preserves_confirmed_but_blocks_old_preview_commit[smoothed] _
+
+branch = 'smoothed'
+
+    @pytest.mark.parametrize("branch", DERIVED)
+    def test_pp044_pp045_edit_preserves_confirmed_but_blocks_old_preview_commit(branch: str) -> None:
+        ws, sid = confirmed_workspace()
+>       original = graph(ws, sid)
+                   ^^^^^^^^^^^^^^
+
+tests/postprocessing/test_state_contracts.py:163: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/postprocessing/test_state_contracts.py:45: in graph
+    "smoothed": apply_branch(ws, sid, "smoothed", SMOOTH),
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ws = BatchWorkspace(schema_version='1.0', workspace_id='cc7873a76421478d9eee6fb8c6e452f2', workflow_mode='independent_batch... committed_draft=None, errors=[]), normalization_source='baseline', export_choice='baseline', display_preferences={})})
+sid = 'e5ec8c83910a4779ad6733963af4d4cb', branch = 'smoothed'
+values = {'enabled': True, 'method': 'gaussian', 'gaussian_sigma_points': 1.0}
+
+    def apply_branch(ws: BatchWorkspace, sid: str, branch: str, values: dict):
+        """Commit only the preview requested for this explicit branch and record."""
+        update_draft(ws, sid, branch, values)
+        preview = preview_branch(ws, sid, branch)
+        confirm_branch(ws, sid, branch)
+        actual = get_branch(ws, sid, branch)
+>       assert actual is preview
+E       AssertionError: assert PostprocessSnapshot(workspace_id='cc7873a76421478d9eee6fb8c6e452f2', spectrum_id='e5ec8c83910a4779ad6733963af4d4cb', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=()) is PostprocessSnapshot(workspace_id='cc7873a76421478d9eee6fb8c6e452f2', spectrum_id='e5ec8c83910a4779ad6733963af4d4cb', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=())
+
+tests/postprocessing/test_state_contracts.py:39: AssertionError
+_ test_pp044_pp045_edit_preserves_confirmed_but_blocks_old_preview_commit[normalized_baseline] _
+
+branch = 'normalized_baseline'
+
+    @pytest.mark.parametrize("branch", DERIVED)
+    def test_pp044_pp045_edit_preserves_confirmed_but_blocks_old_preview_commit(branch: str) -> None:
+        ws, sid = confirmed_workspace()
+>       original = graph(ws, sid)
+                   ^^^^^^^^^^^^^^
+
+tests/postprocessing/test_state_contracts.py:163: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/postprocessing/test_state_contracts.py:45: in graph
+    "smoothed": apply_branch(ws, sid, "smoothed", SMOOTH),
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ws = BatchWorkspace(schema_version='1.0', workspace_id='11656a9e9f6b4694bc6ed867fd02406c', workflow_mode='independent_batch... committed_draft=None, errors=[]), normalization_source='baseline', export_choice='baseline', display_preferences={})})
+sid = '9277bee6880f4581812914448277fe6c', branch = 'smoothed'
+values = {'enabled': True, 'method': 'gaussian', 'gaussian_sigma_points': 1.0}
+
+    def apply_branch(ws: BatchWorkspace, sid: str, branch: str, values: dict):
+        """Commit only the preview requested for this explicit branch and record."""
+        update_draft(ws, sid, branch, values)
+        preview = preview_branch(ws, sid, branch)
+        confirm_branch(ws, sid, branch)
+        actual = get_branch(ws, sid, branch)
+>       assert actual is preview
+E       AssertionError: assert PostprocessSnapshot(workspace_id='11656a9e9f6b4694bc6ed867fd02406c', spectrum_id='9277bee6880f4581812914448277fe6c', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=()) is PostprocessSnapshot(workspace_id='11656a9e9f6b4694bc6ed867fd02406c', spectrum_id='9277bee6880f4581812914448277fe6c', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=())
+
+tests/postprocessing/test_state_contracts.py:39: AssertionError
+_ test_pp044_pp045_edit_preserves_confirmed_but_blocks_old_preview_commit[normalized_smoothed] _
+
+branch = 'normalized_smoothed'
+
+    @pytest.mark.parametrize("branch", DERIVED)
+    def test_pp044_pp045_edit_preserves_confirmed_but_blocks_old_preview_commit(branch: str) -> None:
+        ws, sid = confirmed_workspace()
+>       original = graph(ws, sid)
+                   ^^^^^^^^^^^^^^
+
+tests/postprocessing/test_state_contracts.py:163: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/postprocessing/test_state_contracts.py:45: in graph
+    "smoothed": apply_branch(ws, sid, "smoothed", SMOOTH),
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ws = BatchWorkspace(schema_version='1.0', workspace_id='d7da264f7d184e268f86cbd494b15cf9', workflow_mode='independent_batch... committed_draft=None, errors=[]), normalization_source='baseline', export_choice='baseline', display_preferences={})})
+sid = 'bacd4b4f4e434b1e974e5e57890bb813', branch = 'smoothed'
+values = {'enabled': True, 'method': 'gaussian', 'gaussian_sigma_points': 1.0}
+
+    def apply_branch(ws: BatchWorkspace, sid: str, branch: str, values: dict):
+        """Commit only the preview requested for this explicit branch and record."""
+        update_draft(ws, sid, branch, values)
+        preview = preview_branch(ws, sid, branch)
+        confirm_branch(ws, sid, branch)
+        actual = get_branch(ws, sid, branch)
+>       assert actual is preview
+E       AssertionError: assert PostprocessSnapshot(workspace_id='d7da264f7d184e268f86cbd494b15cf9', spectrum_id='bacd4b4f4e434b1e974e5e57890bb813', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=()) is PostprocessSnapshot(workspace_id='d7da264f7d184e268f86cbd494b15cf9', spectrum_id='bacd4b4f4e434b1e974e5e57890bb813', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=())
+
+tests/postprocessing/test_state_contracts.py:39: AssertionError
+________ test_pp046_new_smoothing_invalidates_only_its_normalized_child ________
+
+    def test_pp046_new_smoothing_invalidates_only_its_normalized_child() -> None:
+        ws, sid = confirmed_workspace()
+>       original = graph(ws, sid)
+                   ^^^^^^^^^^^^^^
+
+tests/postprocessing/test_state_contracts.py:179: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/postprocessing/test_state_contracts.py:45: in graph
+    "smoothed": apply_branch(ws, sid, "smoothed", SMOOTH),
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ws = BatchWorkspace(schema_version='1.0', workspace_id='b6e82847f1784574a916e7cdd2f24f5e', workflow_mode='independent_batch... committed_draft=None, errors=[]), normalization_source='baseline', export_choice='baseline', display_preferences={})})
+sid = 'd6e83230604d49db9ec714aecba94d16', branch = 'smoothed'
+values = {'enabled': True, 'method': 'gaussian', 'gaussian_sigma_points': 1.0}
+
+    def apply_branch(ws: BatchWorkspace, sid: str, branch: str, values: dict):
+        """Commit only the preview requested for this explicit branch and record."""
+        update_draft(ws, sid, branch, values)
+        preview = preview_branch(ws, sid, branch)
+        confirm_branch(ws, sid, branch)
+        actual = get_branch(ws, sid, branch)
+>       assert actual is preview
+E       AssertionError: assert PostprocessSnapshot(workspace_id='b6e82847f1784574a916e7cdd2f24f5e', spectrum_id='d6e83230604d49db9ec714aecba94d16', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=()) is PostprocessSnapshot(workspace_id='b6e82847f1784574a916e7cdd2f24f5e', spectrum_id='d6e83230604d49db9ec714aecba94d16', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=())
+
+tests/postprocessing/test_state_contracts.py:39: AssertionError
+_ test_pp047_confirmed_new_baseline_invalidates_only_that_records_descendants __
+
+    def test_pp047_confirmed_new_baseline_invalidates_only_that_records_descendants() -> None:
+        ws, a = confirmed_workspace()
+        _, b = confirmed_workspace(workspace=ws, name="unrelated.csv")
+>       original_a, original_b = graph(ws, a), graph(ws, b)
+                                 ^^^^^^^^^^^^
+
+tests/postprocessing/test_state_contracts.py:196: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/postprocessing/test_state_contracts.py:45: in graph
+    "smoothed": apply_branch(ws, sid, "smoothed", SMOOTH),
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ws = BatchWorkspace(schema_version='1.0', workspace_id='7cba547848b840daa443190d8cac253d', workflow_mode='independent_batch... committed_draft=None, errors=[]), normalization_source='baseline', export_choice='baseline', display_preferences={})})
+sid = 'acd96536382f4e71b5ef875ce84c1433', branch = 'smoothed'
+values = {'enabled': True, 'method': 'gaussian', 'gaussian_sigma_points': 1.0}
+
+    def apply_branch(ws: BatchWorkspace, sid: str, branch: str, values: dict):
+        """Commit only the preview requested for this explicit branch and record."""
+        update_draft(ws, sid, branch, values)
+        preview = preview_branch(ws, sid, branch)
+        confirm_branch(ws, sid, branch)
+        actual = get_branch(ws, sid, branch)
+>       assert actual is preview
+E       AssertionError: assert PostprocessSnapshot(workspace_id='7cba547848b840daa443190d8cac253d', spectrum_id='acd96536382f4e71b5ef875ce84c1433', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=()) is PostprocessSnapshot(workspace_id='7cba547848b840daa443190d8cac253d', spectrum_id='acd96536382f4e71b5ef875ce84c1433', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=())
+
+tests/postprocessing/test_state_contracts.py:39: AssertionError
+_ test_pp048_normalization_branches_do_not_supersede_each_other[normalized_baseline-normalized_smoothed] _
+
+branch = 'normalized_baseline', other = 'normalized_smoothed'
+
+    @pytest.mark.parametrize("branch,other", [("normalized_baseline", "normalized_smoothed"),
+                                             ("normalized_smoothed", "normalized_baseline")])
+    def test_pp048_normalization_branches_do_not_supersede_each_other(branch: str, other: str) -> None:
+        ws, sid = confirmed_workspace()
+>       original = graph(ws, sid)
+                   ^^^^^^^^^^^^^^
+
+tests/postprocessing/test_state_contracts.py:213: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/postprocessing/test_state_contracts.py:45: in graph
+    "smoothed": apply_branch(ws, sid, "smoothed", SMOOTH),
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ws = BatchWorkspace(schema_version='1.0', workspace_id='a626b74c5c6a47959a18ea269e2a0dac', workflow_mode='independent_batch... committed_draft=None, errors=[]), normalization_source='baseline', export_choice='baseline', display_preferences={})})
+sid = '4ed39d07efd14c4e9c92f521365085c8', branch = 'smoothed'
+values = {'enabled': True, 'method': 'gaussian', 'gaussian_sigma_points': 1.0}
+
+    def apply_branch(ws: BatchWorkspace, sid: str, branch: str, values: dict):
+        """Commit only the preview requested for this explicit branch and record."""
+        update_draft(ws, sid, branch, values)
+        preview = preview_branch(ws, sid, branch)
+        confirm_branch(ws, sid, branch)
+        actual = get_branch(ws, sid, branch)
+>       assert actual is preview
+E       AssertionError: assert PostprocessSnapshot(workspace_id='a626b74c5c6a47959a18ea269e2a0dac', spectrum_id='4ed39d07efd14c4e9c92f521365085c8', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=()) is PostprocessSnapshot(workspace_id='a626b74c5c6a47959a18ea269e2a0dac', spectrum_id='4ed39d07efd14c4e9c92f521365085c8', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=())
+
+tests/postprocessing/test_state_contracts.py:39: AssertionError
+_ test_pp048_normalization_branches_do_not_supersede_each_other[normalized_smoothed-normalized_baseline] _
+
+branch = 'normalized_smoothed', other = 'normalized_baseline'
+
+    @pytest.mark.parametrize("branch,other", [("normalized_baseline", "normalized_smoothed"),
+                                             ("normalized_smoothed", "normalized_baseline")])
+    def test_pp048_normalization_branches_do_not_supersede_each_other(branch: str, other: str) -> None:
+        ws, sid = confirmed_workspace()
+>       original = graph(ws, sid)
+                   ^^^^^^^^^^^^^^
+
+tests/postprocessing/test_state_contracts.py:213: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/postprocessing/test_state_contracts.py:45: in graph
+    "smoothed": apply_branch(ws, sid, "smoothed", SMOOTH),
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ws = BatchWorkspace(schema_version='1.0', workspace_id='386f10347b504223a881a5b637a8304f', workflow_mode='independent_batch... committed_draft=None, errors=[]), normalization_source='baseline', export_choice='baseline', display_preferences={})})
+sid = '258a9b87c21e4e09b5dd4473cb46f7d4', branch = 'smoothed'
+values = {'enabled': True, 'method': 'gaussian', 'gaussian_sigma_points': 1.0}
+
+    def apply_branch(ws: BatchWorkspace, sid: str, branch: str, values: dict):
+        """Commit only the preview requested for this explicit branch and record."""
+        update_draft(ws, sid, branch, values)
+        preview = preview_branch(ws, sid, branch)
+        confirm_branch(ws, sid, branch)
+        actual = get_branch(ws, sid, branch)
+>       assert actual is preview
+E       AssertionError: assert PostprocessSnapshot(workspace_id='386f10347b504223a881a5b637a8304f', spectrum_id='258a9b87c21e4e09b5dd4473cb46f7d4', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=()) is PostprocessSnapshot(workspace_id='386f10347b504223a881a5b637a8304f', spectrum_id='258a9b87c21e4e09b5dd4473cb46f7d4', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=())
+
+tests/postprocessing/test_state_contracts.py:39: AssertionError
+_ test_pp049_equal_smoothing_arrays_with_different_recipe_still_change_parent __
+
+    def test_pp049_equal_smoothing_arrays_with_different_recipe_still_change_parent() -> None:
+        ws, sid = confirmed_workspace(np.arange(21.0), np.ones(21))
+>       old_smoothing = apply_branch(ws, sid, "smoothed", {
+            "enabled": True, "method": "median", "median_window_length": 3,
+        })
+
+tests/postprocessing/test_state_contracts.py:223: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ws = BatchWorkspace(schema_version='1.0', workspace_id='44ff7bc7240c4d24b1632ac75504cadf', workflow_mode='independent_batch... committed_draft=None, errors=[]), normalization_source='baseline', export_choice='baseline', display_preferences={})})
+sid = '816b5b9ddc094afca4dab1cf5607ef63', branch = 'smoothed'
+values = {'enabled': True, 'method': 'median', 'median_window_length': 3}
+
+    def apply_branch(ws: BatchWorkspace, sid: str, branch: str, values: dict):
+        """Commit only the preview requested for this explicit branch and record."""
+        update_draft(ws, sid, branch, values)
+        preview = preview_branch(ws, sid, branch)
+        confirm_branch(ws, sid, branch)
+        actual = get_branch(ws, sid, branch)
+>       assert actual is preview
+E       AssertionError: assert PostprocessSnapshot(workspace_id='44ff7bc7240c4d24b1632ac75504cadf', spectrum_id='816b5b9ddc094afca4dab1cf5607ef63', s...roxy({'span_cm1': 2.0})}), warnings=('Median / despike smoothing is nonlinear and may flatten genuine narrow peaks.',)) is PostprocessSnapshot(workspace_id='44ff7bc7240c4d24b1632ac75504cadf', spectrum_id='816b5b9ddc094afca4dab1cf5607ef63', s...roxy({'span_cm1': 2.0})}), warnings=('Median / despike smoothing is nonlinear and may flatten genuine narrow peaks.',))
+
+tests/postprocessing/test_state_contracts.py:39: AssertionError
+___ test_pp050_reconfirm_and_unused_parameters_do_not_invalidate_descendants ___
+
+    def test_pp050_reconfirm_and_unused_parameters_do_not_invalidate_descendants() -> None:
+        ws, sid = confirmed_workspace()
+>       original = graph(ws, sid)
+                   ^^^^^^^^^^^^^^
+
+tests/postprocessing/test_state_contracts.py:236: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/postprocessing/test_state_contracts.py:45: in graph
+    "smoothed": apply_branch(ws, sid, "smoothed", SMOOTH),
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ws = BatchWorkspace(schema_version='1.0', workspace_id='b3f0588134614580a763743827e55076', workflow_mode='independent_batch... committed_draft=None, errors=[]), normalization_source='baseline', export_choice='baseline', display_preferences={})})
+sid = '194bbc46e95f492781ea857c3c50e019', branch = 'smoothed'
+values = {'enabled': True, 'method': 'gaussian', 'gaussian_sigma_points': 1.0}
+
+    def apply_branch(ws: BatchWorkspace, sid: str, branch: str, values: dict):
+        """Commit only the preview requested for this explicit branch and record."""
+        update_draft(ws, sid, branch, values)
+        preview = preview_branch(ws, sid, branch)
+        confirm_branch(ws, sid, branch)
+        actual = get_branch(ws, sid, branch)
+>       assert actual is preview
+E       AssertionError: assert PostprocessSnapshot(workspace_id='b3f0588134614580a763743827e55076', spectrum_id='194bbc46e95f492781ea857c3c50e019', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=()) is PostprocessSnapshot(workspace_id='b3f0588134614580a763743827e55076', spectrum_id='194bbc46e95f492781ea857c3c50e019', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=())
+
+tests/postprocessing/test_state_contracts.py:39: AssertionError
+____ test_pp051_per_source_drafts_and_display_selection_remain_independent _____
+
+    def test_pp051_per_source_drafts_and_display_selection_remain_independent() -> None:
+        ws, a = confirmed_workspace()
+        _, b = confirmed_workspace(workspace=ws, name="B.csv")
+>       original = graph(ws, a)
+                   ^^^^^^^^^^^^
+
+tests/postprocessing/test_state_contracts.py:256: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/postprocessing/test_state_contracts.py:45: in graph
+    "smoothed": apply_branch(ws, sid, "smoothed", SMOOTH),
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ws = BatchWorkspace(schema_version='1.0', workspace_id='ad3b03b4db79413586f585146cbc7d6a', workflow_mode='independent_batch... committed_draft=None, errors=[]), normalization_source='baseline', export_choice='baseline', display_preferences={})})
+sid = '6653f42abd7f4330a8f8aa4509edcf30', branch = 'smoothed'
+values = {'enabled': True, 'method': 'gaussian', 'gaussian_sigma_points': 1.0}
+
+    def apply_branch(ws: BatchWorkspace, sid: str, branch: str, values: dict):
+        """Commit only the preview requested for this explicit branch and record."""
+        update_draft(ws, sid, branch, values)
+        preview = preview_branch(ws, sid, branch)
+        confirm_branch(ws, sid, branch)
+        actual = get_branch(ws, sid, branch)
+>       assert actual is preview
+E       AssertionError: assert PostprocessSnapshot(workspace_id='ad3b03b4db79413586f585146cbc7d6a', spectrum_id='6653f42abd7f4330a8f8aa4509edcf30', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=()) is PostprocessSnapshot(workspace_id='ad3b03b4db79413586f585146cbc7d6a', spectrum_id='6653f42abd7f4330a8f8aa4509edcf30', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=())
+
+tests/postprocessing/test_state_contracts.py:39: AssertionError
+_ test_pp052_copy_resolves_each_targets_smoothed_parent_without_fallback_or_coefficient_copy _
+
+    def test_pp052_copy_resolves_each_targets_smoothed_parent_without_fallback_or_coefficient_copy() -> None:
+        ws, a = confirmed_workspace()
+        _, b = confirmed_workspace(workspace=ws, name="no-S.csv")
+        _, c = confirmed_workspace(np.linspace(1500.0, 1400.0, 21), np.ones(21),
+                                   workspace=ws, name="missing-range.csv")
+        _, d = confirmed_workspace(ws.records[a].wavenumber, ws.records[a].raw_intensity * 2.0,
+                                   workspace=ws, name="own-amplitude.csv")
+        for sid in (a, c, d):
+>           apply_branch(ws, sid, "smoothed", SMOOTH)
+
+tests/postprocessing/test_state_contracts.py:285: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ws = BatchWorkspace(schema_version='1.0', workspace_id='f2168eedd67e4fa6a665802d34c991fc', workflow_mode='independent_batch... committed_draft=None, errors=[]), normalization_source='baseline', export_choice='baseline', display_preferences={})})
+sid = '7bcf53dd69b74bdf926865aae4f0fafc', branch = 'smoothed'
+values = {'enabled': True, 'method': 'gaussian', 'gaussian_sigma_points': 1.0}
+
+    def apply_branch(ws: BatchWorkspace, sid: str, branch: str, values: dict):
+        """Commit only the preview requested for this explicit branch and record."""
+        update_draft(ws, sid, branch, values)
+        preview = preview_branch(ws, sid, branch)
+        confirm_branch(ws, sid, branch)
+        actual = get_branch(ws, sid, branch)
+>       assert actual is preview
+E       AssertionError: assert PostprocessSnapshot(workspace_id='f2168eedd67e4fa6a665802d34c991fc', spectrum_id='7bcf53dd69b74bdf926865aae4f0fafc', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=()) is PostprocessSnapshot(workspace_id='f2168eedd67e4fa6a665802d34c991fc', spectrum_id='7bcf53dd69b74bdf926865aae4f0fafc', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=())
+
+tests/postprocessing/test_state_contracts.py:39: AssertionError
+_ test_pp053_batch_preview_and_confirm_isolate_invalid_windows_from_good_and_committed_items _
+
+    def test_pp053_batch_preview_and_confirm_isolate_invalid_windows_from_good_and_committed_items() -> None:
+        ws, a = confirmed_workspace()
+        _, b = confirmed_workspace(np.arange(5.0), np.ones(5), workspace=ws, name="short.csv")
+        _, c = confirmed_workspace(workspace=ws, name="previous-valid.csv")
+>       previous = apply_branch(ws, c, "smoothed", SMOOTH)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/postprocessing/test_state_contracts.py:308: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ws = BatchWorkspace(schema_version='1.0', workspace_id='545f516b65c74451b3b9fdee1784fa07', workflow_mode='independent_batch... committed_draft=None, errors=[]), normalization_source='baseline', export_choice='baseline', display_preferences={})})
+sid = '65fa64759cfd4662bf15c951eb9c7e66', branch = 'smoothed'
+values = {'enabled': True, 'method': 'gaussian', 'gaussian_sigma_points': 1.0}
+
+    def apply_branch(ws: BatchWorkspace, sid: str, branch: str, values: dict):
+        """Commit only the preview requested for this explicit branch and record."""
+        update_draft(ws, sid, branch, values)
+        preview = preview_branch(ws, sid, branch)
+        confirm_branch(ws, sid, branch)
+        actual = get_branch(ws, sid, branch)
+>       assert actual is preview
+E       AssertionError: assert PostprocessSnapshot(workspace_id='545f516b65c74451b3b9fdee1784fa07', spectrum_id='65fa64759cfd4662bf15c951eb9c7e66', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=()) is PostprocessSnapshot(workspace_id='545f516b65c74451b3b9fdee1784fa07', spectrum_id='65fa64759cfd4662bf15c951eb9c7e66', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=())
+
+tests/postprocessing/test_state_contracts.py:39: AssertionError
+_ test_pp054_identical_values_from_different_sources_never_share_snapshot_provenance _
+
+    def test_pp054_identical_values_from_different_sources_never_share_snapshot_provenance() -> None:
+        ws, a = confirmed_workspace()
+        _, b = confirmed_workspace(ws.records[a].wavenumber, ws.records[a].raw_intensity,
+                                   workspace=ws, name="synthetic.csv")
+>       original_a, original_b = graph(ws, a), graph(ws, b)
+                                 ^^^^^^^^^^^^
+
+tests/postprocessing/test_state_contracts.py:326: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/postprocessing/test_state_contracts.py:45: in graph
+    "smoothed": apply_branch(ws, sid, "smoothed", SMOOTH),
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ws = BatchWorkspace(schema_version='1.0', workspace_id='49848ef8495e4f1185e68955cffe87e1', workflow_mode='independent_batch... committed_draft=None, errors=[]), normalization_source='baseline', export_choice='baseline', display_preferences={})})
+sid = 'ea2401c8d1c1418daf3e8778fa6e31b4', branch = 'smoothed'
+values = {'enabled': True, 'method': 'gaussian', 'gaussian_sigma_points': 1.0}
+
+    def apply_branch(ws: BatchWorkspace, sid: str, branch: str, values: dict):
+        """Commit only the preview requested for this explicit branch and record."""
+        update_draft(ws, sid, branch, values)
+        preview = preview_branch(ws, sid, branch)
+        confirm_branch(ws, sid, branch)
+        actual = get_branch(ws, sid, branch)
+>       assert actual is preview
+E       AssertionError: assert PostprocessSnapshot(workspace_id='49848ef8495e4f1185e68955cffe87e1', spectrum_id='ea2401c8d1c1418daf3e8778fa6e31b4', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=()) is PostprocessSnapshot(workspace_id='49848ef8495e4f1185e68955cffe87e1', spectrum_id='ea2401c8d1c1418daf3e8778fa6e31b4', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=())
+
+tests/postprocessing/test_state_contracts.py:39: AssertionError
+_______ test_preview_from_another_identity_cannot_be_confirmed[smoothed] _______
+
+branch = 'smoothed'
+
+    @pytest.mark.parametrize("branch", DERIVED)
+    def test_preview_from_another_identity_cannot_be_confirmed(branch: str) -> None:
+        ws, a = confirmed_workspace()
+        _, b = confirmed_workspace(ws.records[a].wavenumber, ws.records[a].raw_intensity,
+                                   workspace=ws, name="same-data.csv")
+>       original_a, original_b = graph(ws, a), graph(ws, b)
+                                 ^^^^^^^^^^^^
+
+tests/postprocessing/test_state_contracts.py:352: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/postprocessing/test_state_contracts.py:45: in graph
+    "smoothed": apply_branch(ws, sid, "smoothed", SMOOTH),
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ws = BatchWorkspace(schema_version='1.0', workspace_id='9d15de946bfe4216b3b45a71e7e84038', workflow_mode='independent_batch... committed_draft=None, errors=[]), normalization_source='baseline', export_choice='baseline', display_preferences={})})
+sid = 'a62728cb62fc4df7941648fc415627df', branch = 'smoothed'
+values = {'enabled': True, 'method': 'gaussian', 'gaussian_sigma_points': 1.0}
+
+    def apply_branch(ws: BatchWorkspace, sid: str, branch: str, values: dict):
+        """Commit only the preview requested for this explicit branch and record."""
+        update_draft(ws, sid, branch, values)
+        preview = preview_branch(ws, sid, branch)
+        confirm_branch(ws, sid, branch)
+        actual = get_branch(ws, sid, branch)
+>       assert actual is preview
+E       AssertionError: assert PostprocessSnapshot(workspace_id='9d15de946bfe4216b3b45a71e7e84038', spectrum_id='a62728cb62fc4df7941648fc415627df', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=()) is PostprocessSnapshot(workspace_id='9d15de946bfe4216b3b45a71e7e84038', spectrum_id='a62728cb62fc4df7941648fc415627df', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=())
+
+tests/postprocessing/test_state_contracts.py:39: AssertionError
+_ test_preview_from_another_identity_cannot_be_confirmed[normalized_baseline] __
+
+branch = 'normalized_baseline'
+
+    @pytest.mark.parametrize("branch", DERIVED)
+    def test_preview_from_another_identity_cannot_be_confirmed(branch: str) -> None:
+        ws, a = confirmed_workspace()
+        _, b = confirmed_workspace(ws.records[a].wavenumber, ws.records[a].raw_intensity,
+                                   workspace=ws, name="same-data.csv")
+>       original_a, original_b = graph(ws, a), graph(ws, b)
+                                 ^^^^^^^^^^^^
+
+tests/postprocessing/test_state_contracts.py:352: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/postprocessing/test_state_contracts.py:45: in graph
+    "smoothed": apply_branch(ws, sid, "smoothed", SMOOTH),
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ws = BatchWorkspace(schema_version='1.0', workspace_id='f85c1ac83c7845f8a87338e57f830209', workflow_mode='independent_batch... committed_draft=None, errors=[]), normalization_source='baseline', export_choice='baseline', display_preferences={})})
+sid = 'f536839b6d4d4681a1c45a7bcc5537ff', branch = 'smoothed'
+values = {'enabled': True, 'method': 'gaussian', 'gaussian_sigma_points': 1.0}
+
+    def apply_branch(ws: BatchWorkspace, sid: str, branch: str, values: dict):
+        """Commit only the preview requested for this explicit branch and record."""
+        update_draft(ws, sid, branch, values)
+        preview = preview_branch(ws, sid, branch)
+        confirm_branch(ws, sid, branch)
+        actual = get_branch(ws, sid, branch)
+>       assert actual is preview
+E       AssertionError: assert PostprocessSnapshot(workspace_id='f85c1ac83c7845f8a87338e57f830209', spectrum_id='f536839b6d4d4681a1c45a7bcc5537ff', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=()) is PostprocessSnapshot(workspace_id='f85c1ac83c7845f8a87338e57f830209', spectrum_id='f536839b6d4d4681a1c45a7bcc5537ff', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=())
+
+tests/postprocessing/test_state_contracts.py:39: AssertionError
+_ test_preview_from_another_identity_cannot_be_confirmed[normalized_smoothed] __
+
+branch = 'normalized_smoothed'
+
+    @pytest.mark.parametrize("branch", DERIVED)
+    def test_preview_from_another_identity_cannot_be_confirmed(branch: str) -> None:
+        ws, a = confirmed_workspace()
+        _, b = confirmed_workspace(ws.records[a].wavenumber, ws.records[a].raw_intensity,
+                                   workspace=ws, name="same-data.csv")
+>       original_a, original_b = graph(ws, a), graph(ws, b)
+                                 ^^^^^^^^^^^^
+
+tests/postprocessing/test_state_contracts.py:352: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/postprocessing/test_state_contracts.py:45: in graph
+    "smoothed": apply_branch(ws, sid, "smoothed", SMOOTH),
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ws = BatchWorkspace(schema_version='1.0', workspace_id='3f24c56f188646298cea15959c28c190', workflow_mode='independent_batch... committed_draft=None, errors=[]), normalization_source='baseline', export_choice='baseline', display_preferences={})})
+sid = '9ec47fb1638a4e51805901d97033f345', branch = 'smoothed'
+values = {'enabled': True, 'method': 'gaussian', 'gaussian_sigma_points': 1.0}
+
+    def apply_branch(ws: BatchWorkspace, sid: str, branch: str, values: dict):
+        """Commit only the preview requested for this explicit branch and record."""
+        update_draft(ws, sid, branch, values)
+        preview = preview_branch(ws, sid, branch)
+        confirm_branch(ws, sid, branch)
+        actual = get_branch(ws, sid, branch)
+>       assert actual is preview
+E       AssertionError: assert PostprocessSnapshot(workspace_id='3f24c56f188646298cea15959c28c190', spectrum_id='9ec47fb1638a4e51805901d97033f345', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=()) is PostprocessSnapshot(workspace_id='3f24c56f188646298cea15959c28c190', spectrum_id='9ec47fb1638a4e51805901d97033f345', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=())
+
+tests/postprocessing/test_state_contracts.py:39: AssertionError
+_______ test_forged_snapshot_arrays_or_parent_cannot_be_promoted[output] _______
+
+change = 'output'
+
+    @pytest.mark.parametrize("change", ["output", "axis", "baseline", "parent"])
+    def test_forged_snapshot_arrays_or_parent_cannot_be_promoted(change: str) -> None:
+        ws, a = confirmed_workspace()
+        _, b = confirmed_workspace(workspace=ws, name="other.csv")
+>       original = graph(ws, a)
+                   ^^^^^^^^^^^^
+
+tests/postprocessing/test_state_contracts.py:363: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/postprocessing/test_state_contracts.py:45: in graph
+    "smoothed": apply_branch(ws, sid, "smoothed", SMOOTH),
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ws = BatchWorkspace(schema_version='1.0', workspace_id='80cd34cb485e464f9b94ad190c9dbf80', workflow_mode='independent_batch... committed_draft=None, errors=[]), normalization_source='baseline', export_choice='baseline', display_preferences={})})
+sid = '74cd3e1f40ff4cb29e49aed3c687a4e8', branch = 'smoothed'
+values = {'enabled': True, 'method': 'gaussian', 'gaussian_sigma_points': 1.0}
+
+    def apply_branch(ws: BatchWorkspace, sid: str, branch: str, values: dict):
+        """Commit only the preview requested for this explicit branch and record."""
+        update_draft(ws, sid, branch, values)
+        preview = preview_branch(ws, sid, branch)
+        confirm_branch(ws, sid, branch)
+        actual = get_branch(ws, sid, branch)
+>       assert actual is preview
+E       AssertionError: assert PostprocessSnapshot(workspace_id='80cd34cb485e464f9b94ad190c9dbf80', spectrum_id='74cd3e1f40ff4cb29e49aed3c687a4e8', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=()) is PostprocessSnapshot(workspace_id='80cd34cb485e464f9b94ad190c9dbf80', spectrum_id='74cd3e1f40ff4cb29e49aed3c687a4e8', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=())
+
+tests/postprocessing/test_state_contracts.py:39: AssertionError
+________ test_forged_snapshot_arrays_or_parent_cannot_be_promoted[axis] ________
+
+change = 'axis'
+
+    @pytest.mark.parametrize("change", ["output", "axis", "baseline", "parent"])
+    def test_forged_snapshot_arrays_or_parent_cannot_be_promoted(change: str) -> None:
+        ws, a = confirmed_workspace()
+        _, b = confirmed_workspace(workspace=ws, name="other.csv")
+>       original = graph(ws, a)
+                   ^^^^^^^^^^^^
+
+tests/postprocessing/test_state_contracts.py:363: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/postprocessing/test_state_contracts.py:45: in graph
+    "smoothed": apply_branch(ws, sid, "smoothed", SMOOTH),
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ws = BatchWorkspace(schema_version='1.0', workspace_id='aa92964e761e4be5bceba2da2b0ff489', workflow_mode='independent_batch... committed_draft=None, errors=[]), normalization_source='baseline', export_choice='baseline', display_preferences={})})
+sid = '3e58d778a0bf4430bdfa34c28c2ce1ae', branch = 'smoothed'
+values = {'enabled': True, 'method': 'gaussian', 'gaussian_sigma_points': 1.0}
+
+    def apply_branch(ws: BatchWorkspace, sid: str, branch: str, values: dict):
+        """Commit only the preview requested for this explicit branch and record."""
+        update_draft(ws, sid, branch, values)
+        preview = preview_branch(ws, sid, branch)
+        confirm_branch(ws, sid, branch)
+        actual = get_branch(ws, sid, branch)
+>       assert actual is preview
+E       AssertionError: assert PostprocessSnapshot(workspace_id='aa92964e761e4be5bceba2da2b0ff489', spectrum_id='3e58d778a0bf4430bdfa34c28c2ce1ae', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=()) is PostprocessSnapshot(workspace_id='aa92964e761e4be5bceba2da2b0ff489', spectrum_id='3e58d778a0bf4430bdfa34c28c2ce1ae', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=())
+
+tests/postprocessing/test_state_contracts.py:39: AssertionError
+______ test_forged_snapshot_arrays_or_parent_cannot_be_promoted[baseline] ______
+
+change = 'baseline'
+
+    @pytest.mark.parametrize("change", ["output", "axis", "baseline", "parent"])
+    def test_forged_snapshot_arrays_or_parent_cannot_be_promoted(change: str) -> None:
+        ws, a = confirmed_workspace()
+        _, b = confirmed_workspace(workspace=ws, name="other.csv")
+>       original = graph(ws, a)
+                   ^^^^^^^^^^^^
+
+tests/postprocessing/test_state_contracts.py:363: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/postprocessing/test_state_contracts.py:45: in graph
+    "smoothed": apply_branch(ws, sid, "smoothed", SMOOTH),
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ws = BatchWorkspace(schema_version='1.0', workspace_id='77b4bc28252a498cbf450a66e8b5a95c', workflow_mode='independent_batch... committed_draft=None, errors=[]), normalization_source='baseline', export_choice='baseline', display_preferences={})})
+sid = '395aa93a8f84403491bff89042d39fcc', branch = 'smoothed'
+values = {'enabled': True, 'method': 'gaussian', 'gaussian_sigma_points': 1.0}
+
+    def apply_branch(ws: BatchWorkspace, sid: str, branch: str, values: dict):
+        """Commit only the preview requested for this explicit branch and record."""
+        update_draft(ws, sid, branch, values)
+        preview = preview_branch(ws, sid, branch)
+        confirm_branch(ws, sid, branch)
+        actual = get_branch(ws, sid, branch)
+>       assert actual is preview
+E       AssertionError: assert PostprocessSnapshot(workspace_id='77b4bc28252a498cbf450a66e8b5a95c', spectrum_id='395aa93a8f84403491bff89042d39fcc', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=()) is PostprocessSnapshot(workspace_id='77b4bc28252a498cbf450a66e8b5a95c', spectrum_id='395aa93a8f84403491bff89042d39fcc', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=())
+
+tests/postprocessing/test_state_contracts.py:39: AssertionError
+_______ test_forged_snapshot_arrays_or_parent_cannot_be_promoted[parent] _______
+
+change = 'parent'
+
+    @pytest.mark.parametrize("change", ["output", "axis", "baseline", "parent"])
+    def test_forged_snapshot_arrays_or_parent_cannot_be_promoted(change: str) -> None:
+        ws, a = confirmed_workspace()
+        _, b = confirmed_workspace(workspace=ws, name="other.csv")
+>       original = graph(ws, a)
+                   ^^^^^^^^^^^^
+
+tests/postprocessing/test_state_contracts.py:363: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/postprocessing/test_state_contracts.py:45: in graph
+    "smoothed": apply_branch(ws, sid, "smoothed", SMOOTH),
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ws = BatchWorkspace(schema_version='1.0', workspace_id='4a8052a6b87d4ad39467ac9c89b525dd', workflow_mode='independent_batch... committed_draft=None, errors=[]), normalization_source='baseline', export_choice='baseline', display_preferences={})})
+sid = '7808cf3c2e854877bbdb9ee49cba29b1', branch = 'smoothed'
+values = {'enabled': True, 'method': 'gaussian', 'gaussian_sigma_points': 1.0}
+
+    def apply_branch(ws: BatchWorkspace, sid: str, branch: str, values: dict):
+        """Commit only the preview requested for this explicit branch and record."""
+        update_draft(ws, sid, branch, values)
+        preview = preview_branch(ws, sid, branch)
+        confirm_branch(ws, sid, branch)
+        actual = get_branch(ws, sid, branch)
+>       assert actual is preview
+E       AssertionError: assert PostprocessSnapshot(workspace_id='4a8052a6b87d4ad39467ac9c89b525dd', spectrum_id='7808cf3c2e854877bbdb9ee49cba29b1', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=()) is PostprocessSnapshot(workspace_id='4a8052a6b87d4ad39467ac9c89b525dd', spectrum_id='7808cf3c2e854877bbdb9ee49cba29b1', s...ax_deviation': 0.0, 'approximate_physical_width': mappingproxy({'sigma_cm1': 5.0, 'fwhm_cm1': 11.7741})}), warnings=())
+
+tests/postprocessing/test_state_contracts.py:39: AssertionError
+=========================== short test summary info ============================
+FAILED tests/postprocessing/test_state_contracts.py::test_pp002_pp003_postprocessing_never_calls_baseline_prepared_or_twod
+FAILED tests/postprocessing/test_state_contracts.py::test_pp004_coarse_only_requires_explicit_final_baseline_decision[normalized_smoothed]
+FAILED tests/postprocessing/test_state_contracts.py::test_pp005_parent_arrays_and_recipe_stay_immutable_across_all_branches
+FAILED tests/postprocessing/test_state_contracts.py::test_pp006_smoothing_rejects_every_nonbaseline_source[smoothed]
+FAILED tests/postprocessing/test_state_contracts.py::test_pp006_smoothing_rejects_every_nonbaseline_source[normalized_baseline]
+FAILED tests/postprocessing/test_state_contracts.py::test_pp006_smoothing_rejects_every_nonbaseline_source[normalized_smoothed]
+FAILED tests/postprocessing/test_state_contracts.py::test_pp006_normalization_rejects_every_noncontract_source[normalized_baseline]
+FAILED tests/postprocessing/test_state_contracts.py::test_pp006_normalization_rejects_every_noncontract_source[normalized_smoothed]
+FAILED tests/postprocessing/test_state_contracts.py::test_pp006_normalization_rejects_every_noncontract_source[raw]
+FAILED tests/postprocessing/test_state_contracts.py::test_pp007_single_and_unrelated_batch_have_identical_derived_arrays
+FAILED tests/postprocessing/test_state_contracts.py::test_pp043_preview_alone_is_never_a_confirmed_branch[normalized_smoothed]
+FAILED tests/postprocessing/test_state_contracts.py::test_pp044_pp045_edit_preserves_confirmed_but_blocks_old_preview_commit[smoothed]
+FAILED tests/postprocessing/test_state_contracts.py::test_pp044_pp045_edit_preserves_confirmed_but_blocks_old_preview_commit[normalized_baseline]
+FAILED tests/postprocessing/test_state_contracts.py::test_pp044_pp045_edit_preserves_confirmed_but_blocks_old_preview_commit[normalized_smoothed]
+FAILED tests/postprocessing/test_state_contracts.py::test_pp046_new_smoothing_invalidates_only_its_normalized_child
+FAILED tests/postprocessing/test_state_contracts.py::test_pp047_confirmed_new_baseline_invalidates_only_that_records_descendants
+FAILED tests/postprocessing/test_state_contracts.py::test_pp048_normalization_branches_do_not_supersede_each_other[normalized_baseline-normalized_smoothed]
+FAILED tests/postprocessing/test_state_contracts.py::test_pp048_normalization_branches_do_not_supersede_each_other[normalized_smoothed-normalized_baseline]
+FAILED tests/postprocessing/test_state_contracts.py::test_pp049_equal_smoothing_arrays_with_different_recipe_still_change_parent
+FAILED tests/postprocessing/test_state_contracts.py::test_pp050_reconfirm_and_unused_parameters_do_not_invalidate_descendants
+FAILED tests/postprocessing/test_state_contracts.py::test_pp051_per_source_drafts_and_display_selection_remain_independent
+FAILED tests/postprocessing/test_state_contracts.py::test_pp052_copy_resolves_each_targets_smoothed_parent_without_fallback_or_coefficient_copy
+FAILED tests/postprocessing/test_state_contracts.py::test_pp053_batch_preview_and_confirm_isolate_invalid_windows_from_good_and_committed_items
+FAILED tests/postprocessing/test_state_contracts.py::test_pp054_identical_values_from_different_sources_never_share_snapshot_provenance
+FAILED tests/postprocessing/test_state_contracts.py::test_preview_from_another_identity_cannot_be_confirmed[smoothed]
+FAILED tests/postprocessing/test_state_contracts.py::test_preview_from_another_identity_cannot_be_confirmed[normalized_baseline]
+FAILED tests/postprocessing/test_state_contracts.py::test_preview_from_another_identity_cannot_be_confirmed[normalized_smoothed]
+FAILED tests/postprocessing/test_state_contracts.py::test_forged_snapshot_arrays_or_parent_cannot_be_promoted[output]
+FAILED tests/postprocessing/test_state_contracts.py::test_forged_snapshot_arrays_or_parent_cannot_be_promoted[axis]
+FAILED tests/postprocessing/test_state_contracts.py::test_forged_snapshot_arrays_or_parent_cannot_be_promoted[baseline]
+FAILED tests/postprocessing/test_state_contracts.py::test_forged_snapshot_arrays_or_parent_cannot_be_promoted[parent]
+31 failed, 4 passed in 3.15s
+
+EXIT_CODE: 1
+ELAPSED_SECONDS: 3.482
