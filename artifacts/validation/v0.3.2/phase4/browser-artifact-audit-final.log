@@ -1,0 +1,14 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python outputs/validation-private/v032/browser/audit_downloads.py
+STARTED_UTC: 2026-10-31T17:07:11.487545+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v032 cache>
+Traceback (most recent call last):
+  File "<repository>/outputs/validation-private/v032/browser/audit_downloads.py", line 200, in <module>
+    audit()
+  File "<repository>/outputs/validation-private/v032/browser/audit_downloads.py", line 156, in audit
+    assert headers == metadata["wide_headers"]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+EXIT_CODE: 1
+ELAPSED_SECONDS: 0.796

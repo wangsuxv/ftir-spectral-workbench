@@ -1,0 +1,106 @@
+{
+  "source_unchanged": true,
+  "spectral_arrays_published": false,
+  "files": [
+    {
+      "source": "outputs/validation-private/v032/phase0/pytest.log",
+      "published": "artifacts/validation/v0.3.2/phase0/pytest.log",
+      "source_sha256": "a5d7389995a2d7fca7ea2ec89a3f0b69ecefa710395b589f8e49d3708b9b617d",
+      "published_sha256": "77628b8e1502705325ed5368d83a575910a0e271807155e967e7ba3a060f0185",
+      "redactions": [
+        "repository absolute path",
+        "home absolute path"
+      ]
+    },
+    {
+      "source": "outputs/validation-private/v032/phase0/ruff.log",
+      "published": "artifacts/validation/v0.3.2/phase0/ruff.log",
+      "source_sha256": "48a7fbec078ae39ca1eca44df8e8d59e4af23754d23ca1e5c829150b1999f48b",
+      "published_sha256": "df69c10b934d57685d036ff718acf3272a9bcab55515ed1c70d21558051af984",
+      "redactions": [
+        "repository absolute path",
+        "home absolute path"
+      ]
+    },
+    {
+      "source": "outputs/validation-private/v032/phase0/mypy.log",
+      "published": "artifacts/validation/v0.3.2/phase0/mypy.log",
+      "source_sha256": "666f3ea5abc326a8be4c7fb08a3b50de8cd72d6503ab805584c4a07c5aaccb2a",
+      "published_sha256": "4372cbe1e1024f6d4de13f346acbb95274f26d577b410c6b4038769647423fbc",
+      "redactions": [
+        "repository absolute path",
+        "home absolute path"
+      ]
+    },
+    {
+      "source": "outputs/validation-private/v032/phase0/pip-check.log",
+      "published": "artifacts/validation/v0.3.2/phase0/pip-check.log",
+      "source_sha256": "6b74d4f64b419017f58c20a8415960926168fb3cc93018b9982fe08e03fb4561",
+      "published_sha256": "769a03975db5d7557792895bdf8229e9878515419e914a6b015e1ab66659398a",
+      "redactions": [
+        "repository absolute path",
+        "home absolute path"
+      ]
+    },
+    {
+      "source": "outputs/validation-private/v032/phase0/freeze-and-legacy.log",
+      "published": "artifacts/validation/v0.3.2/phase0/freeze-and-legacy.log",
+      "source_sha256": "2385c6c5544801056a49ef2b120f891bd240c57b872080998ef7d0d96f96c3b6",
+      "published_sha256": "4b242b1fdebcd18f8616b2d86d855a35ef1c3d82baaeaa903a7b420d2d070f0e",
+      "redactions": [
+        "repository absolute path",
+        "home absolute path"
+      ]
+    },
+    {
+      "source": "outputs/validation-private/v032/phase0/environment.json",
+      "published": "artifacts/validation/v0.3.2/phase0/environment.json",
+      "source_sha256": "e055eb5b549f1b68a32de4de97c4fbbac0baf3fb656df8213d0718edfc78b79e",
+      "published_sha256": "ba9169c6f18e02b6b4157ebb3623b8ca034a6057635abc16dbfff57477dc6a08",
+      "redactions": [
+        "repository absolute path",
+        "home absolute path"
+      ]
+    },
+    {
+      "source": "outputs/validation-private/v032/phase0/baseline-summary.json",
+      "published": "artifacts/validation/v0.3.2/phase0/baseline-summary.json",
+      "source_sha256": "2dbff2717e0d24a06e62433aacf51e436e38115880bebc9301c83286d1fac144",
+      "published_sha256": "bb1889dd8c3ab996785897c70804199b318468e7fbfe9c4f53f3a997cae9e015",
+      "redactions": [
+        "repository absolute path",
+        "home absolute path"
+      ]
+    },
+    {
+      "source": "outputs/validation-private/v032/phase0/archive.json",
+      "published": "artifacts/validation/v0.3.2/phase0/archive.json",
+      "source_sha256": "77d5c33d14ed7fb30db3123f17d9d5da636a35240b8e98a04643c225941e6ce9",
+      "published_sha256": "a189b620ea9e714c09420ac65a1109c199f37f25b3ce785091e18efc81fdf2c2",
+      "redactions": [
+        "repository absolute path",
+        "home absolute path"
+      ]
+    },
+    {
+      "source": "outputs/validation-private/v032/phase0/old-fixtures-first.log",
+      "published": "artifacts/validation/v0.3.2/phase0/old-fixtures-first.log",
+      "source_sha256": "5a8a21799e1b0e21840ab1dde840d5458f4cc63ffc2e2d721533c0845dff214f",
+      "published_sha256": "4941e38443cd666f428a91a10b5bdff14f1f7598d3ae4c99bcd8bb0bbb2294b6",
+      "redactions": [
+        "repository absolute path",
+        "home absolute path"
+      ]
+    },
+    {
+      "source": "outputs/validation-private/v032/phase0/old-fixtures-repeat.log",
+      "published": "artifacts/validation/v0.3.2/phase0/old-fixtures-repeat.log",
+      "source_sha256": "822eb73e79f6e74d916b3ad3a7c948a6fa48b967f6d0c1432d7cf2e62ea6d311",
+      "published_sha256": "0b1e4231cfc89a1b13110d77d0b5e1aecc485981868804d12c4bb06ae4212693",
+      "redactions": [
+        "repository absolute path",
+        "home absolute path"
+      ]
+    }
+  ]
+}

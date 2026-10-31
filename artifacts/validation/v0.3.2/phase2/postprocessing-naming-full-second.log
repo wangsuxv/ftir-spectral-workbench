@@ -1,0 +1,103 @@
+# Actual earlier subprocess command output; local repository/home paths redacted.
+COMMAND: ['.venv/bin/python', '-m', 'pytest', 'tests/postprocessing/test_export_naming.py', 'tests/postprocessing/test_export.py', 'tests/postprocessing/test_export_adversarial.py', '-q', '-p', 'no:cacheprovider']
+......................................F................................. [ 61%]
+.............................................                            [100%]
+=================================== FAILURES ===================================
+_ test_rehashed_readable_name_mapping_and_member_attacks_fail_closed[inconsistent_layout] _
+
+attack = 'inconsistent_layout'
+
+    @pytest.mark.parametrize("attack", [
+        "source_id", "source_column", "quantity", "role", "parent_hash", "base_name",
+        "collision_token", "unknown_field", "omit_parent_map", "duplicate_map", "wrong_suffix",
+        "map_csv", "extra_member", "mixed_schema", "unknown_schema", "node_schema",
+        "policy_version", "policy_mismatch", "recipe_path", "inconsistent_per_spectrum_decision",
+        "inconsistent_layout",
+    ])
+    def test_rehashed_readable_name_mapping_and_member_attacks_fail_closed(attack: str) -> None:
+        ws, sid = confirmed_workspace(name="sample.csv")
+        graph(ws, sid)
+        artifact = build_postprocessing_export(ws, [sid], branches=("normalized_smoothed",), include_wide=True)
+        members, metadata, index, nodes = _unpack(artifact.zip_bytes)
+        row = metadata["name_map"][-1]
+        if attack == "source_id":
+            row["source_id"] = "another-source"
+        elif attack == "source_column":
+            row["source_column_index"] += 1
+        elif attack == "quantity":
+            row["quantity"] = "absorbance"
+        elif attack == "role":
+            row["included_as"] = "parent"
+        elif attack == "parent_hash":
+            row["parent_fingerprint"] = "a" * 64
+        elif attack == "base_name":
+            row["base_name"] = "different"
+        elif attack == "collision_token":
+            row["collision_token"] = "12345678"
+        elif attack == "unknown_field":
+            row["unrecognized"] = "ignored?"
+        elif attack == "omit_parent_map":
+            metadata["name_map"].pop(0)
+        elif attack == "duplicate_map":
+            metadata["name_map"].append(dict(row))
+        elif attack in {"wrong_suffix", "recipe_path"}:
+            field = "spectra_csv" if attack == "wrong_suffix" else "recipe_json"
+            old = row[field]
+            new = "spectra/sample__baseline__smooth-median__norm-max.csv" if attack == "wrong_suffix" else "recipes/different.json"
+            row[field] = new
+            nodes[(sid, "normalized_smoothed")][field] = new
+            index["nodes"][-1][field] = new
+            members[new] = members.pop(old)
+        elif attack == "extra_member":
+            members["unreferenced.csv"] = b"extra\n"
+        elif attack == "mixed_schema":
+            index["schema_version"] = "1.0"
+        elif attack == "unknown_schema":
+            metadata["schema_version"] = index["schema_version"] = "9.0"
+        elif attack == "node_schema":
+            nodes[(sid, "normalized_smoothed")]["schema_version"] = "1.1"
+        elif attack == "policy_version":
+            metadata["naming_policy_version"] = index["naming_policy_version"] = "9.0"
+        elif attack == "policy_mismatch":
+            metadata["naming_policy"] = "display"
+        elif attack == "inconsistent_per_spectrum_decision":
+            row.update(override="different", raw_base_name="different", base_name="different", name_basis="override")
+            node = nodes[(sid, "normalized_smoothed")]
+            old_path = row["spectra_csv"]
+            replacement = make_name_row(
+                row, branch=node["branch"], quantity=node["quantity"], purpose=node["purpose"],
+                fingerprint=node["fingerprint"], parent_fingerprint=node["parent_fingerprint"],
+                recipe_json=node["recipe_json"], included_as="requested",
+                effective_recipe=node["effective_recipe"],
+                parent_effective_recipe=nodes[(sid, "smoothed")]["effective_recipe"],
+            )
+            metadata["name_map"][-1] = replacement
+            node["spectra_csv"] = index["nodes"][-1]["spectra_csv"] = replacement["spectra_csv"]
+            members[replacement["spectra_csv"]] = members.pop(old_path)
+            wide = np.loadtxt(io.BytesIO(members[metadata["wide_csv"]]), delimiter=",", skiprows=1)
+            metadata["wide_headers"] = [replacement["wide_column_label"]]
+            members[metadata["wide_csv"]] = _table(["wavenumber_cm-1", *metadata["wide_headers"]], wide.tolist())
+        elif attack == "inconsistent_layout":
+            for mapped in metadata["name_map"]:
+                mapped["layout_evidence"]["probe"]["layout"] = "wide_table"
+                mapped["source_layout"] = "wide_table"
+                mapped["name_basis"] = "original_column_label"
+        for node in nodes.values():
+            node["node_integrity_sha256"] = json_fingerprint({key: value for key, value in node.items() if key != "node_integrity_sha256"})
+            members[node["recipe_json"]] = json_bytes(node)
+        members["export_name_map.csv"] = _table(*name_map_table(metadata["name_map"]))
+        if attack == "map_csv":
+            members["export_name_map.csv"] += b"invented,row\n"
+        members["batch_metadata.json"] = json_bytes(metadata)
+        members["branch_index.json"] = json_bytes(index)
+>       assert not verify_postprocessing_export(make_archive(members, ARTIFACT_TYPE), recompute=False)
+E       assert not True
+E        +  where True = verify_postprocessing_export(b'PK\x03\x04\x14\x00\x00\x00\x08\x00\x00\x00!\x00\x9e>\xb4\xa9(\x07\x00\x00L\x1e\x00\x00\x13\x00\x00\x00batch_metadata...ample__baseline__smooth-gaussian__norm-max.csvPK\x05\x06\x00\x00\x00\x00\r\x00\r\x00g\x04\x00\x00\x15W\x00\x00\x00\x00', recompute=False)
+E        +    where b'PK\x03\x04\x14\x00\x00\x00\x08\x00\x00\x00!\x00\x9e>\xb4\xa9(\x07\x00\x00L\x1e\x00\x00\x13\x00\x00\x00batch_metadata...ample__baseline__smooth-gaussian__norm-max.csvPK\x05\x06\x00\x00\x00\x00\r\x00\r\x00g\x04\x00\x00\x15W\x00\x00\x00\x00' = make_archive({'batch_metadata.json': b'{\n  "artifact_type": "ordinary_spectrum_postprocess_bundle",\n  "baseline_verification_scop...ne__smooth-gaussian__norm-max.csv,9375d68fccb64933b38018c1f7b1c615,sample__baseline__smooth-gaussian__norm-max\n', ...}, 'ordinary_spectrum_postprocess_bundle')
+
+tests/postprocessing/test_export_naming.py:285: AssertionError
+=========================== short test summary info ============================
+FAILED tests/postprocessing/test_export_naming.py::test_rehashed_readable_name_mapping_and_member_attacks_fail_closed[inconsistent_layout]
+1 failed, 116 passed in 5.10s
+
+EXIT_CODE: 1

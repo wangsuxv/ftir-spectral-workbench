@@ -1,0 +1,11 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m pytest tests/postprocessing/test_export_naming.py tests/batch/test_export_naming.py tests/postprocessing/test_export.py tests/postprocessing/test_export_adversarial.py tests/postprocessing/test_workspace_migration.py -q -p no:cacheprovider
+STARTED_UTC: 2026-10-31T16:51:11.225454+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v032 cache>
+........................................................................ [ 33%]
+........................................................................ [ 66%]
+........................................................................ [100%]
+216 passed in 9.96s
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 10.176

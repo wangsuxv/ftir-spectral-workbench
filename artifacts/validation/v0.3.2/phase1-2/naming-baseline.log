@@ -1,0 +1,24 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/pytest -q -p no:cacheprovider tests/batch/test_export_naming.py tests/batch/test_export.py
+STARTED_UTC: 2026-10-31T16:40:23.818434+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v032 cache>
+.F..........................................................             [100%]
+=================================== FAILURES ===================================
+_______ test_n03_headerless_and_old_probe_fallback_uses_original_indices _______
+
+    def test_n03_headerless_and_old_probe_fallback_uses_original_indices() -> None:
+        ws = BatchWorkspace()
+        ids = import_sources(ws, [("batch01.csv", b"1000,1,2\n1100,2,4\n1200,3,5\n")])
+>       assert [allocate_bases(ws)[sid]["base_name"] for sid in ids] == ["batch01__col01", "batch01__col02"]
+E       AssertionError: assert [] == ['batch01__co...tch01__col02']
+E         
+E         Right contains 2 more items, first extra item: 'batch01__col01'
+E         Use -v to get more diff
+
+tests/batch/test_export_naming.py:75: AssertionError
+=========================== short test summary info ============================
+FAILED tests/batch/test_export_naming.py::test_n03_headerless_and_old_probe_fallback_uses_original_indices
+1 failed, 59 passed in 12.25s
+
+EXIT_CODE: 1
+ELAPSED_SECONDS: 12.546

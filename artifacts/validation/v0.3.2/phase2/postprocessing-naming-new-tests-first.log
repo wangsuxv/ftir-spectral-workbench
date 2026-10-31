@@ -1,0 +1,284 @@
+# Actual earlier subprocess command output; local repository/home paths redacted.
+COMMAND: ['.venv/bin/python', '-m', 'pytest', 'tests/postprocessing/test_export_naming.py', '-q', '-p', 'no:cacheprovider']
+.....FFFFFF...........................                                   [100%]
+=================================== FAILURES ===================================
+_ test_confirmed_normalization_method_suffix_preserves_quantity[maximum-norm-max] _
+
+method = 'maximum', suffix = 'norm-max'
+
+    @pytest.mark.parametrize(("method", "suffix"), [
+        ("maximum", "norm-max"), ("internal_peak_height", "norm-peak-window"),
+        ("internal_peak_area", "norm-area-window"), ("area", "norm-area"),
+        ("vector", "norm-l2"), ("minmax_display", "minmax_scaled_intensity_display_only"),
+    ])
+    def test_confirmed_normalization_method_suffix_preserves_quantity(method: str, suffix: str) -> None:
+        ws, sid = confirmed_workspace(name="样品 α (25°C).csv")
+>       apply_branch(ws, sid, "normalized_baseline", {
+            "enabled": True, "method": method, "reference_range": [1600.0, 1200.0],
+        })
+
+tests/postprocessing/test_export_naming.py:120: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/postprocessing/test_state_contracts.py:38: in apply_branch
+    preview = preview_branch(ws, sid, branch)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/ftir_workbench/batch/postprocessing.py:349: in preview_branch
+    request = _resolve_request(workspace, spectrum_id, branch)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/ftir_workbench/batch/postprocessing.py:329: in _resolve_request
+    config = effective_config(branch, state.draft)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/ftir_workbench/batch/postprocessing.py:180: in effective_config
+    config = effective_smoothing_config(draft) if branch == "smoothed" else normalize_config(draft)
+                                                                            ^^^^^^^^^^^^^^^^^^^^^^^
+src/ftir_workbench/batch/normalization_adapter.py:188: in normalize_config
+    return OrdinaryNormalizationConfig(**_effective_values(config))
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+raw = {'enabled': True, 'method': 'maximum', 'reference_interval': None, 'area_interval': None, ...}
+
+    def _effective_values(raw: Mapping[str, Any]) -> dict[str, Any]:
+        unknown = raw.keys() - _DEFAULTS.keys()
+        if unknown:
+>           raise BatchError(
+                "NORMALIZATION_CONFIG_INVALID", f"Unknown settings: {sorted(unknown, key=str)}"
+            )
+E           ftir_workbench.batch.models.BatchError: NORMALIZATION_CONFIG_INVALID: Unknown settings: ['reference_range']
+
+src/ftir_workbench/batch/normalization_adapter.py:99: BatchError
+_ test_confirmed_normalization_method_suffix_preserves_quantity[internal_peak_height-norm-peak-window] _
+
+method = 'internal_peak_height', suffix = 'norm-peak-window'
+
+    @pytest.mark.parametrize(("method", "suffix"), [
+        ("maximum", "norm-max"), ("internal_peak_height", "norm-peak-window"),
+        ("internal_peak_area", "norm-area-window"), ("area", "norm-area"),
+        ("vector", "norm-l2"), ("minmax_display", "minmax_scaled_intensity_display_only"),
+    ])
+    def test_confirmed_normalization_method_suffix_preserves_quantity(method: str, suffix: str) -> None:
+        ws, sid = confirmed_workspace(name="样品 α (25°C).csv")
+>       apply_branch(ws, sid, "normalized_baseline", {
+            "enabled": True, "method": method, "reference_range": [1600.0, 1200.0],
+        })
+
+tests/postprocessing/test_export_naming.py:120: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/postprocessing/test_state_contracts.py:38: in apply_branch
+    preview = preview_branch(ws, sid, branch)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/ftir_workbench/batch/postprocessing.py:349: in preview_branch
+    request = _resolve_request(workspace, spectrum_id, branch)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/ftir_workbench/batch/postprocessing.py:329: in _resolve_request
+    config = effective_config(branch, state.draft)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/ftir_workbench/batch/postprocessing.py:180: in effective_config
+    config = effective_smoothing_config(draft) if branch == "smoothed" else normalize_config(draft)
+                                                                            ^^^^^^^^^^^^^^^^^^^^^^^
+src/ftir_workbench/batch/normalization_adapter.py:188: in normalize_config
+    return OrdinaryNormalizationConfig(**_effective_values(config))
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+raw = {'enabled': True, 'method': 'internal_peak_height', 'reference_interval': None, 'area_interval': None, ...}
+
+    def _effective_values(raw: Mapping[str, Any]) -> dict[str, Any]:
+        unknown = raw.keys() - _DEFAULTS.keys()
+        if unknown:
+>           raise BatchError(
+                "NORMALIZATION_CONFIG_INVALID", f"Unknown settings: {sorted(unknown, key=str)}"
+            )
+E           ftir_workbench.batch.models.BatchError: NORMALIZATION_CONFIG_INVALID: Unknown settings: ['reference_range']
+
+src/ftir_workbench/batch/normalization_adapter.py:99: BatchError
+_ test_confirmed_normalization_method_suffix_preserves_quantity[internal_peak_area-norm-area-window] _
+
+method = 'internal_peak_area', suffix = 'norm-area-window'
+
+    @pytest.mark.parametrize(("method", "suffix"), [
+        ("maximum", "norm-max"), ("internal_peak_height", "norm-peak-window"),
+        ("internal_peak_area", "norm-area-window"), ("area", "norm-area"),
+        ("vector", "norm-l2"), ("minmax_display", "minmax_scaled_intensity_display_only"),
+    ])
+    def test_confirmed_normalization_method_suffix_preserves_quantity(method: str, suffix: str) -> None:
+        ws, sid = confirmed_workspace(name="样品 α (25°C).csv")
+>       apply_branch(ws, sid, "normalized_baseline", {
+            "enabled": True, "method": method, "reference_range": [1600.0, 1200.0],
+        })
+
+tests/postprocessing/test_export_naming.py:120: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/postprocessing/test_state_contracts.py:38: in apply_branch
+    preview = preview_branch(ws, sid, branch)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/ftir_workbench/batch/postprocessing.py:349: in preview_branch
+    request = _resolve_request(workspace, spectrum_id, branch)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/ftir_workbench/batch/postprocessing.py:329: in _resolve_request
+    config = effective_config(branch, state.draft)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/ftir_workbench/batch/postprocessing.py:180: in effective_config
+    config = effective_smoothing_config(draft) if branch == "smoothed" else normalize_config(draft)
+                                                                            ^^^^^^^^^^^^^^^^^^^^^^^
+src/ftir_workbench/batch/normalization_adapter.py:188: in normalize_config
+    return OrdinaryNormalizationConfig(**_effective_values(config))
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+raw = {'enabled': True, 'method': 'internal_peak_area', 'reference_interval': None, 'area_interval': None, ...}
+
+    def _effective_values(raw: Mapping[str, Any]) -> dict[str, Any]:
+        unknown = raw.keys() - _DEFAULTS.keys()
+        if unknown:
+>           raise BatchError(
+                "NORMALIZATION_CONFIG_INVALID", f"Unknown settings: {sorted(unknown, key=str)}"
+            )
+E           ftir_workbench.batch.models.BatchError: NORMALIZATION_CONFIG_INVALID: Unknown settings: ['reference_range']
+
+src/ftir_workbench/batch/normalization_adapter.py:99: BatchError
+_ test_confirmed_normalization_method_suffix_preserves_quantity[area-norm-area] _
+
+method = 'area', suffix = 'norm-area'
+
+    @pytest.mark.parametrize(("method", "suffix"), [
+        ("maximum", "norm-max"), ("internal_peak_height", "norm-peak-window"),
+        ("internal_peak_area", "norm-area-window"), ("area", "norm-area"),
+        ("vector", "norm-l2"), ("minmax_display", "minmax_scaled_intensity_display_only"),
+    ])
+    def test_confirmed_normalization_method_suffix_preserves_quantity(method: str, suffix: str) -> None:
+        ws, sid = confirmed_workspace(name="样品 α (25°C).csv")
+>       apply_branch(ws, sid, "normalized_baseline", {
+            "enabled": True, "method": method, "reference_range": [1600.0, 1200.0],
+        })
+
+tests/postprocessing/test_export_naming.py:120: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/postprocessing/test_state_contracts.py:38: in apply_branch
+    preview = preview_branch(ws, sid, branch)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/ftir_workbench/batch/postprocessing.py:349: in preview_branch
+    request = _resolve_request(workspace, spectrum_id, branch)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/ftir_workbench/batch/postprocessing.py:329: in _resolve_request
+    config = effective_config(branch, state.draft)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/ftir_workbench/batch/postprocessing.py:180: in effective_config
+    config = effective_smoothing_config(draft) if branch == "smoothed" else normalize_config(draft)
+                                                                            ^^^^^^^^^^^^^^^^^^^^^^^
+src/ftir_workbench/batch/normalization_adapter.py:188: in normalize_config
+    return OrdinaryNormalizationConfig(**_effective_values(config))
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+raw = {'enabled': True, 'method': 'area', 'reference_interval': None, 'area_interval': None, ...}
+
+    def _effective_values(raw: Mapping[str, Any]) -> dict[str, Any]:
+        unknown = raw.keys() - _DEFAULTS.keys()
+        if unknown:
+>           raise BatchError(
+                "NORMALIZATION_CONFIG_INVALID", f"Unknown settings: {sorted(unknown, key=str)}"
+            )
+E           ftir_workbench.batch.models.BatchError: NORMALIZATION_CONFIG_INVALID: Unknown settings: ['reference_range']
+
+src/ftir_workbench/batch/normalization_adapter.py:99: BatchError
+_ test_confirmed_normalization_method_suffix_preserves_quantity[vector-norm-l2] _
+
+method = 'vector', suffix = 'norm-l2'
+
+    @pytest.mark.parametrize(("method", "suffix"), [
+        ("maximum", "norm-max"), ("internal_peak_height", "norm-peak-window"),
+        ("internal_peak_area", "norm-area-window"), ("area", "norm-area"),
+        ("vector", "norm-l2"), ("minmax_display", "minmax_scaled_intensity_display_only"),
+    ])
+    def test_confirmed_normalization_method_suffix_preserves_quantity(method: str, suffix: str) -> None:
+        ws, sid = confirmed_workspace(name="样品 α (25°C).csv")
+>       apply_branch(ws, sid, "normalized_baseline", {
+            "enabled": True, "method": method, "reference_range": [1600.0, 1200.0],
+        })
+
+tests/postprocessing/test_export_naming.py:120: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/postprocessing/test_state_contracts.py:38: in apply_branch
+    preview = preview_branch(ws, sid, branch)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/ftir_workbench/batch/postprocessing.py:349: in preview_branch
+    request = _resolve_request(workspace, spectrum_id, branch)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/ftir_workbench/batch/postprocessing.py:329: in _resolve_request
+    config = effective_config(branch, state.draft)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/ftir_workbench/batch/postprocessing.py:180: in effective_config
+    config = effective_smoothing_config(draft) if branch == "smoothed" else normalize_config(draft)
+                                                                            ^^^^^^^^^^^^^^^^^^^^^^^
+src/ftir_workbench/batch/normalization_adapter.py:188: in normalize_config
+    return OrdinaryNormalizationConfig(**_effective_values(config))
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+raw = {'enabled': True, 'method': 'vector', 'reference_interval': None, 'area_interval': None, ...}
+
+    def _effective_values(raw: Mapping[str, Any]) -> dict[str, Any]:
+        unknown = raw.keys() - _DEFAULTS.keys()
+        if unknown:
+>           raise BatchError(
+                "NORMALIZATION_CONFIG_INVALID", f"Unknown settings: {sorted(unknown, key=str)}"
+            )
+E           ftir_workbench.batch.models.BatchError: NORMALIZATION_CONFIG_INVALID: Unknown settings: ['reference_range']
+
+src/ftir_workbench/batch/normalization_adapter.py:99: BatchError
+_ test_confirmed_normalization_method_suffix_preserves_quantity[minmax_display-minmax_scaled_intensity_display_only] _
+
+method = 'minmax_display', suffix = 'minmax_scaled_intensity_display_only'
+
+    @pytest.mark.parametrize(("method", "suffix"), [
+        ("maximum", "norm-max"), ("internal_peak_height", "norm-peak-window"),
+        ("internal_peak_area", "norm-area-window"), ("area", "norm-area"),
+        ("vector", "norm-l2"), ("minmax_display", "minmax_scaled_intensity_display_only"),
+    ])
+    def test_confirmed_normalization_method_suffix_preserves_quantity(method: str, suffix: str) -> None:
+        ws, sid = confirmed_workspace(name="样品 α (25°C).csv")
+>       apply_branch(ws, sid, "normalized_baseline", {
+            "enabled": True, "method": method, "reference_range": [1600.0, 1200.0],
+        })
+
+tests/postprocessing/test_export_naming.py:120: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/postprocessing/test_state_contracts.py:38: in apply_branch
+    preview = preview_branch(ws, sid, branch)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/ftir_workbench/batch/postprocessing.py:349: in preview_branch
+    request = _resolve_request(workspace, spectrum_id, branch)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/ftir_workbench/batch/postprocessing.py:329: in _resolve_request
+    config = effective_config(branch, state.draft)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/ftir_workbench/batch/postprocessing.py:180: in effective_config
+    config = effective_smoothing_config(draft) if branch == "smoothed" else normalize_config(draft)
+                                                                            ^^^^^^^^^^^^^^^^^^^^^^^
+src/ftir_workbench/batch/normalization_adapter.py:188: in normalize_config
+    return OrdinaryNormalizationConfig(**_effective_values(config))
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+raw = {'enabled': True, 'method': 'minmax_display', 'reference_interval': None, 'area_interval': None, ...}
+
+    def _effective_values(raw: Mapping[str, Any]) -> dict[str, Any]:
+        unknown = raw.keys() - _DEFAULTS.keys()
+        if unknown:
+>           raise BatchError(
+                "NORMALIZATION_CONFIG_INVALID", f"Unknown settings: {sorted(unknown, key=str)}"
+            )
+E           ftir_workbench.batch.models.BatchError: NORMALIZATION_CONFIG_INVALID: Unknown settings: ['reference_range']
+
+src/ftir_workbench/batch/normalization_adapter.py:99: BatchError
+=========================== short test summary info ============================
+FAILED tests/postprocessing/test_export_naming.py::test_confirmed_normalization_method_suffix_preserves_quantity[maximum-norm-max]
+FAILED tests/postprocessing/test_export_naming.py::test_confirmed_normalization_method_suffix_preserves_quantity[internal_peak_height-norm-peak-window]
+FAILED tests/postprocessing/test_export_naming.py::test_confirmed_normalization_method_suffix_preserves_quantity[internal_peak_area-norm-area-window]
+FAILED tests/postprocessing/test_export_naming.py::test_confirmed_normalization_method_suffix_preserves_quantity[area-norm-area]
+FAILED tests/postprocessing/test_export_naming.py::test_confirmed_normalization_method_suffix_preserves_quantity[vector-norm-l2]
+FAILED tests/postprocessing/test_export_naming.py::test_confirmed_normalization_method_suffix_preserves_quantity[minmax_display-minmax_scaled_intensity_display_only]
+6 failed, 32 passed in 2.29s
+
+EXIT_CODE: 1

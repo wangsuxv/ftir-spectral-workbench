@@ -1,0 +1,10 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -
+STARTED_UTC: 2026-10-31T16:44:13.754661+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v032 cache>
+deep_metadata False
+coherently_rehashed_report_wrong_spectrum_id True
+contradictory_two_column_probe_claims_99_columns False
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 0.719

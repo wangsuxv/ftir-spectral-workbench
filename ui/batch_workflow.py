@@ -31,6 +31,11 @@ from ftir_workbench.batch.state import (
 from ftir_workbench.display_units import convert_absorbance_for_display
 
 try:
+    from ui.batch_export_naming import (
+        naming_context,
+        render_naming_preview,
+        render_naming_settings,
+    )
     from ui.batch_postprocessing import postprocessing_save_context, render_postprocessing
     from ui.components.baseline_preview import (
         anchor_diagnostics_table,
@@ -39,6 +44,11 @@ try:
         fine_residual_figure,
     )
 except ModuleNotFoundError:
+    from batch_export_naming import (  # type: ignore[no-redef]
+        naming_context,
+        render_naming_preview,
+        render_naming_settings,
+    )
     from batch_postprocessing import (  # type: ignore[no-redef]
         postprocessing_save_context,
         render_postprocessing,
@@ -311,6 +321,9 @@ def _import_page(ws: BatchWorkspace) -> None:
         )
     if st.button("确认单位并导入", disabled=not uploads, type="primary"):
         try:
+            from ftir_workbench.batch.export_naming import get_naming_options, set_naming_policy
+
+            naming_policy = get_naming_options(ws)["policy"]
             options = TextImportOptions(
                 delimiter=delimiter,
                 decimal_mark=decimal,
@@ -329,6 +342,8 @@ def _import_page(ws: BatchWorkspace) -> None:
                         options=options,
                     )
                 )
+            # New records inherit the shared preference without changing their inputs.
+            set_naming_policy(ws, naming_policy)
             st.success(f"已导入 {len(added)} 条独立光谱。")
         except ValueError as exc:
             st.error(str(exc))
@@ -708,6 +723,7 @@ def _workspace_context(
 
     payload: dict[str, Any] = {
         "workspace": ws.workspace_id,
+        "export_naming": naming_context(ws),
         "order": ws.display_order if spectrum_ids is None else spectrum_ids,
         "import_issues": ws.import_issues,
         "records": {
@@ -784,7 +800,11 @@ def _workspace_restore(ws: BatchWorkspace) -> None:
 
 
 def _export_controls(ws: BatchWorkspace, sid: str | None, stage: str) -> None:
-    from ftir_workbench.batch.export import build_batch_export, can_export_wide
+    from ftir_workbench.batch.export import (
+        build_batch_export,
+        can_export_wide,
+        preview_batch_export,
+    )
 
     title = "粗调" if stage == "coarse" else "最终"
     st.divider()
@@ -809,6 +829,10 @@ def _export_controls(ws: BatchWorkspace, sid: str | None, stage: str) -> None:
     derived = st.multiselect(
         "附加派生透过率副本", UNITS[1:], format_func=UNIT_LABELS.get, key="export_derived_" + stage
     )
+    naming = render_naming_settings(ws, sid, context=stage)
+    preview = preview_batch_export(ws, ids, stage=stage, naming=naming,
+                                   ready_only=ready_only, derived_units=derived)
+    render_naming_preview(ws, preview)
     if any(
         any(draft_changes(ws, item).values())
         or any(k.startswith("error_") for k in ws.states[item].display_preferences)
@@ -816,7 +840,8 @@ def _export_controls(ws: BatchWorkspace, sid: str | None, stage: str) -> None:
     ):
         st.info("存在未提交或无效草稿。此导出只使用各条已确认的正式数组，草稿不会被采用。")
     options = (tuple(ids), ready_only, bool(wide and wide_allowed), tuple(derived))
-    context = (_workspace_context(ws, spectrum_ids=list(ids)), options)
+    context = (_workspace_context(ws, spectrum_ids=list(ids)), options,
+               preview["naming_plan_digest"])
     cache_key = "batch_download_" + stage
     if st.button(f"打包已确认{title}结果", disabled=not ids):
         try:
@@ -827,6 +852,7 @@ def _export_controls(ws: BatchWorkspace, sid: str | None, stage: str) -> None:
                 ready_only=ready_only,
                 include_wide=bool(wide and wide_allowed),
                 derived_units=derived,
+                naming=naming,
             )
             st.session_state[cache_key] = (context, artifact)
             ws.last_export_summary = artifact.metadata
@@ -858,7 +884,8 @@ def _export_controls(ws: BatchWorkspace, sid: str | None, stage: str) -> None:
                 mime="text/csv",
                 key="download_wide_" + stage,
             )
-        st.dataframe(pd.DataFrame(artifact.report), hide_index=True)
+        with st.expander(f"{title}打包报告（含完整身份）"):
+            st.dataframe(pd.DataFrame(artifact.report), hide_index=True)
     elif cached:
         st.caption("上次导出包的条目、正式结果或报告信息已变化，请重新打包。")
 

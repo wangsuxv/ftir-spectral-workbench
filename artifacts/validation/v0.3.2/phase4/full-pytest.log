@@ -1,0 +1,70 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/pytest -q -p no:cacheprovider
+STARTED_UTC: 2026-10-31T16:47:55.624678+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v032 cache>
+........................................................................ [  5%]
+........................................................................ [ 10%]
+........................................................................ [ 15%]
+........................................................................ [ 20%]
+........................................................................ [ 25%]
+........................................................................ [ 31%]
+........................................................................ [ 36%]
+........................................................................ [ 41%]
+........................................................................ [ 46%]
+........................................................................ [ 51%]
+........................................................................ [ 57%]
+........................................................................ [ 62%]
+........................................................................ [ 67%]
+........................................................................ [ 72%]
+...................................................FF................... [ 77%]
+........................................................................ [ 83%]
+........................................................................ [ 88%]
+........................................................................ [ 93%]
+........................................................................ [ 98%]
+.................                                                        [100%]
+=================================== FAILURES ===================================
+____ test_v025_release_audit_passes_without_private_path_or_raw_data_output ____
+
+    def test_v025_release_audit_passes_without_private_path_or_raw_data_output() -> None:
+        summary = run_release_audit(REPOSITORY, expected_version="0.3.1")
+        serialized = json.dumps(summary, ensure_ascii=False, sort_keys=True)
+    
+>       assert summary["status"] == "pass"
+E       AssertionError: assert 'fail' == 'pass'
+E         
+E         - pass
+E         + fail
+
+tests/release/test_v025_release_audit.py:28: AssertionError
+____ test_default_v025_metadata_check_rejects_v031_without_explicit_target _____
+
+    def test_default_v025_metadata_check_rejects_v031_without_explicit_target() -> None:
+        historical = audit_release_metadata(REPOSITORY)
+        assert historical["status"] == "fail"
+        assert historical["expected_version"] == "0.2.5"
+>       assert historical["distribution_version"] == "0.3.1"
+E       AssertionError: assert '0.3.2' == '0.3.1'
+E         
+E         - 0.3.1
+E         ?     ^
+E         + 0.3.2
+E         ?     ^
+
+tests/release/test_v025_release_audit.py:73: AssertionError
+=============================== warnings summary ===============================
+tests/integration/test_unified_cli.py::test_supported_extension_cli_entry_points[tab]
+tests/integration/test_unified_cli.py::test_supported_extension_cli_entry_points[dpt]
+tests/integration/test_unified_cli.py::test_supported_extension_cli_entry_points[asc]
+tests/integration/test_unified_cli.py::test_supported_extension_cli_entry_points[dat]
+tests/integration/test_unified_cli.py::test_supported_extension_cli_entry_points[xy]
+  <repository>/src/ftir_baseline/qc.py:372: UserWarning: Attempting to set identical low and high ylims makes transformation singular; automatically expanding.
+    image = axis.imshow(display_matrix, aspect="auto", origin="lower", extent=extent)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/release/test_v025_release_audit.py::test_v025_release_audit_passes_without_private_path_or_raw_data_output
+FAILED tests/release/test_v025_release_audit.py::test_default_v025_metadata_check_rejects_v031_without_explicit_target
+2 failed, 1383 passed, 5 warnings in 162.94s (0:02:42)
+
+EXIT_CODE: 1
+ELAPSED_SECONDS: 163.458

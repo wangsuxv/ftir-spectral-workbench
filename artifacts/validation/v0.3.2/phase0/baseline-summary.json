@@ -1,0 +1,69 @@
+{
+  "pytest": {
+    "command": [
+      "<repository>/.venv/bin/python",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider"
+    ],
+    "started_utc": "2026-10-31T16:34:16.787184+00:00",
+    "exit_code": 0,
+    "elapsed_seconds": 147.529,
+    "log": "outputs/validation-private/v032/phase0/pytest.log"
+  },
+  "ruff": {
+    "command": [
+      "<repository>/.venv/bin/python",
+      "-m",
+      "ruff",
+      "check",
+      "src",
+      "tests",
+      "ui",
+      "scripts"
+    ],
+    "started_utc": "2026-10-31T16:34:16.787332+00:00",
+    "exit_code": 0,
+    "elapsed_seconds": 0.195,
+    "log": "outputs/validation-private/v032/phase0/ruff.log"
+  },
+  "mypy": {
+    "command": [
+      "<repository>/.venv/bin/python",
+      "-m",
+      "mypy",
+      "src/ftir_workbench",
+      "--no-incremental"
+    ],
+    "started_utc": "2026-10-31T16:34:16.787404+00:00",
+    "exit_code": 0,
+    "elapsed_seconds": 4.006,
+    "log": "outputs/validation-private/v032/phase0/mypy.log"
+  },
+  "pip-check": {
+    "command": [
+      "<repository>/.venv/bin/python",
+      "-m",
+      "pip",
+      "check"
+    ],
+    "started_utc": "2026-10-31T16:34:16.787455+00:00",
+    "exit_code": 0,
+    "elapsed_seconds": 0.249,
+    "log": "outputs/validation-private/v032/phase0/pip-check.log"
+  },
+  "freeze-and-legacy": {
+    "command": [
+      "<repository>/.venv/bin/python",
+      "scripts/audit_v025_release.py",
+      "--expected-version",
+      "0.3.1"
+    ],
+    "started_utc": "2026-10-31T16:34:16.787586+00:00",
+    "exit_code": 0,
+    "elapsed_seconds": 13.523,
+    "log": "outputs/validation-private/v032/phase0/freeze-and-legacy.log"
+  }
+}

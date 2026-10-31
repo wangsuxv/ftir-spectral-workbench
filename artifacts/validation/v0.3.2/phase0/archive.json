@@ -1,0 +1,6 @@
+{
+  "producer_commit": "14a514d7032f5f7c302f4f47d79a72d895251c1d",
+  "archive_sha256": "505c7837c120501cbaf0c7fbeff01393a7b0233f063bc9a22e65fc0a051a22b4",
+  "source_root": "<repository>/outputs/validation-private/v032/phase0/old-source",
+  "old_source_modules": 76
+}

@@ -225,7 +225,9 @@ def test_pp001_legacy_export_spectra_recipes_and_qc_values_remain_exact(
 ) -> None:
     forbid_calculations(monkeypatch)
     ws = load_batch_workspace((legacy_directory / "legacy_workspace_v030.zip").read_bytes())
-    actual = build_batch_export(ws, ws.display_order, stage=stage, ready_only=stage == "fine")
+    actual = build_batch_export(
+        ws, ws.display_order, stage=stage, ready_only=stage == "fine", naming="legacy_id",
+    )
     expected = (legacy_directory / f"legacy_{stage}_export_v030.zip").read_bytes()
     received_members = read_verified_archive(actual.zip_bytes, "independent_baseline_batch")
     expected_members = read_verified_archive(expected, "independent_baseline_batch")

@@ -1,0 +1,7 @@
+# Actual earlier subprocess command output; local repository/home paths redacted.
+COMMAND: ['.venv/bin/python', '-m', 'pytest', 'tests/postprocessing/test_export.py', 'tests/postprocessing/test_export_adversarial.py', '-q', '-p', 'no:cacheprovider']
+........................................................................ [ 93%]
+.....                                                                    [100%]
+77 passed in 14.03s
+
+EXIT_CODE: 0

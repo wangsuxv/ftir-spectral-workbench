@@ -1,0 +1,8 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/ruff check src tests ui scripts
+STARTED_UTC: 2026-10-31T16:52:57.403474+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v032 cache>
+All checks passed!
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 0.058

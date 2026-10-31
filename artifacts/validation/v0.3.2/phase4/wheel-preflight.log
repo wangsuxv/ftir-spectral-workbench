@@ -1,0 +1,17 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m pip wheel . --no-deps --no-build-isolation -w outputs/release-v032/preflight
+STARTED_UTC: 2026-10-31T16:50:11.138219+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v032 cache>
+Processing <repository>
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Building wheels for collected packages: ftir-spectral-workbench
+  Building wheel for ftir-spectral-workbench (pyproject.toml): started
+  Building wheel for ftir-spectral-workbench (pyproject.toml): finished with status 'done'
+  Created wheel for ftir-spectral-workbench: filename=ftir_spectral_workbench-0.3.2-py3-none-any.whl size=320827 sha256=56ff1f7168cd6f9a837cf145f7289001b6c3baa576d0566ff53f39129676bddc
+  Stored in directory: /private/var/folders/wf/zwvjmfkx1gxftz60_jhvj9s00000gn/T/pip-ephem-wheel-cache-lgite1nu/wheels/b2/3b/8b/5f18904b6d05e9aad211094ab95087eb82d99832f2171d4c8b
+Successfully built ftir-spectral-workbench
+WARNING: The directory '<home>/Library/Caches/pip' or its parent directory is not owned or is not writable by the current user. The cache has been disabled. Check the permissions and owner of that directory. If executing pip with sudo, you should use sudo's -H flag.
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 0.355
