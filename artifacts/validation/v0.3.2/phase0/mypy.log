@@ -1,4 +1,4 @@
-# Real command output; repository/home paths redacted. No experiment spectra were read.
+# Real command output; repository/home paths redacted. No experimental spectral arrays are included in this log.
 COMMAND: <repository>/.venv/bin/python -m mypy src/ftir_workbench --no-incremental
 STARTED_UTC: 2026-10-31T16:34:16.787404+00:00
 pyproject.toml: note: unused section(s): module = ['plotly', 'plotly.*', 'pybaselines', 'streamlit', 'streamlit.*']

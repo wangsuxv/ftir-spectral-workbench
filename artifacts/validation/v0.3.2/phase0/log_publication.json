@@ -6,7 +6,7 @@
       "source": "outputs/validation-private/v032/phase0/pytest.log",
       "published": "artifacts/validation/v0.3.2/phase0/pytest.log",
       "source_sha256": "a5d7389995a2d7fca7ea2ec89a3f0b69ecefa710395b589f8e49d3708b9b617d",
-      "published_sha256": "77628b8e1502705325ed5368d83a575910a0e271807155e967e7ba3a060f0185",
+      "published_sha256": "e833cfc3d772c9df01cd7464c87cb08cabacaa83e5628e9d6183bda0bfc72928",
       "redactions": [
         "repository absolute path",
         "home absolute path"
@@ -16,7 +16,7 @@
       "source": "outputs/validation-private/v032/phase0/ruff.log",
       "published": "artifacts/validation/v0.3.2/phase0/ruff.log",
       "source_sha256": "48a7fbec078ae39ca1eca44df8e8d59e4af23754d23ca1e5c829150b1999f48b",
-      "published_sha256": "df69c10b934d57685d036ff718acf3272a9bcab55515ed1c70d21558051af984",
+      "published_sha256": "c1615272eda7f9569677073892399d4eb7d42d5c4878962abea5334d5786f29f",
       "redactions": [
         "repository absolute path",
         "home absolute path"
@@ -26,7 +26,7 @@
       "source": "outputs/validation-private/v032/phase0/mypy.log",
       "published": "artifacts/validation/v0.3.2/phase0/mypy.log",
       "source_sha256": "666f3ea5abc326a8be4c7fb08a3b50de8cd72d6503ab805584c4a07c5aaccb2a",
-      "published_sha256": "4372cbe1e1024f6d4de13f346acbb95274f26d577b410c6b4038769647423fbc",
+      "published_sha256": "32886685bbee4aea066b1ad742d6e0d2bdeec151df318c7fab7edee5669c0e72",
       "redactions": [
         "repository absolute path",
         "home absolute path"
@@ -36,7 +36,7 @@
       "source": "outputs/validation-private/v032/phase0/pip-check.log",
       "published": "artifacts/validation/v0.3.2/phase0/pip-check.log",
       "source_sha256": "6b74d4f64b419017f58c20a8415960926168fb3cc93018b9982fe08e03fb4561",
-      "published_sha256": "769a03975db5d7557792895bdf8229e9878515419e914a6b015e1ab66659398a",
+      "published_sha256": "5e6ce4ada02a370dab1fb3306ee7fbb5aaa2893bb7bd9afdff9045647ae36475",
       "redactions": [
         "repository absolute path",
         "home absolute path"
@@ -46,7 +46,7 @@
       "source": "outputs/validation-private/v032/phase0/freeze-and-legacy.log",
       "published": "artifacts/validation/v0.3.2/phase0/freeze-and-legacy.log",
       "source_sha256": "2385c6c5544801056a49ef2b120f891bd240c57b872080998ef7d0d96f96c3b6",
-      "published_sha256": "4b242b1fdebcd18f8616b2d86d855a35ef1c3d82baaeaa903a7b420d2d070f0e",
+      "published_sha256": "0f40bde044180e05a9d9cffe149ee686d40e39c5fe485f6cf8a7c1b307f1f7dc",
       "redactions": [
         "repository absolute path",
         "home absolute path"
@@ -86,7 +86,7 @@
       "source": "outputs/validation-private/v032/phase0/old-fixtures-first.log",
       "published": "artifacts/validation/v0.3.2/phase0/old-fixtures-first.log",
       "source_sha256": "5a8a21799e1b0e21840ab1dde840d5458f4cc63ffc2e2d721533c0845dff214f",
-      "published_sha256": "4941e38443cd666f428a91a10b5bdff14f1f7598d3ae4c99bcd8bb0bbb2294b6",
+      "published_sha256": "d74c6cfefe4743f08351c926a1c0f181bb4d437b6bd854625f5386744dbec484",
       "redactions": [
         "repository absolute path",
         "home absolute path"
@@ -96,11 +96,12 @@
       "source": "outputs/validation-private/v032/phase0/old-fixtures-repeat.log",
       "published": "artifacts/validation/v0.3.2/phase0/old-fixtures-repeat.log",
       "source_sha256": "822eb73e79f6e74d916b3ad3a7c948a6fa48b967f6d0c1432d7cf2e62ea6d311",
-      "published_sha256": "0b1e4231cfc89a1b13110d77d0b5e1aecc485981868804d12c4bb06ae4212693",
+      "published_sha256": "8f8556122c0e992ca116cd7d0d473286e980ccc237649cbc3a99e39ce9a36ce2",
       "redactions": [
         "repository absolute path",
         "home absolute path"
       ]
     }
-  ]
+  ],
+  "public_header_clarification": "Public log headers describe nonpublication of experimental spectral arrays. Full local legacy tests may read available private local data; raw command output and source hashes are unchanged."
 }
