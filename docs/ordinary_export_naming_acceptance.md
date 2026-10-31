@@ -35,7 +35,7 @@
 
 新可读包 metadata/index 为 1.1，命名策略版本 1.0；外层 manifest 和后处理节点仍为 1.0。legacy 包为旧 1.0，不增加 `export_name_map.csv` 或新命名字段。未知版本、不一致映射和未引用成员拒绝。旧基线 verifier 保留原有归档完整性能力，不声称具备后处理包同等级的语义重放。
 
-夹具、下载包、原始日志保存在 ignored `outputs/validation-private/v032/`。仓库只记录生成代码、合成测试和脱敏验收日志，没有读取或提交实验原始数据及私有派生谱。
+新增命名夹具和真实浏览器验收均使用合成输入；夹具、下载包、原始日志保存在 ignored `outputs/validation-private/v032/`。完整本地旧回归按既有设计运行了两项私有目录测试，会读取可用的本地实验文件；它们不是本次新增的合成测试。仓库只记录生成代码、合成测试和脱敏验收日志，没有提交或上传实验原始数据及私有派生谱。
 
 ## N01–N22 验收映射
 
@@ -100,6 +100,8 @@
 | 安装包审计 | `outputs/release-v032/install-env/bin/python scripts/audit_v032_distribution.py --wheel outputs/release-v032/preflight/ftir_spectral_workbench-0.3.2-py3-none-any.whl --sdist outputs/release-v032/preflight/ftir_spectral_workbench-0.3.2.tar.gz --output artifacts/validation/v0.3.2/phase4/installed_distribution_scope_audit.json` | 通过；[日志](../artifacts/validation/v0.3.2/phase4/installed-distribution-scope.log)、[逐项 JSON](../artifacts/validation/v0.3.2/phase4/installed_distribution_scope_audit.json) |
 
 最终 5 条警告来自旧单谱扩展名 CLI 测试中 `ftir_baseline/qc.py` 的相同 y 轴上下限绘图提示，与起点相同；没有用修改冻结科学文件来消除警告。
+
+功能 [PR #4](https://github.com/wangsuxv/ftir-spectral-workbench/pull/4) 的 [实际 CI](https://github.com/wangsuxv/ftir-spectral-workbench/actions/runs/41223266740) 在 Python 3.11、3.12、3.13 下均为 **1390 passed、2 skipped、5 warnings**，三环境 Ruff、Mypy 和 wheel 构建全部通过。两项 skip 为既有 `test_private_local_directory_loads_when_available` 和 `test_private_local_data_runs_through_all_streamlit_pages`：GitHub 未提供私有本地数据，按原测试规则跳过。没有删改或关闭这些测试；本地 1392 与 CI 1390+2 的范围应分别理解。Phase 0 公开日志首行只是发布说明，现已澄清为“不包含实验光谱数组”；实际命令输出及原始日志摘要保持不变。
 
 安装包审计核对 77 个项目运行模块的 wheel、源码和独立安装字节，34 个冻结文件、MIT 文件、三个 CLI `--help` 和中立目录 `python -I` 导入位置。三种命名策略 × coarse/fine/post-all 共 **9 种组合**验证真实包、预览、正式数组、MinMax 和工作区偏好恢复，封锁 14 个科学入口且记录 **0 调用**。64 项依赖与 Phase 0/锁文件一致。
 

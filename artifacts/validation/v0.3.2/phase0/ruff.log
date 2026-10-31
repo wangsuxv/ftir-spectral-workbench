@@ -1,4 +1,4 @@
-# Real command output; repository/home paths redacted. No experiment spectra were read.
+# Real command output; repository/home paths redacted. No experimental spectral arrays are included in this log.
 COMMAND: <repository>/.venv/bin/python -m ruff check src tests ui scripts
 STARTED_UTC: 2026-10-31T16:34:16.787332+00:00
 All checks passed!

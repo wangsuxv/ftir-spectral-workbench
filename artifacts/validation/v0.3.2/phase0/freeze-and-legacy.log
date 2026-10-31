@@ -1,4 +1,4 @@
-# Real command output; repository/home paths redacted. No experiment spectra were read.
+# Real command output; repository/home paths redacted. No experimental spectral arrays are included in this log.
 COMMAND: <repository>/.venv/bin/python scripts/audit_v025_release.py --expected-version 0.3.1
 STARTED_UTC: 2026-10-31T16:34:16.787586+00:00
 {

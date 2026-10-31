@@ -1,4 +1,4 @@
-# Real command output; repository/home paths redacted. No experiment spectra were read.
+# Real command output; repository/home paths redacted. No experimental spectral arrays are included in this log.
 COMMAND: <repository>/.venv/bin/python -m pip check
 STARTED_UTC: 2026-10-31T16:34:16.787455+00:00
 WARNING: The directory '<home>/Library/Caches/pip' or its parent directory is not owned or is not writable by the current user. The cache has been disabled. Check the permissions and owner of that directory. If executing pip with sudo, you should use sudo's -H flag.
