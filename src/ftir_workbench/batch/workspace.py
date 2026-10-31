@@ -23,6 +23,7 @@ from ftir_baseline.pipeline import PipelineResult
 from ftir_baseline.qc import QCResult
 from ftir_baseline.units import UnitConversionRecord, convert_to_absorbance
 
+from .export_naming import validate_workspace_naming
 from .fingerprints import implementation_fingerprint, stage_fingerprint
 from .importing import import_sources
 from .models import (
@@ -270,6 +271,12 @@ def _validate_business_structure(value: Any) -> dict[str, Any]:
         _string(state["fine_parent_coarse_fingerprint"], f"states.{key}.fine_parent_coarse_fingerprint", optional=True)
         preferences = _object(state["display_preferences"], f"states.{key}.display_preferences")
         _editor_structure(preferences, state, f"states.{key}.display_preferences")
+    try:
+        validate_workspace_naming([
+            state["display_preferences"] for state in data["states"].values()
+        ])
+    except BatchError as exc:
+        raise _failure(f"invalid export naming preferences: {exc}") from exc
     schema = data["schema_version"]
     if schema == "1.0":
         if "postprocessing" in data or "selected_spectrum_ids" in data:
@@ -466,6 +473,15 @@ def _editor_value(value: Any) -> Any:
 
 def save_batch_workspace(workspace: BatchWorkspace) -> bytes:
     """Save drafts and confirmed results independently; previews are deliberately omitted."""
+    # Editor placeholders may normalize NaN to null below; naming overrides
+    # are strict text and must not silently pass through that editor repair.
+    try:
+        validate_workspace_naming([
+            _object(state.display_preferences, "display_preferences")
+            for state in workspace.states.values()
+        ])
+    except BatchError as exc:
+        raise _failure(f"invalid export naming preferences: {exc}") from exc
     members: dict[str, bytes] = {}
     arrays = _Arrays(members)
     sources = {}

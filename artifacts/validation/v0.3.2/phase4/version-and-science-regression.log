@@ -1,0 +1,9 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/pytest -q -p no:cacheprovider tests/release/test_v025_release_audit.py tests/batch/test_naming_science_freeze.py
+STARTED_UTC: 2026-10-31T16:51:11.776774+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v032 cache>
+.........                                                                [100%]
+9 passed in 4.25s
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 4.540

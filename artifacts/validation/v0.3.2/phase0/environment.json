@@ -1,0 +1,449 @@
+{
+  "observed_utc": "2026-10-31T16:33:56.445488+00:00",
+  "head": "14a514d7032f5f7c302f4f47d79a72d895251c1d",
+  "branch": "feat/readable-spectrum-export-names",
+  "worktree_status": "",
+  "python": "3.12.14 (main, Aug 25 2026, 13:50:33) [Clang 22.1.3 ]",
+  "executable": "<repository>/.venv/bin/python",
+  "prefix": "<repository>/.venv",
+  "base_prefix": "<home>/.cache/codex-runtimes/codex-primary-runtime/dependencies/python",
+  "platform": "macOS-27.0.1-arm64-arm-64bit",
+  "applicable_agents_files": [],
+  "modules": {
+    "numpy": {
+      "installed_version": "2.5.2",
+      "import_ok": true,
+      "origin": "<repository>/.venv/lib/python3.12/site-packages/numpy/__init__.py"
+    },
+    "scipy": {
+      "installed_version": "1.18.1",
+      "import_ok": true,
+      "origin": "<repository>/.venv/lib/python3.12/site-packages/scipy/__init__.py"
+    },
+    "pandas": {
+      "installed_version": "3.0.5",
+      "import_ok": true,
+      "origin": "<repository>/.venv/lib/python3.12/site-packages/pandas/__init__.py"
+    },
+    "pybaselines": {
+      "installed_version": "1.2.1",
+      "import_ok": true,
+      "origin": "<repository>/.venv/lib/python3.12/site-packages/pybaselines/__init__.py"
+    },
+    "pydantic": {
+      "installed_version": "2.13.4",
+      "import_ok": true,
+      "origin": "<repository>/.venv/lib/python3.12/site-packages/pydantic/__init__.py"
+    },
+    "matplotlib": {
+      "installed_version": "3.11.1",
+      "import_ok": true,
+      "origin": "<repository>/.venv/lib/python3.12/site-packages/matplotlib/__init__.py"
+    },
+    "streamlit": {
+      "installed_version": "1.62.0",
+      "import_ok": true,
+      "origin": "<repository>/.venv/lib/python3.12/site-packages/streamlit/__init__.py"
+    },
+    "pytest": {
+      "installed_version": "9.1.1",
+      "import_ok": true,
+      "origin": "<repository>/.venv/lib/python3.12/site-packages/pytest/__init__.py"
+    },
+    "ruff": {
+      "installed_version": "0.16.4"
+    },
+    "mypy": {
+      "installed_version": "2.3.1"
+    },
+    "ftir-spectral-workbench": {
+      "installed_version": "0.3.1"
+    }
+  },
+  "lock_comparison": [
+    {
+      "name": "altair",
+      "locked": "==6.2.2",
+      "actual": "6.2.2",
+      "matches": true
+    },
+    {
+      "name": "annotated-types",
+      "locked": "==0.8.0",
+      "actual": "0.8.0",
+      "matches": true
+    },
+    {
+      "name": "anyio",
+      "locked": "==4.14.2",
+      "actual": "4.14.2",
+      "matches": true
+    },
+    {
+      "name": "ast_serialize",
+      "locked": "==0.8.0",
+      "actual": "0.8.0",
+      "matches": true
+    },
+    {
+      "name": "attrs",
+      "locked": "==26.1.0",
+      "actual": "26.1.0",
+      "matches": true
+    },
+    {
+      "name": "blinker",
+      "locked": "==1.9.0",
+      "actual": "1.9.0",
+      "matches": true
+    },
+    {
+      "name": "certifi",
+      "locked": "==2026.7.22",
+      "actual": "2026.7.22",
+      "matches": true
+    },
+    {
+      "name": "charset-normalizer",
+      "locked": "==3.5.1",
+      "actual": "3.5.1",
+      "matches": true
+    },
+    {
+      "name": "click",
+      "locked": "==8.4.2",
+      "actual": "8.4.2",
+      "matches": true
+    },
+    {
+      "name": "contourpy",
+      "locked": "==1.3.3",
+      "actual": "1.3.3",
+      "matches": true
+    },
+    {
+      "name": "coverage",
+      "locked": "==7.15.4",
+      "actual": "7.15.4",
+      "matches": true
+    },
+    {
+      "name": "cycler",
+      "locked": "==0.12.1",
+      "actual": "0.12.1",
+      "matches": true
+    },
+    {
+      "name": "fonttools",
+      "locked": "==4.63.0",
+      "actual": "4.63.0",
+      "matches": true
+    },
+    {
+      "name": "h11",
+      "locked": "==0.16.0",
+      "actual": "0.16.0",
+      "matches": true
+    },
+    {
+      "name": "httptools",
+      "locked": "==0.8.0",
+      "actual": "0.8.0",
+      "matches": true
+    },
+    {
+      "name": "hypothesis",
+      "locked": "==6.165.10",
+      "actual": "6.165.10",
+      "matches": true
+    },
+    {
+      "name": "idna",
+      "locked": "==3.19",
+      "actual": "3.19",
+      "matches": true
+    },
+    {
+      "name": "iniconfig",
+      "locked": "==2.3.0",
+      "actual": "2.3.0",
+      "matches": true
+    },
+    {
+      "name": "itsdangerous",
+      "locked": "==2.2.0",
+      "actual": "2.2.0",
+      "matches": true
+    },
+    {
+      "name": "Jinja2",
+      "locked": "==3.1.6",
+      "actual": "3.1.6",
+      "matches": true
+    },
+    {
+      "name": "jsonschema",
+      "locked": "==4.26.0",
+      "actual": "4.26.0",
+      "matches": true
+    },
+    {
+      "name": "jsonschema-specifications",
+      "locked": "==2025.9.1",
+      "actual": "2025.9.1",
+      "matches": true
+    },
+    {
+      "name": "kiwisolver",
+      "locked": "==1.5.0",
+      "actual": "1.5.0",
+      "matches": true
+    },
+    {
+      "name": "librt",
+      "locked": "==0.15.0",
+      "actual": "0.15.0",
+      "matches": true
+    },
+    {
+      "name": "MarkupSafe",
+      "locked": "==3.0.3",
+      "actual": "3.0.3",
+      "matches": true
+    },
+    {
+      "name": "matplotlib",
+      "locked": "==3.11.1",
+      "actual": "3.11.1",
+      "matches": true
+    },
+    {
+      "name": "mypy",
+      "locked": "==2.3.1",
+      "actual": "2.3.1",
+      "matches": true
+    },
+    {
+      "name": "mypy_extensions",
+      "locked": "==1.1.0",
+      "actual": "1.1.0",
+      "matches": true
+    },
+    {
+      "name": "narwhals",
+      "locked": "==2.25.0",
+      "actual": "2.25.0",
+      "matches": true
+    },
+    {
+      "name": "numpy",
+      "locked": "==2.5.2",
+      "actual": "2.5.2",
+      "matches": true
+    },
+    {
+      "name": "packaging",
+      "locked": "==26.3",
+      "actual": "26.3",
+      "matches": true
+    },
+    {
+      "name": "pandas",
+      "locked": "==3.0.5",
+      "actual": "3.0.5",
+      "matches": true
+    },
+    {
+      "name": "pandas-stubs",
+      "locked": "==3.0.5.260730",
+      "actual": "3.0.5.260730",
+      "matches": true
+    },
+    {
+      "name": "pathspec",
+      "locked": "==1.1.1",
+      "actual": "1.1.1",
+      "matches": true
+    },
+    {
+      "name": "pillow",
+      "locked": "==12.3.0",
+      "actual": "12.3.0",
+      "matches": true
+    },
+    {
+      "name": "plotly",
+      "locked": "==6.9.0",
+      "actual": "6.9.0",
+      "matches": true
+    },
+    {
+      "name": "pluggy",
+      "locked": "==1.6.0",
+      "actual": "1.6.0",
+      "matches": true
+    },
+    {
+      "name": "protobuf",
+      "locked": "==7.36.0",
+      "actual": "7.36.0",
+      "matches": true
+    },
+    {
+      "name": "pyarrow",
+      "locked": "==25.0.1",
+      "actual": "25.0.1",
+      "matches": true
+    },
+    {
+      "name": "pybaselines",
+      "locked": "==1.2.1",
+      "actual": "1.2.1",
+      "matches": true
+    },
+    {
+      "name": "pydantic",
+      "locked": "==2.13.4",
+      "actual": "2.13.4",
+      "matches": true
+    },
+    {
+      "name": "pydantic_core",
+      "locked": "==2.46.4",
+      "actual": "2.46.4",
+      "matches": true
+    },
+    {
+      "name": "pydeck",
+      "locked": "==0.9.3",
+      "actual": "0.9.3",
+      "matches": true
+    },
+    {
+      "name": "Pygments",
+      "locked": "==2.21.0",
+      "actual": "2.21.0",
+      "matches": true
+    },
+    {
+      "name": "pyparsing",
+      "locked": "==3.3.2",
+      "actual": "3.3.2",
+      "matches": true
+    },
+    {
+      "name": "pytest",
+      "locked": "==9.1.1",
+      "actual": "9.1.1",
+      "matches": true
+    },
+    {
+      "name": "pytest-cov",
+      "locked": "==7.1.0",
+      "actual": "7.1.0",
+      "matches": true
+    },
+    {
+      "name": "python-dateutil",
+      "locked": "==2.9.0.post0",
+      "actual": "2.9.0.post0",
+      "matches": true
+    },
+    {
+      "name": "python-multipart",
+      "locked": "==0.0.32",
+      "actual": "0.0.32",
+      "matches": true
+    },
+    {
+      "name": "referencing",
+      "locked": "==0.37.0",
+      "actual": "0.37.0",
+      "matches": true
+    },
+    {
+      "name": "requests",
+      "locked": "==2.34.2",
+      "actual": "2.34.2",
+      "matches": true
+    },
+    {
+      "name": "rpds-py",
+      "locked": "==2026.6.3",
+      "actual": "2026.6.3",
+      "matches": true
+    },
+    {
+      "name": "ruff",
+      "locked": "==0.16.4",
+      "actual": "0.16.4",
+      "matches": true
+    },
+    {
+      "name": "scipy",
+      "locked": "==1.18.1",
+      "actual": "1.18.1",
+      "matches": true
+    },
+    {
+      "name": "six",
+      "locked": "==1.17.0",
+      "actual": "1.17.0",
+      "matches": true
+    },
+    {
+      "name": "sortedcontainers",
+      "locked": "==2.4.0",
+      "actual": "2.4.0",
+      "matches": true
+    },
+    {
+      "name": "starlette",
+      "locked": "==1.6.0",
+      "actual": "1.6.0",
+      "matches": true
+    },
+    {
+      "name": "streamlit",
+      "locked": "==1.62.0",
+      "actual": "1.62.0",
+      "matches": true
+    },
+    {
+      "name": "toml",
+      "locked": "==0.10.2",
+      "actual": "0.10.2",
+      "matches": true
+    },
+    {
+      "name": "typing_extensions",
+      "locked": "==4.16.0",
+      "actual": "4.16.0",
+      "matches": true
+    },
+    {
+      "name": "typing-inspection",
+      "locked": "==0.4.4",
+      "actual": "0.4.4",
+      "matches": true
+    },
+    {
+      "name": "urllib3",
+      "locked": "==2.7.0",
+      "actual": "2.7.0",
+      "matches": true
+    },
+    {
+      "name": "uvicorn",
+      "locked": "==0.52.4",
+      "actual": "0.52.4",
+      "matches": true
+    },
+    {
+      "name": "websockets",
+      "locked": "==16.1.1",
+      "actual": "16.1.1",
+      "matches": true
+    }
+  ]
+}

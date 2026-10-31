@@ -1,0 +1,9 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -c 'from tests.batch.test_ui import batch_app, coarse_confirm, element, page, workspace; from tests.batch.test_export_naming_ui import upload_one; from ftir_workbench.batch.export_naming import get_naming_options; app=batch_app(); upload_one(app); coarse_confirm(app,"none"); page(app,5); controls=[item for item in app.selectbox if item.label=="导出文件命名方式"]; assert len(controls)==2; controls[1].set_value("display").run(); assert not app.exception; assert [item.value for item in app.selectbox if item.label=="导出文件命名方式"]==["display","display"]; checks=[item for item in app.checkbox if item.label=="覆盖当前光谱的导出基础名"]; checks[1].set_value(True).run(); fields=[item for item in app.text_input if item.label=="当前光谱导出基础名"]; fields[1].set_value("双入口一致").run(); assert not app.exception; assert [item.value for item in app.text_input if item.label=="当前光谱导出基础名"]==["双入口一致","双入口一致"]; assert get_naming_options(workspace(app))["policy"]=="display"; print("PASS: both same-page naming controls synchronize from business preferences")'
+STARTED_UTC: 2026-10-31T16:46:27.986208+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v032 cache>
+PASS: both same-page naming controls synchronize from business preferences
+2026-11-01 00:46:29.200 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 2.417

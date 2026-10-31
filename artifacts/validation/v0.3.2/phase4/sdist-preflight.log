@@ -1,0 +1,8 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m hatchling build -t sdist -d outputs/release-v032/preflight
+STARTED_UTC: 2026-10-31T16:50:23.950800+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v032 cache>
+outputs/release-v032/preflight/ftir_spectral_workbench-0.3.2.tar.gz
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 0.458

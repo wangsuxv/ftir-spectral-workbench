@@ -1,0 +1,11 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -c 'from pathlib import Path; from ftir_workbench.batch.workspace import read_verified_archive, _read_json; from ftir_workbench.batch.postprocessing_export import ARTIFACT_TYPE, verify_postprocessing_export; p=Path("outputs/validation-private/v032/browser");
+for name in ("post_original.zip", "post_override.zip"):
+ b=(p/name).read_bytes(); m=read_verified_archive(b, ARTIFACT_TYPE); j=_read_json(m["batch_metadata.json"]); assert verify_postprocessing_export(b,recompute=False); print(name, [(r["branch"],r["included_as"],r["spectra_csv"]) for r in j["name_map"]])'
+STARTED_UTC: 2026-10-31T17:02:32.065822+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v032 cache>
+post_original.zip [('baseline', 'parent', 'spectra/G2_90RH__baseline.csv'), ('smoothed', 'parent', 'spectra/G2_90RH__baseline__smooth-savgol.csv'), ('normalized_smoothed', 'requested', 'spectra/G2_90RH__baseline__smooth-savgol__norm-max.csv')]
+post_override.zip [('baseline', 'parent', 'spectra/样品 G2 90%RH__baseline.csv'), ('smoothed', 'parent', 'spectra/样品 G2 90%RH__baseline__smooth-savgol.csv'), ('normalized_smoothed', 'requested', 'spectra/样品 G2 90%RH__baseline__smooth-savgol__norm-max.csv')]
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 0.758

@@ -1,0 +1,33 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m pip install -e . --no-deps
+STARTED_UTC: 2026-10-31T16:44:59.771763+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v032 cache>
+Obtaining file://<repository>
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Checking if build backend supports build_editable: started
+  Checking if build backend supports build_editable: finished with status 'done'
+  Getting requirements to build editable: started
+  Getting requirements to build editable: finished with status 'done'
+  Installing backend dependencies: started
+  Installing backend dependencies: finished with status 'done'
+  Preparing editable metadata (pyproject.toml): started
+  Preparing editable metadata (pyproject.toml): finished with status 'done'
+Building wheels for collected packages: ftir-spectral-workbench
+  Building editable for ftir-spectral-workbench (pyproject.toml): started
+  Building editable for ftir-spectral-workbench (pyproject.toml): finished with status 'done'
+  Created wheel for ftir-spectral-workbench: filename=ftir_spectral_workbench-0.3.2-py3-none-any.whl size=12172 sha256=37e4776bad250c8eb059f6c8216dd6d1dcfb6ecf40da9843e2ad6cf35cc08092
+  Stored in directory: /private/var/folders/wf/zwvjmfkx1gxftz60_jhvj9s00000gn/T/pip-ephem-wheel-cache-1bzsjxoz/wheels/b2/3b/8b/5f18904b6d05e9aad211094ab95087eb82d99832f2171d4c8b
+Successfully built ftir-spectral-workbench
+Installing collected packages: ftir-spectral-workbench
+  Attempting uninstall: ftir-spectral-workbench
+    Found existing installation: ftir-spectral-workbench 0.3.1
+    Uninstalling ftir-spectral-workbench-0.3.1:
+      Successfully uninstalled ftir-spectral-workbench-0.3.1
+Successfully installed ftir-spectral-workbench-0.3.2
+
+[notice] A new release of pip is available: 25.0.1 -> 26.2.2
+[notice] To update, run: <repository>/.venv/bin/python -m pip install --upgrade pip
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 9.859

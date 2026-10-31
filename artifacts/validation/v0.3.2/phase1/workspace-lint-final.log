@@ -1,0 +1,8 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m ruff check scripts/generate_v031_naming_fixtures.py tests/batch/test_export_naming_workspace.py tests/batch/test_export_naming_compatibility.py src/ftir_workbench/batch/workspace.py
+STARTED_UTC: 2026-10-31T16:41:44.948718+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v032 cache>
+All checks passed!
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 0.053

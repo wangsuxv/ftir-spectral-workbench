@@ -1,0 +1,8 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m ruff check ui/batch_export_naming.py ui/batch_workflow.py ui/batch_postprocessing.py tests/batch/test_export_naming_ui.py tests/postprocessing/test_export_naming_ui.py
+STARTED_UTC: 2026-10-31T16:42:03.884327+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v032 cache>
+All checks passed!
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 0.025

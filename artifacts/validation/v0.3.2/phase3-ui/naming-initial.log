@@ -1,0 +1,112 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m pytest tests/batch/test_export_naming_ui.py tests/postprocessing/test_export_naming_ui.py -q
+STARTED_UTC: 2026-10-31T16:40:21.096449+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v032 cache>
+F.F...                                                                   [100%]
+=================================== FAILURES ===================================
+_________ test_shared_policy_override_download_and_workspace_roundtrip _________
+
+downloaded_files = {'/mock/media/e30e8b8c56a462f465ec9148c97ccf4a.zip': DownloadedFile(filename='independent_baseline_coarse_3bb0e49e2c67...oarse.csvPK\x05\x06\x00\x00\x00\x00\x08\x00\x08\x00Z\x02\x00\x00\x9d\x1f\x00\x00\x00\x00', mimetype='application/zip')}
+pipeline_calls = ['ad3a2ab32452427a855aeb6d309c7a26']
+
+    def test_shared_policy_override_download_and_workspace_roundtrip(
+        downloaded_files: dict[str, DownloadedFile], pipeline_calls: list[str],
+    ) -> None:
+        app = batch_app()
+        upload_one(app)
+        coarse_confirm(app, "none")
+        ws = workspace(app)
+        sid = ws.selected_spectrum_id
+        record = ws.records[sid]
+        source = ws.sources[record.source_id]
+        snapshot = ws.states[sid].coarse_snapshot
+        assert naming_preview(app)["最终 CSV 路径"].tolist() == ["spectra/G2_90RH__baseline-coarse.csv"]
+        calls = list(pipeline_calls)
+        element(app.text_input, "展示名称").set_value("展示 α").run()
+        element(app.selectbox, "导出文件命名方式").set_value("display").run()
+        assert naming_preview(app)["最终 CSV 路径"].tolist() == ["spectra/展示 α__baseline-coarse.csv"]
+        element(app.checkbox, "覆盖当前光谱的导出基础名").set_value(True).run()
+        element(app.text_input, "当前光谱导出基础名").set_value("样品 G2 90%RH").run()
+        element(app.button, "打包已确认粗调结果").click().run()
+        assert_ok(app)
+        coarse = click_download(app, "下载已确认粗调 ZIP", downloaded_files)
+        assert spectra_members(coarse.content) == set(naming_preview(app)["最终 CSV 路径"])
+        with zipfile.ZipFile(io.BytesIO(coarse.content)) as archive:
+            assert "export_name_map.csv" in archive.namelist()
+        page(app, 4)
+        element(app.button, "确认不做细调").click().run()
+        assert_ok(app)
+        assert element(app.selectbox, "导出文件命名方式").value == "display"
+        assert element(app.text_input, "当前光谱导出基础名").value == "样品 G2 90%RH"
+>       assert naming_preview(app)["最终 CSV 路径"].tolist() == ["spectra/样品 G2 90%RH__baseline.csv"]
+E       AssertionError: assert ['spectra/样品 ...ine.csv', '—'] == ['spectra/样品 ...baseline.csv']
+E         
+E         Left contains one more item: '—'
+E         Use -v to get more diff
+
+tests/batch/test_export_naming_ui.py:77: AssertionError
+----------------------------- Captured stderr call -----------------------------
+2026-11-01 00:40:33.303 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+------------------------------ Captured log call -------------------------------
+WARNING  streamlit.runtime.scriptrunner_utils.script_run_context:script_run_context.py:476 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+______ test_legacy_selection_retains_override_and_actual_legacy_structure ______
+
+downloaded_files = {'/mock/media/9c5c81450f5ed61d711af47fc338376e.zip': DownloadedFile(filename='independent_baseline_coarse_8fe89a32e462...bance.csvPK\x05\x06\x00\x00\x00\x00\x07\x00\x07\x00W\x02\x00\x00\x18\x1b\x00\x00\x00\x00', mimetype='application/zip')}
+pipeline_calls = ['7d22707916064c599a26675690c6b93f']
+
+    def test_legacy_selection_retains_override_and_actual_legacy_structure(
+        downloaded_files: dict[str, DownloadedFile], pipeline_calls: list[str],
+    ) -> None:
+        app = batch_app()
+        upload_one(app)
+        coarse_confirm(app, "none")
+        ws = workspace(app)
+        sid = ws.selected_spectrum_id
+        calls = list(pipeline_calls)
+        element(app.checkbox, "覆盖当前光谱的导出基础名").set_value(True).run()
+        element(app.text_input, "当前光谱导出基础名").set_value("custom").run()
+        element(app.selectbox, "导出文件命名方式").set_value("legacy_id").run()
+        assert element(app.text_input, "当前光谱导出基础名").disabled
+        assert element(app.checkbox, "覆盖当前光谱的导出基础名").disabled
+        paths = set(naming_preview(app)["最终 CSV 路径"])
+        assert all(sid in name for name in paths)
+        element(app.button, "打包已确认粗调结果").click().run()
+        actual = click_download(app, "下载已确认粗调 ZIP", downloaded_files)
+        assert spectra_members(actual.content) == paths
+        with zipfile.ZipFile(io.BytesIO(actual.content)) as archive:
+            assert "export_name_map.csv" not in archive.namelist()
+>           assert json.loads(archive.read("metadata.json"))["schema_version"] == "1.0"
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/batch/test_export_naming_ui.py:166: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/zipfile/__init__.py:1585: in read
+    with self.open(name, "r", pwd) as fp:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../../.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/zipfile/__init__.py:1622: in open
+    zinfo = self.getinfo(name)
+            ^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <zipfile.ZipFile [closed]>, name = 'metadata.json'
+
+    def getinfo(self, name):
+        """Return the instance of ZipInfo given 'name'."""
+        info = self.NameToInfo.get(name)
+        if info is None:
+>           raise KeyError(
+                'There is no item named %r in the archive' % name)
+E           KeyError: "There is no item named 'metadata.json' in the archive"
+
+../../../../.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/zipfile/__init__.py:1550: KeyError
+----------------------------- Captured stderr call -----------------------------
+2026-11-01 00:40:36.243 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+------------------------------ Captured log call -------------------------------
+WARNING  streamlit.runtime.scriptrunner_utils.script_run_context:script_run_context.py:476 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+=========================== short test summary info ============================
+FAILED tests/batch/test_export_naming_ui.py::test_shared_policy_override_download_and_workspace_roundtrip
+FAILED tests/batch/test_export_naming_ui.py::test_legacy_selection_retains_override_and_actual_legacy_structure
+2 failed, 4 passed in 21.04s
+
+EXIT_CODE: 1
+ELAPSED_SECONDS: 21.445

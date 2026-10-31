@@ -1,0 +1,26 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python outputs/validation-private/v032/browser/audit_downloads.py
+STARTED_UTC: 2026-10-31T17:07:57.865681+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v032 cache>
+{
+  "status": "pass",
+  "version": "0.3.2",
+  "artifacts": 8,
+  "checks": {
+    "stable_ids": true,
+    "original_sources_and_inputs": true,
+    "drafts": true,
+    "confirmed_arrays_and_fingerprints": true,
+    "parent_relationships": true,
+    "naming_preference_and_normalization_source": true,
+    "restore_omits_previews": true,
+    "all_exported_arrays_equal_workspace": true,
+    "preview_paths_equal_zip": true,
+    "baseline_pipeline_forbidden_during_audit": true,
+    "wide_headers_and_arrays": true
+  },
+  "summary": "artifacts/validation/v0.3.2/phase4/browser-summary.json"
+}
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 0.897

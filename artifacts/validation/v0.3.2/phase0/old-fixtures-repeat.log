@@ -1,0 +1,23 @@
+# Real command output; repository/home paths redacted. No experiment spectra were read.
+COMMAND: <repository>/.venv/bin/python scripts/generate_v031_naming_fixtures.py --output <repository>/outputs/validation-private/v032/legacy-v031-repeat
+STARTED_UTC: 2026-10-31T16:39:10.341607+00:00
+{
+  "base_commit": "14a514d7032f5f7c302f4f47d79a72d895251c1d",
+  "archive_sha256": "505c7837c120501cbaf0c7fbeff01393a7b0233f063bc9a22e65fc0a051a22b4",
+  "workbench_version": "0.3.1",
+  "dependencies": {
+    "numpy": "2.5.2",
+    "scipy": "1.18.1",
+    "pybaselines": "1.2.1",
+    "pydantic": "2.13.4",
+    "ftir-spectral-workbench": "0.3.1"
+  },
+  "workspace_schema": "2.0",
+  "expected_array_count": 176,
+  "self_roundtrip_arrays_exact": true
+}
+Wrote 11 synthetic artifacts to <repository>/outputs/validation-private/v032/legacy-v031-repeat
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 2.358
+PASS: all 11 artifact SHA256 values and complete producer metadata are identical across independent archives.

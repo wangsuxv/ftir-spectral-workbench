@@ -1,0 +1,201 @@
+{
+  "status": "pass",
+  "audited_utc": "2026-10-31T17:07:58.704311+00:00",
+  "application_version": "0.3.2",
+  "final_server": "http://127.0.0.1:8767",
+  "data": "two synthetic 181-point absorbance CSV files, identical wavenumber axes",
+  "workflow": [
+    "real upload",
+    "A linear coarse confirmation",
+    "A explicit fine skip",
+    "B arPLS coarse confirmation",
+    "B explicit fine skip",
+    "A Savitzky-Golay confirmation",
+    "A S-source maximum normalization confirmation",
+    "default coarse and N_S downloads",
+    "override invalidated old download",
+    "override download",
+    "workspace real download/upload in new tab",
+    "restored N_S download",
+    "restored workspace download",
+    "two-spectrum coarse ZIP plus exact-axis wide CSV"
+  ],
+  "checks": {
+    "stable_ids": true,
+    "original_sources_and_inputs": true,
+    "drafts": true,
+    "confirmed_arrays_and_fingerprints": true,
+    "parent_relationships": true,
+    "naming_preference_and_normalization_source": true,
+    "restore_omits_previews": true,
+    "all_exported_arrays_equal_workspace": true,
+    "preview_paths_equal_zip": true,
+    "baseline_pipeline_forbidden_during_audit": true,
+    "wide_headers_and_arrays": true
+  },
+  "artifacts": [
+    {
+      "filename": "coarse_original.zip",
+      "sha256": "98fd5805c55793f43255c805eabbf5256dd479aafe7e572d6268c4152665d305",
+      "bytes": 15560,
+      "zip_member_count": 8,
+      "schema_version": "1.1",
+      "naming_policy": "original",
+      "member_count": 7,
+      "csv_member_count": 5,
+      "main_spectrum_csv_count": 1,
+      "verify_recompute_false": true,
+      "verify_recompute_true": "not applicable",
+      "paths": [
+        "spectra/G2_90RH__baseline-coarse.csv"
+      ],
+      "roles": [
+        "requested"
+      ]
+    },
+    {
+      "filename": "post_original.zip",
+      "sha256": "e7c5ed3c8da7ec2a9f1043d3f4e1f66b37a32675b6c1923a31a9fb023b639fcd",
+      "bytes": 21512,
+      "zip_member_count": 12,
+      "schema_version": "1.1",
+      "naming_policy": "original",
+      "member_count": 11,
+      "csv_member_count": 6,
+      "main_spectrum_csv_count": 3,
+      "verify_recompute_false": true,
+      "verify_recompute_true": true,
+      "paths": [
+        "spectra/G2_90RH__baseline.csv",
+        "spectra/G2_90RH__baseline__smooth-savgol.csv",
+        "spectra/G2_90RH__baseline__smooth-savgol__norm-max.csv"
+      ],
+      "roles": [
+        "parent",
+        "parent",
+        "requested"
+      ]
+    },
+    {
+      "filename": "post_override.zip",
+      "sha256": "aaf4a6a5ba69cb103068b3c0228a7f276c61a95a6c616bdeee59fc85507b6dc9",
+      "bytes": 21754,
+      "zip_member_count": 12,
+      "schema_version": "1.1",
+      "naming_policy": "original",
+      "member_count": 11,
+      "csv_member_count": 6,
+      "main_spectrum_csv_count": 3,
+      "verify_recompute_false": true,
+      "verify_recompute_true": true,
+      "paths": [
+        "spectra/样品 G2 90%RH__baseline.csv",
+        "spectra/样品 G2 90%RH__baseline__smooth-savgol.csv",
+        "spectra/样品 G2 90%RH__baseline__smooth-savgol__norm-max.csv"
+      ],
+      "roles": [
+        "parent",
+        "parent",
+        "requested"
+      ]
+    },
+    {
+      "filename": "workspace_before.zip",
+      "sha256": "b92abf4efadf6dfe61ea156cb35437e31cc5996b4370925c0fec67854c1eb526",
+      "bytes": 219495,
+      "zip_member_count": 256,
+      "schema_version": "2.0",
+      "member_count": 255,
+      "spectrum_count": 2
+    },
+    {
+      "filename": "post_restored.zip",
+      "sha256": "aaf4a6a5ba69cb103068b3c0228a7f276c61a95a6c616bdeee59fc85507b6dc9",
+      "bytes": 21754,
+      "zip_member_count": 12,
+      "schema_version": "1.1",
+      "naming_policy": "original",
+      "member_count": 11,
+      "csv_member_count": 6,
+      "main_spectrum_csv_count": 3,
+      "verify_recompute_false": true,
+      "verify_recompute_true": true,
+      "paths": [
+        "spectra/样品 G2 90%RH__baseline.csv",
+        "spectra/样品 G2 90%RH__baseline__smooth-savgol.csv",
+        "spectra/样品 G2 90%RH__baseline__smooth-savgol__norm-max.csv"
+      ],
+      "roles": [
+        "parent",
+        "parent",
+        "requested"
+      ]
+    },
+    {
+      "filename": "workspace_restored.zip",
+      "sha256": "cad8701d04d6f7a06a66815efccb8fc4205a6c477560e6fee1c646a72861f341",
+      "bytes": 219491,
+      "zip_member_count": 256,
+      "schema_version": "2.0",
+      "member_count": 255,
+      "spectrum_count": 2
+    },
+    {
+      "filename": "coarse_two_wide.zip",
+      "sha256": "e1e7f49aee5e6a70c15414296b3d359de6f09634025251bd91d1be2e99a8e670",
+      "bytes": 34947,
+      "zip_member_count": 12,
+      "schema_version": "1.1",
+      "naming_policy": "original",
+      "member_count": 11,
+      "csv_member_count": 8,
+      "main_spectrum_csv_count": 2,
+      "verify_recompute_false": true,
+      "verify_recompute_true": "not applicable",
+      "paths": [
+        "spectra/样品 G2 90%RH__baseline-coarse.csv",
+        "spectra/样品 α (25°C 80%RH)__baseline-coarse.csv"
+      ],
+      "roles": [
+        "requested",
+        "requested"
+      ],
+      "wide_exact_array_equality": true
+    },
+    {
+      "filename": "coarse_two_wide.csv",
+      "sha256": "c9744a9645f0db89544ffbdbe67d6cb4fe692d1f80d0900cf5c972d0d258e3ef",
+      "bytes": 8947,
+      "columns": 3,
+      "rows": 181,
+      "headers": [
+        "wavenumber_cm-1",
+        "样品 G2 90%RH__baseline-coarse",
+        "样品 α (25°C 80%RH)__baseline-coarse"
+      ]
+    }
+  ],
+  "browser_not_executed": [
+    "display naming policy",
+    "legacy naming policy",
+    "N_B computation",
+    "heterogeneous-axis export"
+  ],
+  "issues": [
+    "8766 old hot-reloaded session produced COARSE_STALE; full restart on stable 8767 resolved it",
+    "radio input pointer interception; visible label navigation succeeded",
+    "mode/rerun timing caused initial disabled-import and dropdown-option timeouts; actions retried only after actual UI was ready",
+    "table toolbar CSV download emitted no download event and timed out; screenshot used instead",
+    "coarse scope option locator timed out; normal combobox keyboard entry selected all spectra",
+    "audit script initial expectations corrected to actual artifact type, intensity-only wide_headers, and distribution name; failed logs retained"
+  ],
+  "traces": [
+    ".playwright-mcp/traces/trace-1793465578901.trace",
+    ".playwright-mcp/traces/trace-1793466213814.trace"
+  ],
+  "preview_screenshots": [
+    "post_original_preview.png",
+    "post_override_preview.png",
+    "coarse_two_preview.png"
+  ]
+}

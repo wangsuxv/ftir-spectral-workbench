@@ -1,0 +1,30 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python outputs/validation-private/v032/browser/audit_downloads.py
+STARTED_UTC: 2026-10-31T17:07:27.804103+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v032 cache>
+Traceback (most recent call last):
+  File "<home>/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/importlib/metadata/__init__.py", line 397, in from_name
+    return next(cls.discover(name=name))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+StopIteration
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "<repository>/outputs/validation-private/v032/browser/audit_downloads.py", line 201, in <module>
+    audit()
+  File "<repository>/outputs/validation-private/v032/browser/audit_downloads.py", line 173, in audit
+    "application_version": version("ftir-workbench"), "final_server": "http://127.0.0.1:8767",
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<home>/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/importlib/metadata/__init__.py", line 889, in version
+    return distribution(distribution_name).version
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<home>/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/importlib/metadata/__init__.py", line 862, in distribution
+    return Distribution.from_name(distribution_name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<home>/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/importlib/metadata/__init__.py", line 399, in from_name
+    raise PackageNotFoundError(name)
+importlib.metadata.PackageNotFoundError: No package metadata was found for ftir-workbench
+
+EXIT_CODE: 1
+ELAPSED_SECONDS: 0.782

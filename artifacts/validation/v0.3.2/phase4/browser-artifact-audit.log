@@ -1,0 +1,16 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python outputs/validation-private/v032/browser/audit_downloads.py
+STARTED_UTC: 2026-10-31T17:06:53.513869+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v032 cache>
+Traceback (most recent call last):
+  File "<repository>/outputs/validation-private/v032/browser/audit_downloads.py", line 200, in <module>
+    audit()
+  File "<repository>/outputs/validation-private/v032/browser/audit_downloads.py", line 119, in audit
+    members = read_verified_archive(payload, kind)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<repository>/src/ftir_workbench/batch/workspace.py", line 119, in read_verified_archive
+    raise _failure("unsupported artifact type or schema")
+ftir_workbench.batch.models.BatchError: WORKSPACE_INTEGRITY_FAILED: unsupported artifact type or schema
+
+EXIT_CODE: 1
+ELAPSED_SECONDS: 0.902

@@ -56,8 +56,9 @@ def test_e01_e02_e06_export_exact_confirmed_arrays_and_never_pipeline(monkeypatc
                 assert entry["stage_fingerprint"] == snapshot.fingerprint
             wide = np.loadtxt(io.BytesIO(artifact.wide_csv_bytes), delimiter=",", skiprows=1)
             np.testing.assert_array_equal(wide[:, 1], getattr(ws.states[a], f"{stage}_snapshot").result.analysis_data[0])
-            assert a in artifact.wide_csv_bytes.decode().splitlines()[0]
-            assert b in artifact.wide_csv_bytes.decode().splitlines()[0]
+            assert [row['spectrum_id'] for row in artifact.metadata['name_map']] == [a, b]
+            assert artifact.metadata['wide_headers'] == [row['wide_column_label'] for row in artifact.metadata['name_map']]
+            assert all(label in artifact.wide_csv_bytes.decode().splitlines()[0] for label in artifact.metadata['wide_headers'])
             qc = archive.read("qc_summary.csv").decode()
             assert "cross_sample_time_continuity,N/A,not_applicable" in qc
             assert ",perturbation," not in qc

@@ -20,6 +20,15 @@ from ftir_baseline.models import FloatArray
 from ftir_workbench.post_baseline_smoothing import smooth_spectral_arrays, validate_spectral_arrays
 
 from .export import BatchExportArtifact, _safe_name, _table
+from .export_naming import (
+    allocate_bases,
+    ensure_unique_names,
+    get_naming_options,
+    make_name_row,
+    name_map_table,
+    naming_plan_digest,
+    validate_name_row,
+)
 from .fingerprints import json_fingerprint, source_selection_fingerprint
 from .models import BatchError, BatchWorkspace, StageSnapshot
 from .normalization_adapter import normalize_spectral_arrays
@@ -80,12 +89,14 @@ def _select(
     spectrum_ids: Sequence[str],
     branches: Sequence[str],
     valid_only: bool,
+    *,
+    allow_empty: bool = False,
 ) -> tuple[list[tuple[str, str, Snapshot]], list[dict[str, Any]]]:
     if isinstance(spectrum_ids, str) or isinstance(branches, str):
         raise BatchError("EXPORT_NOT_READY", "spectrum_ids and branches must be explicit sequences")
     ids, selected_branches = list(dict.fromkeys(spectrum_ids)), list(dict.fromkeys(branches))
     if (
-        not ids
+        (not ids and not allow_empty)
         or not selected_branches
         or any(branch not in BRANCHES for branch in selected_branches)
     ):
@@ -155,7 +166,7 @@ def _select(
             "EXPORT_NOT_READY",
             "; ".join(f"{row['spectrum_id']}/{row['branch']}: {row['reason']}" for row in failures),
         )
-    if not ready:
+    if not ready and not allow_empty:
         raise BatchError(
             "EXPORT_NOT_READY", "no requested confirmed, current branches are available"
         )
@@ -224,11 +235,16 @@ def _serialize_node(
     sid: str,
     branch: str,
     snapshot: Snapshot,
+    name_row: Mapping[str, Any] | None = None,
 ) -> tuple[dict[str, Any], dict[str, bytes]]:
     source = _source(workspace, sid)
     x, y = branch_arrays(snapshot)
     quantity = "absorbance" if isinstance(snapshot, StageSnapshot) else snapshot.quantity
-    spectra_path, recipe_path, removed_path = _node_paths(source, branch, quantity)
+    spectra_path, recipe_path, removed_path = (
+        _node_paths(source, branch, quantity)
+        if name_row is None
+        else (name_row["spectra_csv"], name_row["recipe_json"], name_row["removed_csv"])
+    )
     node: dict[str, Any] = {
         "schema_version": "1.0",
         "workspace_id": workspace.workspace_id,
@@ -326,23 +342,9 @@ def _heterogeneous_warnings(nodes: Sequence[dict[str, Any]]) -> list[str]:
     return warnings
 
 
-def build_postprocessing_export(
-    workspace: BatchWorkspace,
-    spectrum_ids: Sequence[str],
-    *,
-    branches: Sequence[str] = ("baseline",),
-    valid_only: bool = False,
-    include_wide: bool = False,
-) -> BatchExportArtifact:
-    """Capture confirmed nodes and serialize their complete B/S parent graph."""
-
-    ready, report = _select(workspace, spectrum_ids, branches, valid_only)
-    first_axis = branch_arrays(ready[0][2])[0]
-    same_axis = all(
-        np.array_equal(first_axis, branch_arrays(snapshot)[0]) for _, _, snapshot in ready
-    )
-    if include_wide and not same_axis:
-        raise BatchError("AXIS_MISMATCH_FOR_WIDE_EXPORT", _AXIS_REASON)
+def _capture(
+    ready: Sequence[tuple[str, str, Snapshot]],
+) -> dict[tuple[str, str], Snapshot]:
     captured: dict[tuple[str, str], Snapshot] = {}
 
     def include(sid: str, branch: str, snapshot: Snapshot) -> None:
@@ -361,18 +363,109 @@ def build_postprocessing_export(
 
     for sid, branch, snapshot in ready:
         include(sid, branch, snapshot)
+    return captured
+
+
+def _name_rows(
+    workspace: BatchWorkspace,
+    captured: Mapping[tuple[str, str], Snapshot],
+    requested: set[tuple[str, str]],
+    bases: Mapping[str, Any],
+    *,
+    legacy: bool,
+) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for (sid, branch), snapshot in captured.items():
+        source = _source(workspace, sid)
+        quantity = "absorbance" if isinstance(snapshot, StageSnapshot) else snapshot.quantity
+        purpose = "scientific" if isinstance(snapshot, StageSnapshot) else snapshot.purpose
+        old_paths = _node_paths(source, branch, quantity)
+        row = make_name_row(
+            bases[sid], branch=branch, quantity=quantity, purpose=purpose,
+            fingerprint=snapshot.fingerprint,
+            parent_fingerprint=None if isinstance(snapshot, StageSnapshot) else snapshot.parent_fingerprint,
+            recipe_json=old_paths[1],
+            included_as="requested" if (sid, branch) in requested else "parent",
+            effective_recipe=None if isinstance(snapshot, StageSnapshot) else snapshot.effective_recipe,
+            parent_effective_recipe=(
+                snapshot.parent_smoothed.effective_recipe
+                if isinstance(snapshot, PostprocessSnapshot) and snapshot.parent_smoothed is not None
+                else None
+            ),
+        )
+        if legacy:
+            row.update(
+                spectra_csv=old_paths[0], recipe_json=old_paths[1], removed_csv=old_paths[2],
+                wide_column_label=(
+                    f"{_safe_name(str(source['display_name']))}__{sid}__{branch}__{_quantity_header(branch, quantity)}"
+                ),
+            )
+        rows.append(row)
+    if not legacy:
+        ensure_unique_names(rows)
+    return rows
+
+
+def preview_postprocessing_export(
+    workspace: BatchWorkspace,
+    spectrum_ids: Sequence[str],
+    branches: Sequence[str] = ("baseline",),
+    *,
+    valid_only: bool = False,
+    naming: str | Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Resolve confirmed-node names without fitting, including unavailable rows."""
+    options = get_naming_options(workspace, naming)
+    bases = allocate_bases(workspace, naming)
+    # Preview reports unavailable selections even when strict packaging would fail.
+    ready, report = _select(workspace, spectrum_ids, branches, True, allow_empty=True)
+    rows = _name_rows(
+        workspace, _capture(ready), {(sid, branch) for sid, branch, _ in ready}, bases,
+        legacy=options["policy"] == "legacy_id",
+    )
+    return {
+        "name_map": rows, "report": report,
+        "naming_plan_digest": naming_plan_digest(bases, rows),
+    }
+
+
+def build_postprocessing_export(
+    workspace: BatchWorkspace,
+    spectrum_ids: Sequence[str],
+    *,
+    branches: Sequence[str] = ("baseline",),
+    valid_only: bool = False,
+    include_wide: bool = False,
+    naming: str | Mapping[str, Any] | None = None,
+) -> BatchExportArtifact:
+    """Capture confirmed nodes and serialize their complete B/S parent graph."""
+
+    ready, report = _select(workspace, spectrum_ids, branches, valid_only)
+    first_axis = branch_arrays(ready[0][2])[0]
+    same_axis = all(
+        np.array_equal(first_axis, branch_arrays(snapshot)[0]) for _, _, snapshot in ready
+    )
+    if include_wide and not same_axis:
+        raise BatchError("AXIS_MISMATCH_FOR_WIDE_EXPORT", _AXIS_REASON)
+    options = get_naming_options(workspace, naming)
+    legacy = options["policy"] == "legacy_id"
+    captured = _capture(ready)
+    requested_keys = {(sid, branch) for sid, branch, _ in ready}
+    name_rows = [] if legacy else _name_rows(
+        workspace, captured, requested_keys, allocate_bases(workspace, naming), legacy=False,
+    )
+    names = {(row["spectrum_id"], row["branch"]): row for row in name_rows}
     members: dict[str, bytes] = {}
     nodes: list[dict[str, Any]] = []
-    requested_keys = {(sid, branch) for sid, branch, _ in ready}
     for (sid, branch), snapshot in captured.items():
-        node, added = _serialize_node(workspace, sid, branch, snapshot)
+        node, added = _serialize_node(workspace, sid, branch, snapshot, names.get((sid, branch)))
         if set(members) & set(added):
             raise BatchError("EXPORT_NOT_READY", "stable export member names collide")
         nodes.append(node)
         members.update(added)
     index = {
         "artifact_type": ARTIFACT_TYPE,
-        "schema_version": "1.0",
+        "schema_version": "1.0" if legacy else "1.1",
         "workspace_id": workspace.workspace_id,
         "nodes": [
             {
@@ -397,6 +490,7 @@ def build_postprocessing_export(
             quantity = "absorbance" if isinstance(snapshot, StageSnapshot) else snapshot.quantity
             wide_headers.append(
                 f"{_safe_name(workspace.records[sid].display_name)}__{sid}__{branch}__{_quantity_header(branch, quantity)}"
+                if legacy else names[(sid, branch)]["wide_column_label"]
             )
         wide = _table(
             ["wavenumber_cm-1", *wide_headers],
@@ -411,7 +505,7 @@ def build_postprocessing_export(
         members[str(wide_path)] = wide
     metadata = {
         "artifact_type": ARTIFACT_TYPE,
-        "schema_version": "1.0",
+        "schema_version": "1.0" if legacy else "1.1",
         "workflow_mode": "independent_batch",
         "workspace_id": workspace.workspace_id,
         "is_2d_ready": False,
@@ -439,6 +533,13 @@ def build_postprocessing_export(
         },
         "qc_applicability": {"cross_sample_time_continuity": "not_applicable"},
     }
+    if not legacy:
+        declaration = {"naming_policy_version": "1.0", "naming_policy": options["policy"]}
+        index.update(declaration)
+        metadata.update(
+            **declaration, name_map=name_rows, name_map_csv="export_name_map.csv",
+        )
+        members["export_name_map.csv"] = _table(*name_map_table(name_rows))
     headers = sorted({key for row in report for key in row})
     members["processing_report.csv"] = _table(
         headers,
@@ -836,12 +937,43 @@ def verify_postprocessing_export(payload: bytes, *, recompute: bool = True) -> b
         )
         for document in (metadata, index):
             _require(
-                document["artifact_type"] == ARTIFACT_TYPE and document["schema_version"] == "1.0",
+                document["artifact_type"] == ARTIFACT_TYPE
+                and document["schema_version"] in {"1.0", "1.1"},
                 "unsupported bundle schema",
             )
             _require(
                 isinstance(document["workspace_id"], str) and bool(document["workspace_id"]),
                 "invalid workspace identity",
+            )
+        _require(metadata["schema_version"] == index["schema_version"], "mixed bundle schemas")
+        readable = metadata["schema_version"] == "1.1"
+        name_rows: list[dict[str, Any]] = []
+        names: dict[tuple[str, str], dict[str, Any]] = {}
+        if readable:
+            _require(
+                metadata["naming_policy_version"] == index["naming_policy_version"] == "1.0"
+                and metadata["naming_policy"] == index["naming_policy"]
+                and metadata["naming_policy"] in {"original", "display"}
+                and metadata["name_map_csv"] == "export_name_map.csv",
+                "unsupported or inconsistent naming declaration",
+            )
+            name_rows = metadata["name_map"]
+            _require(isinstance(name_rows, list), "invalid name mapping")
+            ensure_unique_names(name_rows)
+            _require(
+                all(row["policy"] == metadata["naming_policy"] for row in name_rows),
+                "name mapping policy mismatch",
+            )
+            names = {(row["spectrum_id"], row["branch"]): row for row in name_rows}
+            _require(
+                members["export_name_map.csv"] == _table(*name_map_table(name_rows)),
+                "CSV name map differs from authoritative JSON",
+            )
+        else:
+            naming_fields = {"naming_policy", "naming_policy_version", "name_map", "name_map_csv"}
+            _require(
+                not naming_fields.intersection(metadata) and not naming_fields.intersection(index),
+                "legacy bundle contains readable naming fields",
             )
         _require(
             metadata["workspace_id"] == index["workspace_id"] and metadata["is_2d_ready"] is False,
@@ -936,6 +1068,8 @@ def verify_postprocessing_export(payload: bytes, *, recompute: bool = True) -> b
         nodes: dict[tuple[str, str], dict[str, Any]] = {}
         arrays: dict[tuple[str, str], tuple[FloatArray, FloatArray]] = {}
         used = {"batch_metadata.json", "branch_index.json", "processing_report.csv"}
+        if readable:
+            used.add("export_name_map.csv")
         index_nodes = index["nodes"]
         _require(
             isinstance(index_nodes, list) and len(index_nodes) <= len(ids) * len(BRANCHES),
@@ -993,7 +1127,10 @@ def verify_postprocessing_export(payload: bytes, *, recompute: bool = True) -> b
             )
             _verify_source(node)
             _require(
-                _node_paths(node["source"], node["branch"], node["quantity"])
+                (
+                    (names[key]["spectra_csv"], names[key]["recipe_json"], names[key]["removed_csv"])
+                    if readable else _node_paths(node["source"], node["branch"], node["quantity"])
+                )
                 == (node["spectra_csv"], node["recipe_json"], node["removed_csv"]),
                 "branch filename identity/quantity mismatch",
             )
@@ -1048,6 +1185,26 @@ def verify_postprocessing_export(payload: bytes, *, recompute: bool = True) -> b
                 "report/source identity mismatch",
             )
         _require(set(nodes) == required, "graph is missing parents or contains unrequested extras")
+        if readable:
+            _require(
+                [(row["spectrum_id"], row["branch"]) for row in name_rows]
+                == [(entry["spectrum_id"], entry["branch"]) for entry in index_nodes],
+                "name map does not cover exactly the indexed graph",
+            )
+            for key, node in nodes.items():
+                parent_recipe = (
+                    nodes[(key[0], "smoothed")]["effective_recipe"]
+                    if key[1] == "normalized_smoothed" else None
+                )
+                validate_name_row(
+                    names[key], node["source"], branch=node["branch"],
+                    quantity=node["quantity"], purpose=node["purpose"],
+                    fingerprint=node["fingerprint"], parent_fingerprint=node["parent_fingerprint"],
+                    recipe_json=_node_paths(node["source"], node["branch"], node["quantity"])[1],
+                    included_as="requested" if key in requested else "parent",
+                    effective_recipe=None if key[1] == "baseline" else node["effective_recipe"],
+                    parent_effective_recipe=parent_recipe,
+                )
         for branch in BRANCHES[1:]:
             for key, node in nodes.items():
                 if key[1] != branch:
@@ -1102,7 +1259,8 @@ def verify_postprocessing_export(payload: bytes, *, recompute: bool = True) -> b
                 "invalid wide export",
             )
             headers = [
-                f"{_safe_name(nodes[(row['spectrum_id'], row['branch'])]['source']['display_name'])}__{row['spectrum_id']}__{row['branch']}__{nodes[(row['spectrum_id'], row['branch'])]['column_label']}"
+                names[(row["spectrum_id"], row["branch"])]["wide_column_label"]
+                if readable else f"{_safe_name(nodes[(row['spectrum_id'], row['branch'])]['source']['display_name'])}__{row['spectrum_id']}__{row['branch']}__{nodes[(row['spectrum_id'], row['branch'])]['column_label']}"
                 for row in exported
             ]
             _require(
@@ -1141,5 +1299,6 @@ __all__ = [
     "ARTIFACT_TYPE",
     "build_postprocessing_export",
     "can_export_postprocessing_wide",
+    "preview_postprocessing_export",
     "verify_postprocessing_export",
 ]

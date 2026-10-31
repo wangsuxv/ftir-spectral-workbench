@@ -1,8 +1,14 @@
 # Project Status
 
-更新日期：2026-09-11
+更新日期：2026-11-01
 
 ## 当前状态
+
+当前工作版本为 v0.3.2，基于本地与远端一致的已发布 v0.3.1 `14a514d7032f5f7c302f4f47d79a72d895251c1d`，开发分支 `feat/readable-spectrum-export-names`。普通两类导出默认采用原文件/原列名与正式处理步骤，提供 display、逐谱 override 和 legacy_id；新旧包双向验证、名称映射、工作区兼容与全局命名缓存已接入。科学核心、34 个冻结文件、旧原位/2D 和数值依赖保留。最新真实验收与发布链接统一见 [v0.3.2 报告](docs/ordinary_export_naming_acceptance.md)，操作见 [导出命名说明](docs/ordinary_export_naming.md)。
+
+## v0.3.1 历史交付状态（2026-09-11）
+
+v0.3.1 随后已在原仓库公开发布；下段及历史验收日志中的“未发布”是当时本地交付状态，不代表当前 GitHub 状态。
 
 当前本地版本为 v0.3.1，普通光谱后处理已完成全量测试、构建与真实浏览器导出/恢复验收，开发分支为 `feat/v0.3.1-ordinary-postprocessing`。实际基准为 `9fc13c10ae34bd53cb220d0807edb18c9e2e41dc`（v0.3.0），Phase 0–4 最近提交为 `c5072946508e5c0f6f9a71da803a99221bada743`；完成提交 SHA 与最终证据见 [交付报告](artifacts/validation/v0.3.1/REPORT.md)。未 reset 或覆盖用户工作，未对外发布。
 

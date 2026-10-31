@@ -314,7 +314,10 @@ def test_all_branch_export_requires_explicit_valid_only_and_preserves_minmax_qua
     assert set(metadata["requested_branches"]) == set(pp.BRANCHES)
     assert metadata["excluded_items"]
     arrays = _csv_arrays(downloaded.content)
-    minmax = [pair for name, pair in arrays.items() if b in name and "minmax" in name]
+    with zipfile.ZipFile(io.BytesIO(downloaded.content)) as archive:
+        nodes = json.loads(archive.read("branch_index.json"))["nodes"]
+    minmax = [arrays[node["spectra_csv"]] for node in nodes
+              if node["spectrum_id"] == b and node["branch"] == "normalized_baseline"]
     assert len(minmax) == 1
     assert minmax[0][0][1] == "minmax_scaled_intensity_display_only"
     assert np.min(minmax[0][1][:, 1]) == 0 and np.max(minmax[0][1][:, 1]) == 1

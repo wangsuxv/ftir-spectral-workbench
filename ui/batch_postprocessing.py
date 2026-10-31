@@ -34,6 +34,19 @@ from ftir_workbench.batch.postprocessing import (
 from ftir_workbench.batch.state import draft_changes
 from ftir_workbench.display_units import DisplayIntensityUnit
 
+try:
+    from ui.batch_export_naming import (
+        naming_context,
+        render_naming_preview,
+        render_naming_settings,
+    )
+except ModuleNotFoundError:
+    from batch_export_naming import (  # type: ignore[no-redef]
+        naming_context,
+        render_naming_preview,
+        render_naming_settings,
+    )
+
 BRANCH_LABELS = {
     "baseline": "B · 最终基线校正谱",
     "smoothed": "S · 平滑校正谱",
@@ -151,6 +164,7 @@ def _post_export_context(ws: BatchWorkspace, ids: list[str], branches: tuple[str
     post = postprocessing_save_context(ws)
     return json_fingerprint({
         "workspace": ws.workspace_id, "ids": ids, "branches": branches,
+        "export_naming": naming_context(ws),
         "valid_only": valid_only, "wide": wide,
         "items": {
             sid: {
@@ -176,6 +190,7 @@ def _export_controls(ws: BatchWorkspace, sid: str) -> None:
     from ftir_workbench.batch.postprocessing_export import (
         build_postprocessing_export,
         can_export_postprocessing_wide,
+        preview_postprocessing_export,
     )
 
     state = get_postprocessing_state(ws, sid)
@@ -200,7 +215,8 @@ def _export_controls(ws: BatchWorkspace, sid: str) -> None:
         st.info("已选择全部分支；明确勾选只导出有效项后，才会跳过下表不可用项并保留完整报告。"
                 if valid_only else "已选择全部分支：所有目标的 B / S / N_B / N_S 均须有效；存在不可用项时默认阻止打包。")
     report = _export_preflight(ws, ids, branches)
-    st.dataframe(pd.DataFrame(report), hide_index=True, width="stretch")
+    st.dataframe(pd.DataFrame(report).drop(columns=["光谱 ID"], errors="ignore"),
+                 hide_index=True, width="stretch")
     invalid = [row for row in report if not row["将被导出"]]
     if invalid:
         st.warning("上表包含不可用项。指定分支不会退回其他来源；需明确排除不可用项才能打包其余正式结果。")
@@ -216,13 +232,17 @@ def _export_controls(ws: BatchWorkspace, sid: str) -> None:
     if not wide_allowed:
         st.caption("后处理宽表不可用：" + reason)
     st.caption("ZIP 按谱保留原轴；N_B 包含 B，N_S 包含 B 与 S。归一化 / Min–Max 不导出为物理 T 或 %T。")
-    context = _post_export_context(ws, ids, branches, valid_only, wide)
+    naming = render_naming_settings(ws, sid, context="postprocessing")
+    preview = preview_postprocessing_export(ws, ids, branches, valid_only=valid_only, naming=naming)
+    render_naming_preview(ws, preview)
+    context = (_post_export_context(ws, ids, branches, valid_only, wide),
+               preview["naming_plan_digest"])
     cache_key = _key(ws, sid, "export", "download")
     disabled = not report or not any(row["将被导出"] for row in report) or (bool(invalid) and not valid_only)
     if st.button("打包已确认后处理结果", key=_key(ws, sid, "export", "build"), disabled=disabled):
         try:
             artifact = build_postprocessing_export(ws, ids, branches=branches, valid_only=valid_only,
-                                                   include_wide=wide)
+                                                   include_wide=wide, naming=naming)
             st.session_state[cache_key] = (context, artifact)
             ws.last_export_summary = artifact.metadata
             ws.export_history.append({"artifact": "ordinary_postprocess", "requested": ids,
@@ -238,7 +258,8 @@ def _export_controls(ws: BatchWorkspace, sid: str) -> None:
             st.download_button("下载后处理同轴宽表 CSV", data=artifact.wide_csv_bytes,
                                file_name="ordinary_postprocessing_wide.csv", mime="text/csv",
                                key=_key(ws, sid, "export", "wide_csv"))
-        st.dataframe(pd.DataFrame(artifact.report), hide_index=True, width="stretch")
+        with st.expander("后处理打包报告（含完整身份）"):
+            st.dataframe(pd.DataFrame(artifact.report), hide_index=True, width="stretch")
         for warning in artifact.metadata.get("warnings", []):
             st.warning(str(warning))
     elif cached:

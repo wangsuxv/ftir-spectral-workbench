@@ -1,0 +1,11 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: outputs/release-v032/install-env/bin/python -m pip install --no-deps --ignore-installed outputs/release-v032/preflight/ftir_spectral_workbench-0.3.2-py3-none-any.whl
+STARTED_UTC: 2026-10-31T16:53:19.284468+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v032 cache>
+Processing ./outputs/release-v032/preflight/ftir_spectral_workbench-0.3.2-py3-none-any.whl
+Installing collected packages: ftir-spectral-workbench
+Successfully installed ftir-spectral-workbench-0.3.2
+WARNING: The directory '<home>/Library/Caches/pip' or its parent directory is not owned or is not writable by the current user. The cache has been disabled. Check the permissions and owner of that directory. If executing pip with sudo, you should use sudo's -H flag.
+
+EXIT_CODE: 0
+ELAPSED_SECONDS: 0.306

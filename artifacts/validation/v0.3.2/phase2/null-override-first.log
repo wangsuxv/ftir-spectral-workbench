@@ -1,0 +1,57 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m pytest tests/postprocessing/test_export_naming.py -k explicit_null_override -q -p no:cacheprovider
+STARTED_UTC: 2026-10-31T16:50:56.871971+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v032 cache>
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+_ test_explicit_null_override_clears_only_this_export_without_restoring_saved_value[original] _
+
+policy = 'original'
+
+    @pytest.mark.parametrize("policy", ["original", "display"])
+    def test_explicit_null_override_clears_only_this_export_without_restoring_saved_value(policy: str) -> None:
+        ws, sid = confirmed_workspace(name="original.csv")
+        ws.records[sid] = replace(ws.records[sid], display_name="display name")
+        graph(ws, sid)
+        set_naming_policy(ws, policy)
+        set_name_override(ws, sid, "saved override")
+        before = get_naming_options(ws)
+        naming = {"overrides": {sid: None}}
+        preview = preview_postprocessing_export(ws, [sid], ("normalized_smoothed",), naming=naming)
+        artifact = build_postprocessing_export(ws, [sid], branches=("normalized_smoothed",), naming=naming)
+        expected = "original" if policy == "original" else "display name"
+        assert preview["name_map"] == artifact.metadata["name_map"]
+>       assert all(row["override"] is None and row["base_name"] == expected for row in preview["name_map"])
+E       assert False
+E        +  where False = all(<generator object test_explicit_null_override_clears_only_this_export_without_restoring_saved_value.<locals>.<genexpr> at 0x10faf6670>)
+
+tests/postprocessing/test_export_naming.py:188: AssertionError
+_ test_explicit_null_override_clears_only_this_export_without_restoring_saved_value[display] _
+
+policy = 'display'
+
+    @pytest.mark.parametrize("policy", ["original", "display"])
+    def test_explicit_null_override_clears_only_this_export_without_restoring_saved_value(policy: str) -> None:
+        ws, sid = confirmed_workspace(name="original.csv")
+        ws.records[sid] = replace(ws.records[sid], display_name="display name")
+        graph(ws, sid)
+        set_naming_policy(ws, policy)
+        set_name_override(ws, sid, "saved override")
+        before = get_naming_options(ws)
+        naming = {"overrides": {sid: None}}
+        preview = preview_postprocessing_export(ws, [sid], ("normalized_smoothed",), naming=naming)
+        artifact = build_postprocessing_export(ws, [sid], branches=("normalized_smoothed",), naming=naming)
+        expected = "original" if policy == "original" else "display name"
+        assert preview["name_map"] == artifact.metadata["name_map"]
+>       assert all(row["override"] is None and row["base_name"] == expected for row in preview["name_map"])
+E       assert False
+E        +  where False = all(<generator object test_explicit_null_override_clears_only_this_export_without_restoring_saved_value.<locals>.<genexpr> at 0x10fc43ed0>)
+
+tests/postprocessing/test_export_naming.py:188: AssertionError
+=========================== short test summary info ============================
+FAILED tests/postprocessing/test_export_naming.py::test_explicit_null_override_clears_only_this_export_without_restoring_saved_value[original]
+FAILED tests/postprocessing/test_export_naming.py::test_explicit_null_override_clears_only_this_export_without_restoring_saved_value[display]
+2 failed, 44 deselected in 0.93s
+
+EXIT_CODE: 1
+ELAPSED_SECONDS: 1.194

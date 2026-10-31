@@ -91,3 +91,7 @@ streamlit run ui/streamlit_app.py
 本次实际阶段记录为 Phase 0 旧测试 723 passed、Phase 1 导入及旧 importer 139 passed、Phase 2 独立核心 74 passed、Phase 3 普通及旧 UI 48 passed、Phase 4 batch/UI 联合 177 passed。它们是不同命令的结果，不能相加当作最终全量测试数。阶段命令、初始失败与修复后的真实输出见 [v0.3.0 验证日志](../artifacts/validation/v0.3.0/)；整体验收、性能、冻结检查及浏览器闭环以 [Phase 5 记录](../artifacts/validation/v0.3.0/phase5/) 为准，此处不预填尚未完成的结果。
 
 科学冻结仍以未重写的 [v0.2.1 manifest](../artifacts/v0.2.1_science_freeze_manifest.json) 及冻结根文件集合核对。本版不增加新算法或数值依赖、不新增普通模式后基线平滑/科学归一化/2D 分支、不做局部多区间基线，也不重做桌面 GUI。原位 baseline/Prepared/2D、旧 bundle/project 和 v0.2.5 smoothing 分支继续独立回归。本文不表示已推送、打 tag、发布 Release 或完成未记录的浏览器操作。
+
+## v0.3.2 导出名称
+
+普通粗调与最终基线默认使用原文件/原列名加正式处理步骤；数值与确认规则不变。导出区域可切换展示名、设置单谱覆盖，或选择 legacy_id 保留旧路径/schema 1.0。新版包含名称对照 CSV/JSON，工作区仍使用 schema 2.0。详见 [名称规则、兼容与升级](ordinary_export_naming.md)。

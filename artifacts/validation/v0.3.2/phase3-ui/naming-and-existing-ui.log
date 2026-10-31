@@ -1,0 +1,53 @@
+# Real command output; local repository/home paths redacted.
+COMMAND: .venv/bin/python -m pytest tests/batch/test_ui.py tests/batch/test_ui_roundtrip.py tests/batch/test_export_naming_ui.py tests/postprocessing/test_ui_postprocessing.py tests/postprocessing/test_ui_adversarial.py tests/postprocessing/test_ui_roundtrip.py tests/postprocessing/test_export_naming_ui.py -q
+STARTED_UTC: 2026-10-31T16:42:03.884331+00:00
+ENV: PYTHONPATH=src:. MYPYPATH=src MPLCONFIGDIR=<private v032 cache>
+...........................................F...                          [100%]
+=================================== FAILURES ===================================
+_ test_all_branch_export_requires_explicit_valid_only_and_preserves_minmax_quantity _
+
+downloaded_files = {'/mock/media/b25bda6d3044d639c5e2e31d2dcc6f70.zip': DownloadedFile(filename='ordinary_postprocessing_0920a1a18e31.zip..._norm-max.csvPK\x05\x06\x00\x00\x00\x00\x1a\x00\x1a\x00\r\n\x00\x00z\xd4\x00\x00\x00\x00', mimetype='application/zip')}
+science_calls = {'smoothing': 3, 'normalization': 3}
+
+    def test_all_branch_export_requires_explicit_valid_only_and_preserves_minmax_quantity(
+        downloaded_files: dict[str, DownloadedFile], science_calls: dict[str, int],
+    ) -> None:
+        app, ws, ids = _confirmed_app()
+        a, b, _ = ids
+        pp.update_draft(ws, b, "normalized_baseline", {"enabled": True, "method": "minmax_display"})
+        pp.preview_branch(ws, b, "normalized_baseline")
+        pp.confirm_branch(ws, b, "normalized_baseline")
+        before = dict(science_calls)
+        element(app.selectbox, "后处理导出分支").set_value("all").run()
+        element(app.selectbox, "后处理导出范围").set_value("全部条目").run()
+        assert not element(app.checkbox, "只导出有效项（明确排除下表不可用项）").value
+        assert element(app.button, "打包已确认后处理结果").disabled
+        element(app.checkbox, "只导出有效项（明确排除下表不可用项）").set_value(True).run()
+        assert not element(app.button, "打包已确认后处理结果").disabled
+        element(app.button, "打包已确认后处理结果").click().run()
+        downloaded = click_download(app, "下载已确认后处理 ZIP", downloaded_files)
+        metadata = _assert_bundle(downloaded.content, ws)
+        assert metadata["selection_policy"] == "valid_only"
+        assert set(metadata["requested_branches"]) == set(pp.BRANCHES)
+        assert metadata["excluded_items"]
+        arrays = _csv_arrays(downloaded.content)
+        minmax = [pair for name, pair in arrays.items() if b in name and "minmax" in name]
+>       assert len(minmax) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests/postprocessing/test_ui_roundtrip.py:318: AssertionError
+----------------------------- Captured stderr call -----------------------------
+2026-11-01 00:43:16.367 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-11-01 00:43:16.367 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-11-01 00:43:16.368 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+------------------------------ Captured log call -------------------------------
+WARNING  streamlit.runtime.scriptrunner_utils.script_run_context:script_run_context.py:476 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+WARNING  streamlit.runtime.scriptrunner_utils.script_run_context:script_run_context.py:476 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+WARNING  streamlit.runtime.scriptrunner_utils.script_run_context:script_run_context.py:476 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+=========================== short test summary info ============================
+FAILED tests/postprocessing/test_ui_roundtrip.py::test_all_branch_export_requires_explicit_valid_only_and_preserves_minmax_quantity
+1 failed, 46 passed in 78.62s (0:01:18)
+
+EXIT_CODE: 1
+ELAPSED_SECONDS: 79.020
